@@ -1,0 +1,35 @@
+class RouteNames {
+  static const String splashRoute = '/';
+  static const String homeRoute = '/home';
+  static const String dashboardRoute = '/dashboard';
+  static const String loginRoute = '/login';
+  static const String profile = '/profile';
+  static const String onboardingRoute = '/onboarding';
+  static const String registerRoute = '/register';
+  static const String verifyPhoneRoute = '/verify-phone';
+  static const String verifyCodeRoute = '/verify-code';
+  static const String userInfoRoute = '/user-info';
+  static const String notFoundRoute = '/not-found';
+  static const String forgotPasswordRoute = '/forgot-password';
+  static const String resetCodeRoute = '/reset-code';
+  static const String resetPasswordRoute = '/reset-password';
+  static const String resetPasswordSuccessRoute = '/reset-password-success';
+  static const String choosePlanRoute = '/choose-plan';
+  static const String checkoutRoute = '/checkout';
+  static const String paymentSuccessRoute = '/payment-success';
+  static const String paymentFailedRoute = '/payment-failed';
+  static const String profileEditRoute = '/profile-edit';
+  static const String changePasswordRoute = '/change-password';
+  static const String reportViewRoute = '/report-view';
+  static const String paymentLinkListRoute = '/payment-link-list';
+  static const String createLinkActionRoute = '/create-link-action';
+  static const String linkCreatedSuccessRoute = '/link-created-success';
+  static const String fulfillmentFormRoute = '/fulfillment-form';
+  static const String fulfillmentSuccessRoute = '/fulfillment-success';
+  static const String transactionStatusRoute = '/transaction-status';
+  static const String payViaLinkRoute = '/pay-via-link';
+  static const String buyerPaymentDetailsRoute = '/buyer-payment-details';
+  static const String buyerPaymentSuccessRoute = '/buyer-payment-success';
+  static const String riderSearchRoute = '/rider-search';
+  static const String deliveryTrackingRoute = '/delivery-tracking';
+}
