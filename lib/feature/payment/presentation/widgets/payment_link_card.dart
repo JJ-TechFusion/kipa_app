@@ -225,8 +225,14 @@ class PaymentLinkCard extends ConsumerWidget {
   Widget _buildDefaultActions() {
     final statusString = (data['status'] ?? '').toString();
     final status = PaymentRequestStatus.fromString(statusString);
-    final showReuseButton =
-        data['isReusable'] == true && status == PaymentRequestStatus.completed;
+    final isReusable = data['isReusable'] == true;
+    final showReuseButton = isReusable && status == PaymentRequestStatus.completed;
+
+    // For reusable completed links, show edit/delete so they can modify before reusing
+    final showEdit = status == PaymentRequestStatus.draft ||
+                     (status == PaymentRequestStatus.completed && isReusable);
+    final showDelete = !status.isPaid ||
+                       (status == PaymentRequestStatus.completed && isReusable);
 
     return Row(
       children: [
@@ -243,10 +249,10 @@ class PaymentLinkCard extends ConsumerWidget {
             ),
           ),
         if (showReuseButton) horizontalSpace(12),
-        if (!showReuseButton) const Spacer(),
-        _buildIconButton(CupertinoIcons.pencil, onEdit),
-        horizontalSpace(8),
-        _buildIconButton(CupertinoIcons.delete, onDelete),
+        const Spacer(),
+        if (showEdit) _buildIconButton(CupertinoIcons.pencil, onEdit),
+        if (showEdit && showDelete) horizontalSpace(8),
+        if (showDelete) _buildIconButton(CupertinoIcons.delete, onDelete),
       ],
     );
   }

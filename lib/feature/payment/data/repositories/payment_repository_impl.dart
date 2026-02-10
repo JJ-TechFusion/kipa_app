@@ -78,4 +78,14 @@ class PaymentRepositoryImpl implements PaymentRepository {
   Future<NetworkResponse> markReadyForPickup(String paymentRequestId) async {
     return await remoteDataSource.markReadyForPickup(paymentRequestId);
   }
+
+  @override
+  Future<NetworkResponse> cancelRiderSearch(String paymentRequestId) async {
+    return await remoteDataSource.cancelRiderSearch(paymentRequestId);
+  }
+
+  @override
+  Future<NetworkResponse> getTransactionStatus(String paymentRequestId) async {
+    return await remoteDataSource.getTransactionStatus(paymentRequestId);
+  }
 }

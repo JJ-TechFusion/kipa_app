@@ -1,25 +1,29 @@
 class UserEntity {
   const UserEntity({
     required this.id,
+    required this.phoneNumber,
+    required this.phoneVerified,
+    required this.email,
     required this.firstName,
     required this.lastName,
-    required this.email,
-    required this.active,
-    required this.phoneNumber,
+    required this.isSeller,
+    required this.isBuyer,
+    required this.isRider,
+    required this.sellerVerified,
     required this.createdAt,
-    required this.updatedAt,
-    required this.profile,
   });
 
   final String id;
+  final String phoneNumber;
+  final bool phoneVerified;
+  final String email;
   final String firstName;
   final String lastName;
-  final String email;
-  final bool active;
-  final String phoneNumber;
+  final bool isSeller;
+  final bool isBuyer;
+  final bool isRider;
+  final bool sellerVerified;
   final DateTime createdAt;
-  final DateTime updatedAt;
-  final String profile;
 
   String get fullName => '$firstName $lastName';
   bool get isProfileComplete =>

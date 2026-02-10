@@ -16,6 +16,7 @@ class PaymentState {
   final bool isInitializingPayment;
   final bool isVerifyingPayment;
   final bool isMarkingReadyForPickup;
+  final bool isCancellingRiderSearch;
   final String? errorMessage;
   final PaymentRequestResponseEntity? createdPaymentRequest;
   final NetworkResponse? deleteResponse;
@@ -43,6 +44,7 @@ class PaymentState {
     this.isInitializingPayment = false,
     this.isVerifyingPayment = false,
     this.isMarkingReadyForPickup = false,
+    this.isCancellingRiderSearch = false,
     this.isFetchingPaymentDetails = false,
     this.errorMessage,
     this.createdPaymentRequest,
@@ -71,6 +73,7 @@ class PaymentState {
     bool? isInitializingPayment,
     bool? isVerifyingPayment,
     bool? isMarkingReadyForPickup,
+    bool? isCancellingRiderSearch,
     bool? isFetchingPaymentDetails,
     String? errorMessage,
     PaymentRequestResponseEntity? createdPaymentRequest,
@@ -107,6 +110,8 @@ class PaymentState {
       isVerifyingPayment: isVerifyingPayment ?? this.isVerifyingPayment,
       isMarkingReadyForPickup:
           isMarkingReadyForPickup ?? this.isMarkingReadyForPickup,
+      isCancellingRiderSearch:
+          isCancellingRiderSearch ?? this.isCancellingRiderSearch,
       isFetchingPaymentDetails:
           isFetchingPaymentDetails ?? this.isFetchingPaymentDetails,
       errorMessage: errorMessage,

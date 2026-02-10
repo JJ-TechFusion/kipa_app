@@ -1,37 +1,161 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/core/shared/widgets/buttons/roundedbutton.dart';
 import 'package:kipa/core/shared/widgets/custom_text.dart';
+import 'package:kipa/feature/payment/domain/entities/transaction_status_entities.dart';
+import 'package:kipa/feature/payment/presentation/providers/payment_provider.dart';
 import 'package:kipa/feature/payment/presentation/widgets/buyer_info_card.dart';
 import 'package:kipa/feature/payment/presentation/widgets/transaction_details_card.dart';
 import 'package:kipa/feature/payment/presentation/widgets/transaction_timeline.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 
-class TransactionStatusScreen extends StatefulWidget {
-  final bool initialStatusReceived;
+class TransactionStatusScreen extends ConsumerStatefulWidget {
+  final String paymentRequestId;
 
-  const TransactionStatusScreen({
-    super.key,
-    this.initialStatusReceived = false,
-  });
+  const TransactionStatusScreen({super.key, required this.paymentRequestId});
 
   @override
-  State<TransactionStatusScreen> createState() =>
+  ConsumerState<TransactionStatusScreen> createState() =>
       _TransactionStatusScreenState();
 }
 
-class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
-  late bool isReceived;
-
+class _TransactionStatusScreenState
+    extends ConsumerState<TransactionStatusScreen> {
   @override
   void initState() {
     super.initState();
-    isReceived = widget.initialStatusReceived;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(transactionStatusNotifierProvider.notifier)
+          .fetchTransactionStatus(widget.paymentRequestId);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(transactionStatusNotifierProvider);
+    final transaction = state.transactionStatus;
+
+    if (state.isLoading && transaction == null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: AppColor.primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+          title: const BodyText(
+            'Transaction Status',
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (state.errorMessage != null && transaction == null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: AppColor.primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+          title: const BodyText(
+            'Transaction Status',
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(state.errorMessage!),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref
+                      .read(transactionStatusNotifierProvider.notifier)
+                      .fetchTransactionStatus(widget.paymentRequestId);
+                },
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (transaction == null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: AppColor.primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+          title: const BodyText(
+            'Transaction Status',
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+        ),
+        body: const Center(child: Text('No transaction data')),
+      );
+    }
+
+    final isBuyer = transaction.isBuyer;
+    final isPaid = transaction.payment.isPaid;
+    final currencyFormat = NumberFormat.currency(symbol: '₦', decimalDigits: 2);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -46,21 +170,11 @@ class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
             child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
           ),
         ),
-        title: BodyText(
-          isReceived ? 'Transaction Status' : 'Transaction Status',
+        title: const BodyText(
+          'Transaction Status',
           fontWeight: FontWeight.w600,
           fontSize: 18,
         ),
-        actions: [
-          // Toggle for demo
-          CupertinoSwitch(
-            value: isReceived,
-            onChanged: (val) {
-              setState(() => isReceived = val);
-            },
-          ),
-          horizontalSpace(16),
-        ],
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -69,43 +183,49 @@ class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 22),
         child: Column(
           children: [
-            (isReceived) ? _buildReceivedHeader() : _buildPendingHeader(),
+            isPaid ? _buildReceivedHeader(transaction) : _buildPendingHeader(),
             verticalSpace(24),
 
-            if (isReceived) ...[_buildProcessingBanner(), verticalSpace(24)],
+            if (isPaid && transaction.isSeller) ...[
+              _buildProcessingBanner(transaction),
+              verticalSpace(24),
+            ],
 
-            TransactionDetailsCard(
-              itemName: 'iPhone 16 Pro Max',
-              itemSpecs: 'BRE-B640 • Silver 256GB/4GB RAM',
-              itemPrice: '₦2,250,000.00',
-              buyerFee: '₦25,500.00',
-              buyerTotal: '₦2,275,500.00',
-              youReceive: '₦2,250,000.00',
-              isReceived: isReceived,
-            ),
+            _buildTransactionDetailsCard(transaction, isBuyer, currencyFormat),
             verticalSpace(32),
 
             Align(
               alignment: Alignment.centerLeft,
-              child: TransactionTimeline(steps: _getTimelineSteps()),
+              child: TransactionTimeline(
+                steps: _getTimelineSteps(transaction.timeline),
+              ),
             ),
             verticalSpace(32),
 
-            if (isReceived) ...[
-              _buildBuyerInfo(),
+            // Show other party's info
+            if (isPaid) ...[
+              _buildUserInfo(transaction, isBuyer),
               verticalSpace(32),
-              _buildFundsSecuredBanner(),
+              _buildFundsSecuredBanner(transaction, isBuyer, currencyFormat),
               verticalSpace(32),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
-                child: CustomButton(
-                  title: 'Start Delivery',
-                  onTap: () {},
-                  icon: CupertinoIcons.cube_box,
-                  borderRadius: 30,
+              if (transaction.isSeller &&
+                  transaction.status == 'paid_awaiting_fulfillment') ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 42),
+                  child: CustomButton(
+                    title: 'View Payment List',
+                    onTap: () {
+                      Navigator.pushReplacementNamed(
+                        context,
+                        RouteNames.paymentLinkListRoute,
+                      );
+                    },
+                    icon: CupertinoIcons.cube_box,
+                    borderRadius: 30,
+                  ),
                 ),
-              ),
-              verticalSpace(16),
+                verticalSpace(16),
+              ],
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 42),
                 child: CustomButton(
@@ -147,7 +267,10 @@ class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
     );
   }
 
-  Widget _buildReceivedHeader() {
+  Widget _buildReceivedHeader(TransactionStatusEntity transaction) {
+    final currencyFormat = NumberFormat.currency(symbol: '₦', decimalDigits: 2);
+    final dateFormat = DateFormat('MMM dd, hh:mma');
+
     return Column(
       children: [
         Container(
@@ -165,14 +288,42 @@ class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
         verticalSpace(16),
         const BodySmall('Payment Received', fontWeight: FontWeight.w500),
         verticalSpace(8),
-        const H4('₦2,250,000.00'),
+        H4(currencyFormat.format(transaction.payment.amount)),
         verticalSpace(8),
-        const Caption('Dec 30, 14:54PM', color: AppColor.lightText),
+        Caption(
+          transaction.payment.paidAt != null
+              ? dateFormat.format(transaction.payment.paidAt!)
+              : 'Payment date unavailable',
+          color: AppColor.lightText,
+        ),
       ],
     );
   }
 
-  Widget _buildProcessingBanner() {
+  Widget _buildProcessingBanner(TransactionStatusEntity transaction) {
+    final now = DateTime.now();
+    final processingDeadline = transaction.payment.paidAt?.add(
+      Duration(hours: transaction.processingTimeHours),
+    );
+
+    String timeLeft = 'Processing';
+    if (processingDeadline != null) {
+      final difference = processingDeadline.difference(now);
+      if (difference.inHours > 24) {
+        final days = (difference.inHours / 24).ceil();
+        timeLeft = '$days ${days == 1 ? 'day' : 'days'} left';
+      } else if (difference.inHours > 0) {
+        timeLeft =
+            '${difference.inHours} ${difference.inHours == 1 ? 'hour' : 'hours'} left';
+      } else if (difference.inMinutes > 0) {
+        timeLeft = '${difference.inMinutes} minutes left';
+      } else {
+        timeLeft = 'Expired';
+      }
+    }
+
+    final maxDays = (transaction.processingTimeHours / 24).ceil();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -200,9 +351,9 @@ class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
                   ),
                 ],
               ),
-              const Text(
-                '3 days left',
-                style: TextStyle(
+              Text(
+                timeLeft,
+                style: const TextStyle(
                   color: Color(0xFFE65100),
                   fontWeight: FontWeight.w500,
                   fontSize: 12,
@@ -211,8 +362,8 @@ class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
             ],
           ),
           verticalSpace(8),
-          const Caption(
-            'Your have a maximum of 3 days to send your package for delivery or the money will be automatically refunded to the buyer',
+          Caption(
+            'You have a maximum of $maxDays ${maxDays == 1 ? 'day' : 'days'} to send your package for delivery or the money will be automatically refunded to the buyer',
             fontSize: 11,
             color: AppColor.kipaGrey2,
           ),
@@ -221,16 +372,31 @@ class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
     );
   }
 
-  Widget _buildBuyerInfo() {
+  Widget _buildUserInfo(TransactionStatusEntity transaction, bool isBuyer) {
+    final user = isBuyer ? transaction.seller : transaction.buyer;
+    final title = isBuyer ? 'Seller Information' : 'Buyer Information';
+    final roleLabel = isBuyer ? 'Seller' : 'Buyer';
+
     return BuyerInfoCard(
-      name: 'Grace Ikpang',
-      email: 'grace.ikpang@gmail.com',
-      phone: '+234 8123457890',
+      name: user.name,
+      email: '',
+      phone: user.phoneNumber,
       onCall: () {},
+      title: title,
+      roleLabel: roleLabel,
     );
   }
 
-  Widget _buildFundsSecuredBanner() {
+  Widget _buildFundsSecuredBanner(
+    TransactionStatusEntity transaction,
+    bool isBuyer,
+    NumberFormat currencyFormat,
+  ) {
+    final amount = currencyFormat.format(transaction.payment.amount);
+    final confirmationText = isBuyer
+        ? 'is held safely until you confirm delivery'
+        : 'is held safely until delivery is confirmed by the buyer';
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -263,17 +429,16 @@ class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
                 fontSize: 11,
                 color: AppColor.successCheckIcon,
                 fontFamily: 'Plus Jakarta Sans',
-              ), // Assuming font
+              ),
               children: [
-                const TextSpan(text: 'Your payment of '),
-                const TextSpan(
-                  text: '₦2,250,000.00',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                TextSpan(
+                  text: isBuyer ? 'Your payment of ' : 'The payment of ',
                 ),
-                const TextSpan(
-                  text:
-                      ' is held safely until delivery is confirmed by the buyer',
+                TextSpan(
+                  text: amount,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
+                TextSpan(text: ' $confirmationText'),
               ],
             ),
           ),
@@ -282,45 +447,62 @@ class _TransactionStatusScreenState extends State<TransactionStatusScreen> {
     );
   }
 
-  List<TimelineStep> _getTimelineSteps() {
-    if (isReceived) {
-      return [
-        TimelineStep(
-          title: 'Link Created',
-          subtitle: 'Dec 30, 14:33PM',
-          isCompleted: true,
-        ),
-        TimelineStep(
-          title: 'Payment Received',
-          subtitle: 'Dec 30, 14:54PM',
-          isCompleted: true,
-          extraWidget: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColor.successCircleBackground,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Text(
-              'Funds in Kipa Protect',
-              style: TextStyle(
-                fontSize: 10,
-                color: AppColor.successCheckIcon,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-        TimelineStep(title: 'Awaiting Processing Time', isActive: true),
-      ];
-    } else {
-      return [
-        TimelineStep(
-          title: 'Link Created',
-          subtitle: 'Dec 30, 14:33PM',
-          isCompleted: true,
-        ),
-        TimelineStep(title: 'Payment Pending', isActive: true),
-      ];
-    }
+  Widget _buildTransactionDetailsCard(
+    TransactionStatusEntity transaction,
+    bool isBuyer,
+    NumberFormat currencyFormat,
+  ) {
+    return TransactionDetailsCard(
+      itemName: transaction.itemName,
+      itemSpecs: transaction.itemDescription,
+      itemPrice: currencyFormat.format(transaction.itemPrice),
+      buyerFee: currencyFormat.format(
+        isBuyer
+            ? (transaction.feeInfo.serviceFee ?? 0.0)
+            : (transaction.feeInfo.platformFee ?? 0.0),
+      ),
+      buyerTotal: currencyFormat.format(transaction.feeInfo.buyerPaysTotal),
+      isReceived: transaction.payment.isPaid,
+      youReceive: isBuyer
+          ? null
+          : currencyFormat.format(transaction.feeInfo.youReceive ?? 0.0),
+      totalLabel: isBuyer ? 'Buyer Pays Total' : null,
+      deliveryFee: transaction.deliveryType.toLowerCase() == 'kipa_delivery'
+          ? currencyFormat.format(transaction.feeInfo.estimatedDeliveryFee)
+          : null,
+    );
+  }
+
+  List<TimelineStep> _getTimelineSteps(TransactionTimelineEntity timeline) {
+    final dateFormat = DateFormat('MMM dd, hh:mma');
+
+    return timeline.steps.map((step) {
+      return TimelineStep(
+        title: step.title,
+        subtitle: step.timestamp != null
+            ? dateFormat.format(step.timestamp!)
+            : null,
+        isCompleted: step.isCompleted,
+        isActive: step.isCurrent,
+        extraWidget:
+            step.title.toLowerCase().contains('payment') && step.isCompleted
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColor.successCircleBackground,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'Funds in Kipa Protect',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColor.successCheckIcon,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              )
+            : null,
+      );
+    }).toList();
   }
 }

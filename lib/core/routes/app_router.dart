@@ -19,6 +19,7 @@ import '../../feature/payment/presentation/pages/buyer_payment_details_screen.da
 import '../../feature/payment/presentation/pages/buyer_payment_success_screen.dart';
 import '../../feature/payment/presentation/pages/rider_search_screen.dart';
 import '../../feature/delivery/presentation/pages/delivery_tracking_screen.dart';
+import '../../feature/delivery/presentation/pages/delivery_details_screen.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -96,8 +97,11 @@ class AppRouter {
         );
 
       case RouteNames.transactionStatusRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => const TransactionStatusScreen(),
+          builder: (_) => TransactionStatusScreen(
+            paymentRequestId: args?['paymentRequestId'] as String? ?? '',
+          ),
         );
 
       case RouteNames.payViaLinkRoute:
@@ -112,8 +116,11 @@ class AppRouter {
         );
 
       case RouteNames.buyerPaymentSuccessRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => const BuyerPaymentSuccessScreen(),
+          builder: (_) => BuyerPaymentSuccessScreen(
+            paymentRequestId: args?['paymentRequestId'] as String?,
+          ),
         );
 
       case RouteNames.riderSearchRoute:
@@ -130,6 +137,17 @@ class AppRouter {
           builder: (_) => DeliveryTrackingScreen(
             deliveryJobId: args?['deliveryJobId'] ?? '',
             initialJob: args?['initialJob'],
+          ),
+        );
+
+      case RouteNames.deliveryDetailsRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => DeliveryDetailsScreen(
+            deliveryJobId: args?['deliveryJobId'] ?? '',
+            purchaseId: args?['purchaseId'],
+            saleId: args?['saleId'],
+            isBuyer: args?['isBuyer'] ?? true,
           ),
         );
 

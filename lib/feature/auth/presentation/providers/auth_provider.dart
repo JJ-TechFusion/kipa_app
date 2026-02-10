@@ -10,6 +10,7 @@ import '../../domain/usecases/verify_otp_usecase.dart';
 import '../../domain/usecases/resend_otp_usecase.dart';
 import '../../domain/usecases/upload_profile_picture_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
+import '../../domain/usecases/get_current_user_usecase.dart';
 import '../state/auth_notifier.dart';
 import '../state/auth_state.dart';
 
@@ -48,6 +49,10 @@ final uploadProfilePictureUseCaseProvider =
 
 final updateProfileUseCaseProvider = Provider<UpdateProfileUseCase>((ref) {
   return UpdateProfileUseCase(ref.read(authRepositoryProvider));
+});
+
+final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
+  return GetCurrentUserUseCase(ref.read(authRepositoryProvider));
 });
 
 // State Notifier

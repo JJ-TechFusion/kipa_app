@@ -224,6 +224,17 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
     });
   }
 
+  Future<void> _cancelRiderSearch() async {
+    final success = await ref
+        .read(paymentNotifierProvider.notifier)
+        .cancelRiderSearch(paymentRequestId: widget.paymentRequestId);
+
+    if (success && mounted) {
+      _pollingTimer?.cancel();
+      Navigator.pop(context);
+    }
+  }
+
   Future<void> _checkRiderStatus() async {
     await ref.read(paymentNotifierProvider.notifier).fetchPaymentRequests();
 
@@ -484,17 +495,21 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
           verticalSpace(24),
 
           // Cancel button
-          AnimatedButton(
-            onTap: () {
-              _pollingTimer?.cancel();
-              Navigator.pop(context);
+          Consumer(
+            builder: (context, ref, child) {
+              final isCancelling =
+                  ref.watch(paymentNotifierProvider).isCancellingRiderSearch;
+              return AnimatedButton(
+                onTap: isCancelling ? null : () => _cancelRiderSearch(),
+                child: CustomButton(
+                  title: isCancelling ? 'Cancelling...' : 'Cancel Search',
+                  borderRadius: 30,
+                  color: AppColor.kipaGrey.withAlpha(50),
+                  textColor: AppColor.primaryText,
+                  isLoading: isCancelling,
+                ),
+              );
             },
-            child: CustomButton(
-              title: 'Cancel Search',
-              borderRadius: 30,
-              color: AppColor.kipaGrey.withAlpha(50),
-              textColor: AppColor.primaryText,
-            ),
           ),
 
           verticalSpace(16),

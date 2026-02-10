@@ -13,6 +13,7 @@ class InitializePaymentResponseModel extends InitializePaymentResponseEntity {
     super.accessCode,
     super.authorizationUrl,
     required super.orderId,
+    required super.paymentRequestId,
     required super.paymentMethod,
     super.reference,
     super.escrowId,
@@ -25,6 +26,7 @@ class InitializePaymentResponseModel extends InitializePaymentResponseEntity {
       accessCode: json['access_code'] ?? '',
       authorizationUrl: json['authorization_url'] ?? '',
       orderId: json['order_id'] ?? '',
+      paymentRequestId: json['payment_request_id'] ?? '',
       paymentMethod: json['payment_method'] ?? '',
       reference: json['reference'] ?? '',
       escrowId: json['escrow_id'],
@@ -39,6 +41,7 @@ class VerifyPaymentResponseModel extends VerifyPaymentResponseEntity {
     required super.escrowId,
     required super.message,
     required super.orderId,
+    required super.paymentRequestId,
     required super.paymentStatus,
     required super.status,
   });
@@ -48,6 +51,7 @@ class VerifyPaymentResponseModel extends VerifyPaymentResponseEntity {
       escrowId: json['escrow_id'] ?? '',
       message: json['message'] ?? '',
       orderId: json['order_id'] ?? '',
+      paymentRequestId: json['payment_request_id'] ?? '',
       paymentStatus: json['payment_status'] ?? '',
       status: json['status'] ?? '',
     );

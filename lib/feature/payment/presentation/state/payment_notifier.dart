@@ -4,7 +4,6 @@ import '../../domain/usecases/create_payment_request_usecase.dart';
 import '../../domain/usecases/update_payment_request_usecase.dart';
 import '../../domain/usecases/delete_payment_request_usecase.dart';
 import '../../domain/usecases/create_fulfillment_usecase.dart';
-import '../../data/models/payment_request_model.dart';
 import '../../../location/domain/entities/fulfillment_entity.dart';
 import '../../../location/domain/entities/location_entity.dart';
 import '../providers/payment_provider.dart';
@@ -17,6 +16,7 @@ import '../../domain/usecases/initialize_payment_usecase.dart';
 import '../../domain/usecases/verify_payment_usecase.dart';
 import '../../domain/usecases/get_payment_details_usecase.dart';
 import '../../domain/usecases/mark_ready_for_pickup_usecase.dart';
+import '../../domain/usecases/cancel_rider_search_usecase.dart';
 
 class PaymentNotifier extends Notifier<PaymentState> {
   late final CreatePaymentRequestUseCase _createPaymentRequestUseCase;
@@ -30,6 +30,7 @@ class PaymentNotifier extends Notifier<PaymentState> {
   late final VerifyPaymentUseCase _verifyPaymentUseCase;
   late final GetPaymentDetailsUseCase _getPaymentDetailsUseCase;
   late final MarkReadyForPickupUseCase _markReadyForPickupUseCase;
+  late final CancelRiderSearchUseCase _cancelRiderSearchUseCase;
 
   @override
   PaymentState build() {
@@ -54,6 +55,7 @@ class PaymentNotifier extends Notifier<PaymentState> {
     _verifyPaymentUseCase = ref.read(verifyPaymentUseCaseProvider);
     _getPaymentDetailsUseCase = ref.read(getPaymentDetailsUseCaseProvider);
     _markReadyForPickupUseCase = ref.read(markReadyForPickupUseCaseProvider);
+    _cancelRiderSearchUseCase = ref.read(cancelRiderSearchUseCaseProvider);
     return const PaymentState();
   }
 
@@ -105,7 +107,7 @@ class PaymentNotifier extends Notifier<PaymentState> {
     required String itemName,
     required String itemDescription,
     required double itemPrice,
-    required List<String> itemImages,
+    List<String>? itemImages,
     required int processingTimeHours,
     required bool isReusable,
     int? maxUses,
@@ -117,7 +119,7 @@ class PaymentNotifier extends Notifier<PaymentState> {
         'item_name': itemName,
         'item_description': itemDescription,
         'item_price': itemPrice,
-        'item_images': itemImages,
+        if (itemImages != null) 'item_images': itemImages,
         'processing_time_hours': processingTimeHours,
         'is_reusable': isReusable,
         if (maxUses != null) 'max_uses': maxUses,
@@ -126,13 +128,9 @@ class PaymentNotifier extends Notifier<PaymentState> {
       final response = await _updatePaymentRequestUseCase(id, data);
 
       if (response.success && response.data != null) {
-        final responseData = response.data as Map<String, dynamic>;
-
         state = state.copyWith(
           isUpdatingPaymentRequest: false,
-          createdPaymentRequest: PaymentRequestResponseModel.fromJson(
-            responseData['data'] as Map<String, dynamic>,
-          ).toEntity(),
+          createdPaymentRequest: response.data as PaymentRequestResponseEntity?,
         );
       } else {
         state = state.copyWith(
@@ -427,6 +425,32 @@ class PaymentNotifier extends Notifier<PaymentState> {
         isMarkingReadyForPickup: false,
         errorMessage: e.toString(),
       );
+    }
+  }
+
+  Future<bool> cancelRiderSearch({required String paymentRequestId}) async {
+    state = state.copyWith(isCancellingRiderSearch: true, errorMessage: null);
+
+    try {
+      final response = await _cancelRiderSearchUseCase(paymentRequestId);
+
+      if (response.success) {
+        state = state.copyWith(isCancellingRiderSearch: false);
+        await fetchPaymentRequests();
+        return true;
+      } else {
+        state = state.copyWith(
+          isCancellingRiderSearch: false,
+          errorMessage: response.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isCancellingRiderSearch: false,
+        errorMessage: e.toString(),
+      );
+      return false;
     }
   }
 }

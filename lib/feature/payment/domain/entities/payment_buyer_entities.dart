@@ -8,6 +8,7 @@ class InitializePaymentResponseEntity {
   final String accessCode;
   final String authorizationUrl;
   final String orderId;
+  final String paymentRequestId;
   final String paymentMethod;
   final String reference;
   // For wallet payment
@@ -19,6 +20,7 @@ class InitializePaymentResponseEntity {
     this.accessCode = '',
     this.authorizationUrl = '',
     required this.orderId,
+    required this.paymentRequestId,
     required this.paymentMethod,
     this.reference = '',
     this.escrowId,
@@ -31,6 +33,7 @@ class VerifyPaymentResponseEntity {
   final String escrowId;
   final String message;
   final String orderId;
+  final String paymentRequestId;
   final String paymentStatus;
   final String status;
 
@@ -38,6 +41,7 @@ class VerifyPaymentResponseEntity {
     required this.escrowId,
     required this.message,
     required this.orderId,
+    required this.paymentRequestId,
     required this.paymentStatus,
     required this.status,
   });

@@ -7,7 +7,9 @@ import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 
 class BuyerPaymentSuccessScreen extends StatelessWidget {
-  const BuyerPaymentSuccessScreen({super.key});
+  final String? paymentRequestId;
+
+  const BuyerPaymentSuccessScreen({super.key, this.paymentRequestId});
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +64,24 @@ class BuyerPaymentSuccessScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 42),
                 child: AnimatedButton(
                   onTap: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      RouteNames.transactionStatusRoute,
-                      (route) => route.isFirst,
-                    );
+                    debugPrint('Payment Request ID: $paymentRequestId');
+                    if (paymentRequestId != null && paymentRequestId!.isNotEmpty) {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        RouteNames.transactionStatusRoute,
+                        (route) => route.isFirst,
+                        arguments: {
+                          'paymentRequestId': paymentRequestId,
+                        },
+                      );
+                    } else {
+                      // Navigate to dashboard if no paymentRequestId
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        RouteNames.dashboardRoute,
+                        (route) => false,
+                      );
+                    }
                   },
                   child: CustomButton(
                     title: 'View Transaction Details',

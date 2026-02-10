@@ -83,10 +83,9 @@ class TransactionTimeline extends StatelessWidget {
           color: AppColor.primary,
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.check, size: 14, color: Colors.white),
+        child: const Icon(Icons.check_circle, size: 14, color: Colors.white),
       );
     } else {
-      // Pending/Future state
       return Container(
         width: 22,
         height: 22,

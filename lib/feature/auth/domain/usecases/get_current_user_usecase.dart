@@ -1,9 +1,12 @@
-// class GetCurrentUserUsecase {
-//   final AuthRepository repository;
+import '../../../../core/services/network/network_response.dart';
+import '../repositories/auth_repository.dart';
 
-//   GetCurrentUserUsecase({required this.repository});
+class GetCurrentUserUseCase {
+  final AuthRepository repository;
 
-//   Future<UserEntity?> call(NoParams params) async {
-//     return await repository.getCurrentUser();
-//   }
-// }
+  GetCurrentUserUseCase(this.repository);
+
+  Future<NetworkResponse> call() async {
+    return await repository.getCurrentUser();
+  }
+}

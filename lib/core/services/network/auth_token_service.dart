@@ -1,4 +1,6 @@
+import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/core/services/storage/secure_storage.dart';
+import 'package:kipa/main.dart';
 import 'package:kipa/utils/constant.dart';
 
 class AuthTokenService {
@@ -16,14 +18,24 @@ class AuthTokenService {
       await _storageService.deleteData('cached_user');
 
       await _storageService.writeData('tokenExpired', 'true');
+
+      _navigateToLogin();
     } catch (e) {
       try {
         await _storageService.writeData('tokenExpired', 'true');
         await _storageService.deleteData('access_token');
+        _navigateToLogin();
       } catch (flagError) {
         // Critical failure in token expiration handling
       }
     }
+  }
+
+  void _navigateToLogin() {
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      RouteNames.loginRoute,
+      (route) => false,
+    );
   }
 
   Future<String?> getToken() async {

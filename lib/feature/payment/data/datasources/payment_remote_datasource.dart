@@ -7,6 +7,7 @@ import '../../domain/entities/payment_buyer_entities.dart';
 import '../models/payment_request_model.dart';
 import '../models/fulfillment_model.dart';
 import '../models/payment_buyer_models.dart';
+import '../models/transaction_status_models.dart';
 
 class PaymentRemoteDataSource {
   final ApiService apiService;
@@ -40,6 +41,15 @@ class PaymentRemoteDataSource {
       endpoint: '${ApiEndpoints.createPaymentRequestUrl}/$id',
       requestBody: data,
     );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: PaymentRequestResponseModel.fromJson(dataMap).toEntity(),
+        message: response.message,
+      );
+    }
     return response;
   }
 
@@ -192,6 +202,47 @@ class PaymentRemoteDataSource {
         data: MarkReadyForPickupResponseModel.fromJson(dataMap).toEntity(),
         message: response.message,
       );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> cancelRiderSearch(String paymentRequestId) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.cancelRiderSearchUrl(paymentRequestId),
+      requestBody: {},
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: PaymentRequestResponseModel.fromJson(dataMap).toEntity(),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> getTransactionStatus(String paymentRequestId) async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.getTransactionStatusUrl(paymentRequestId),
+    );
+
+    if (response.success && response.data != null) {
+      try {
+        final dataMap = response.data as Map<String, dynamic>;
+        return NetworkResponse(
+          success: true,
+          data: TransactionStatusModel.fromJson(dataMap).toEntity(),
+          message: response.message,
+        );
+      } catch (e) {
+        return NetworkResponse(
+          success: false,
+          data: null,
+          message: 'Failed to parse transaction status: ${e.toString()}',
+        );
+      }
     }
     return response;
   }

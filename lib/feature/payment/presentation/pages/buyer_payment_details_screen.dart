@@ -294,6 +294,9 @@ class _BuyerPaymentDetailsScreenState
                                 context,
                                 RouteNames.buyerPaymentSuccessRoute,
                                 (route) => route.isFirst,
+                                arguments: {
+                                  'paymentRequestId': verifyState.verifyPaymentResponse!.paymentRequestId,
+                                },
                               );
                             }
                           } else {
@@ -303,6 +306,9 @@ class _BuyerPaymentDetailsScreenState
                               context,
                               RouteNames.buyerPaymentSuccessRoute,
                               (route) => route.isFirst,
+                              arguments: {
+                                'paymentRequestId': response.paymentRequestId,
+                              },
                             );
                           }
                         }

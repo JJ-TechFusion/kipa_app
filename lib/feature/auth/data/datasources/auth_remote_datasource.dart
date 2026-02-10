@@ -7,6 +7,7 @@ import '../../domain/entities/auth_request_entity.dart';
 import '../../domain/entities/verify_otp_request_entity.dart';
 import '../../domain/entities/resend_otp_request_entity.dart';
 import '../../domain/entities/update_profile_request_entity.dart';
+import '../models/user_model.dart';
 
 class AuthRemoteDataSource {
   final ApiService apiService;
@@ -57,5 +58,22 @@ class AuthRemoteDataSource {
       requestBody: request.toJson(),
       isProtected: true,
     );
+  }
+
+  Future<NetworkResponse> getCurrentUser() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.getCurrentUserUrl,
+      isProtected: true,
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: UserModel.fromJson(dataMap).toEntity(),
+        message: response.message,
+      );
+    }
+    return response;
   }
 }

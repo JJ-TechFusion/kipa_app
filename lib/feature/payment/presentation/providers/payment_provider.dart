@@ -15,8 +15,12 @@ import '../../domain/usecases/initialize_payment_usecase.dart';
 import '../../domain/usecases/verify_payment_usecase.dart';
 import '../../domain/usecases/get_payment_details_usecase.dart';
 import '../../domain/usecases/mark_ready_for_pickup_usecase.dart';
+import '../../domain/usecases/cancel_rider_search_usecase.dart';
+import '../../domain/usecases/get_transaction_status_usecase.dart';
 import '../state/payment_notifier.dart';
 import '../state/payment_state.dart';
+import '../state/transaction_status_notifier.dart';
+import '../state/transaction_status_state.dart';
 
 // Data Sources
 final paymentRemoteDataSourceProvider = Provider<PaymentRemoteDataSource>((
@@ -92,6 +96,22 @@ final markReadyForPickupUseCaseProvider = Provider<MarkReadyForPickupUseCase>((
   return MarkReadyForPickupUseCase(ref.read(paymentRepositoryProvider));
 });
 
+final cancelRiderSearchUseCaseProvider = Provider<CancelRiderSearchUseCase>((
+  ref,
+) {
+  return CancelRiderSearchUseCase(ref.read(paymentRepositoryProvider));
+});
+
+final getTransactionStatusUseCaseProvider =
+    Provider<GetTransactionStatusUseCase>((ref) {
+  return GetTransactionStatusUseCase(ref.read(paymentRepositoryProvider));
+});
+
 final paymentNotifierProvider = NotifierProvider<PaymentNotifier, PaymentState>(
   PaymentNotifier.new,
+);
+
+final transactionStatusNotifierProvider =
+    NotifierProvider<TransactionStatusNotifier, TransactionStatusState>(
+  TransactionStatusNotifier.new,
 );

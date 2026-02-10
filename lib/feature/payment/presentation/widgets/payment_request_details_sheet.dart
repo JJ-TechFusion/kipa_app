@@ -13,10 +13,7 @@ import '../providers/payment_provider.dart';
 class PaymentRequestDetailsSheet extends ConsumerStatefulWidget {
   final String paymentRequestId;
 
-  const PaymentRequestDetailsSheet({
-    super.key,
-    required this.paymentRequestId,
-  });
+  const PaymentRequestDetailsSheet({super.key, required this.paymentRequestId});
 
   @override
   ConsumerState<PaymentRequestDetailsSheet> createState() =>
@@ -36,10 +33,7 @@ class _PaymentRequestDetailsSheetState
   }
 
   String _formatAmount(double amount) {
-    return '₦${amount.toStringAsFixed(2).replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]},',
-        )}';
+    return '₦${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}';
   }
 
   String _formatDate(DateTime date) {
@@ -76,249 +70,242 @@ class _PaymentRequestDetailsSheetState
               child: Center(child: CircularProgressIndicator()),
             )
           : state.errorMessage != null && details == null
-              ? SizedBox(
-                  height: 400,
-                  child: Center(
+          ? SizedBox(
+              height: 400,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AppColor.kipaGrey,
+                    ),
+                    verticalSpace(16),
+                    BodyText(
+                      'Error: ${state.errorMessage}',
+                      color: AppColor.kipaGrey,
+                      textAlign: TextAlign.center,
+                    ),
+                    verticalSpace(16),
+                    TextButton(
+                      onPressed: () {
+                        ref
+                            .read(paymentNotifierProvider.notifier)
+                            .fetchPaymentRequestDetails(
+                              widget.paymentRequestId,
+                            );
+                      },
+                      child: const BodySmall('Retry', color: AppColor.primary),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Handle
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 12),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  verticalSpace(24),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: AppColor.kipaGrey,
+                        // Header with status
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: BodyText(
+                                'Payment Request Details',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                              ),
+                            ),
+                            _buildStatusBadge(details?.status ?? ''),
+                          ],
                         ),
-                        verticalSpace(16),
-                        BodyText(
-                          'Error: ${state.errorMessage}',
-                          color: AppColor.kipaGrey,
-                          textAlign: TextAlign.center,
+                        verticalSpace(24),
+
+                        // Item details
+                        _buildSectionHeader('Item Details'),
+                        verticalSpace(12),
+                        _buildInfoCard(
+                          children: [
+                            _buildInfoRow('Item Name', details?.itemName ?? ''),
+                            if (details?.itemDescription != null &&
+                                details!.itemDescription.isNotEmpty) ...[
+                              verticalSpace(12),
+                              _buildInfoRow(
+                                'Description',
+                                details.itemDescription,
+                              ),
+                            ],
+                            verticalSpace(12),
+                            _buildInfoRow(
+                              'Item Price',
+                              _formatAmount(details?.itemPrice ?? 0),
+                              isBold: true,
+                            ),
+                          ],
                         ),
-                        verticalSpace(16),
-                        TextButton(
-                          onPressed: () {
-                            ref
-                                .read(paymentNotifierProvider.notifier)
-                                .fetchPaymentRequestDetails(
-                                  widget.paymentRequestId,
+                        verticalSpace(24),
+
+                        // Pricing breakdown
+                        _buildSectionHeader('Pricing'),
+                        verticalSpace(12),
+                        _buildInfoCard(
+                          children: [
+                            _buildInfoRow(
+                              'Item Price',
+                              _formatAmount(details?.itemPrice ?? 0),
+                            ),
+                            verticalSpace(8),
+                            _buildInfoRow(
+                              'Service Fee (1%)',
+                              _formatAmount(details?.buyerServiceFee ?? 0),
+                            ),
+                            if (details?.estimatedDeliveryFee != null) ...[
+                              verticalSpace(8),
+                              _buildInfoRow(
+                                'Delivery Fee',
+                                _formatAmount(details!.estimatedDeliveryFee!),
+                              ),
+                              verticalSpace(4),
+                              const Caption(
+                                'Paid separately to rider',
+                                fontSize: 10,
+                                color: AppColor.kipaGrey2,
+                              ),
+                            ],
+                            verticalSpace(12),
+                            Container(
+                              height: 1,
+                              color: AppColor.kipaGrey.withAlpha(30),
+                            ),
+                            verticalSpace(12),
+                            _buildInfoRow(
+                              'Total (in app)',
+                              _formatAmount(
+                                (details?.itemPrice ?? 0) +
+                                    (details?.buyerServiceFee ?? 0),
+                              ),
+                              isBold: true,
+                              valueColor: AppColor.primary,
+                            ),
+                          ],
+                        ),
+                        verticalSpace(24),
+
+                        // Delivery details
+                        if (details?.pickupAddress != null ||
+                            details?.dropoffAddress != null) ...[
+                          _buildSectionHeader('Delivery Details'),
+                          verticalSpace(12),
+                          _buildInfoCard(
+                            children: [
+                              if (details?.pickupAddress != null) ...[
+                                _buildAddressRow(
+                                  'Pickup Address',
+                                  details!.pickupAddress!,
+                                  Icons.gps_fixed,
+                                  AppColor.primary,
+                                ),
+                              ],
+                              if (details?.pickupAddress != null &&
+                                  details?.dropoffAddress != null)
+                                verticalSpace(16),
+                              if (details?.dropoffAddress != null) ...[
+                                _buildAddressRow(
+                                  'Dropoff Address',
+                                  details!.dropoffAddress!,
+                                  Icons.location_on,
+                                  AppColor.green,
+                                ),
+                              ],
+                            ],
+                          ),
+                          verticalSpace(24),
+                        ],
+
+                        // Payment info
+                        _buildSectionHeader('Payment Information'),
+                        verticalSpace(12),
+                        _buildInfoCard(
+                          children: [
+                            if (details?.paymentCode != null) ...[
+                              _buildInfoRowWithCopy(
+                                'Payment Code',
+                                details!.paymentCode!,
+                              ),
+                              verticalSpace(12),
+                            ],
+                            _buildInfoRow(
+                              'Created',
+                              _formatDate(details?.createdAt ?? DateTime.now()),
+                            ),
+                            if (details?.isReusable == true) ...[
+                              verticalSpace(12),
+                              _buildInfoRow(
+                                'Reusable',
+                                'Yes (${details?.currentUses ?? 0} uses)',
+                              ),
+                            ],
+                          ],
+                        ),
+                        verticalSpace(32),
+
+                        // Action button - only show if not completed or if reusable
+                        if (!(details?.status == 'completed' &&
+                            details?.isReusable == false))
+                          SizedBox(
+                            width: double.infinity,
+                            child: CustomButton(
+                              title: 'Generate Payment Link',
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.pushNamed(
+                                  context,
+                                  RouteNames.fulfillmentFormRoute,
+                                  arguments: {
+                                    'paymentRequestId': widget.paymentRequestId,
+                                  },
                                 );
-                          },
-                          child: const BodySmall('Retry', color: AppColor.primary),
-                        ),
+                              },
+                              borderRadius: 30,
+                            ),
+                          ),
+                        if (!(details?.status == 'completed' &&
+                            details?.isReusable == false))
+                          verticalSpace(24),
+                        if (details?.status == 'completed' &&
+                            details?.isReusable == false)
+                          verticalSpace(12),
                       ],
                     ),
                   ),
-                )
-              : SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Handle
-                      Center(
-                        child: Container(
-                          margin: const EdgeInsets.only(top: 12),
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ),
-                      verticalSpace(24),
-
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Header with status
-                            Row(
-                              children: [
-                                const Expanded(
-                                  child: BodyText(
-                                    'Payment Request Details',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                _buildStatusBadge(details?.status ?? ''),
-                              ],
-                            ),
-                            verticalSpace(24),
-
-                            // Item details
-                            _buildSectionHeader('Item Details'),
-                            verticalSpace(12),
-                            _buildInfoCard(
-                              children: [
-                                _buildInfoRow(
-                                  'Item Name',
-                                  details?.itemName ?? '',
-                                ),
-                                if (details?.itemDescription != null &&
-                                    details!.itemDescription.isNotEmpty) ...[
-                                  verticalSpace(12),
-                                  _buildInfoRow(
-                                    'Description',
-                                    details.itemDescription,
-                                  ),
-                                ],
-                                verticalSpace(12),
-                                _buildInfoRow(
-                                  'Item Price',
-                                  _formatAmount(details?.itemPrice ?? 0),
-                                  isBold: true,
-                                ),
-                              ],
-                            ),
-                            verticalSpace(24),
-
-                            // Pricing breakdown
-                            _buildSectionHeader('Pricing'),
-                            verticalSpace(12),
-                            _buildInfoCard(
-                              children: [
-                                _buildInfoRow(
-                                  'Item Price',
-                                  _formatAmount(details?.itemPrice ?? 0),
-                                ),
-                                verticalSpace(8),
-                                _buildInfoRow(
-                                  'Service Fee (1%)',
-                                  _formatAmount(details?.buyerServiceFee ?? 0),
-                                ),
-                                if (details?.estimatedDeliveryFee != null) ...[
-                                  verticalSpace(8),
-                                  _buildInfoRow(
-                                    'Delivery Fee',
-                                    _formatAmount(details!.estimatedDeliveryFee!),
-                                  ),
-                                  verticalSpace(4),
-                                  const Caption(
-                                    'Paid separately to rider',
-                                    fontSize: 10,
-                                    color: AppColor.kipaGrey2,
-                                  ),
-                                ],
-                                verticalSpace(12),
-                                Container(
-                                  height: 1,
-                                  color: AppColor.kipaGrey.withAlpha(30),
-                                ),
-                                verticalSpace(12),
-                                _buildInfoRow(
-                                  'Total (in app)',
-                                  _formatAmount(
-                                    (details?.itemPrice ?? 0) +
-                                        (details?.buyerServiceFee ?? 0),
-                                  ),
-                                  isBold: true,
-                                  valueColor: AppColor.primary,
-                                ),
-                              ],
-                            ),
-                            verticalSpace(24),
-
-                            // Delivery details
-                            if (details?.pickupAddress != null ||
-                                details?.dropoffAddress != null) ...[
-                              _buildSectionHeader('Delivery Details'),
-                              verticalSpace(12),
-                              _buildInfoCard(
-                                children: [
-                                  if (details?.pickupAddress != null) ...[
-                                    _buildAddressRow(
-                                      'Pickup Address',
-                                      details!.pickupAddress!,
-                                      Icons.location_on,
-                                      Colors.green,
-                                    ),
-                                  ],
-                                  if (details?.pickupAddress != null &&
-                                      details?.dropoffAddress != null)
-                                    verticalSpace(16),
-                                  if (details?.dropoffAddress != null) ...[
-                                    _buildAddressRow(
-                                      'Dropoff Address',
-                                      details!.dropoffAddress!,
-                                      Icons.location_on,
-                                      Colors.red,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              verticalSpace(24),
-                            ],
-
-                            // Payment info
-                            _buildSectionHeader('Payment Information'),
-                            verticalSpace(12),
-                            _buildInfoCard(
-                              children: [
-                                if (details?.paymentCode != null) ...[
-                                  _buildInfoRowWithCopy(
-                                    'Payment Code',
-                                    details!.paymentCode!,
-                                  ),
-                                  verticalSpace(12),
-                                ],
-                                _buildInfoRow(
-                                  'Created',
-                                  _formatDate(details?.createdAt ?? DateTime.now()),
-                                ),
-                                if (details?.isReusable == true) ...[
-                                  verticalSpace(12),
-                                  _buildInfoRow(
-                                    'Reusable',
-                                    'Yes (${details?.currentUses ?? 0} uses)',
-                                  ),
-                                ],
-                              ],
-                            ),
-                            verticalSpace(32),
-
-                            // Action button - only show if not completed or if reusable
-                            if (!(details?.status == 'completed' &&
-                                details?.isReusable == false))
-                              SizedBox(
-                                width: double.infinity,
-                                child: CustomButton(
-                                  title: 'Generate Payment Link',
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    Navigator.pushNamed(
-                                      context,
-                                      RouteNames.fulfillmentFormRoute,
-                                      arguments: {
-                                        'paymentRequestId': widget.paymentRequestId,
-                                      },
-                                    );
-                                  },
-                                  borderRadius: 30,
-                                ),
-                              ),
-                            if (!(details?.status == 'completed' &&
-                                details?.isReusable == false))
-                              verticalSpace(24),
-                            if (details?.status == 'completed' &&
-                                details?.isReusable == false)
-                              verticalSpace(12),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
+              ),
+            ),
     );
   }
 
   Widget _buildSectionHeader(String title) {
-    return BodyText(
-      title,
-      fontWeight: FontWeight.w600,
-      fontSize: 16,
-    );
+    return BodyText(title, fontWeight: FontWeight.w600, fontSize: 16);
   }
 
   Widget _buildInfoCard({required List<Widget> children}) {
@@ -345,12 +332,7 @@ class _PaymentRequestDetailsSheetState
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Caption(
-            label,
-            color: AppColor.lightText,
-          ),
-        ),
+        Expanded(child: Caption(label, color: AppColor.lightText)),
         horizontalSpace(16),
         Expanded(
           child: BodySmall(
@@ -369,10 +351,7 @@ class _PaymentRequestDetailsSheetState
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Caption(
-          label,
-          color: AppColor.lightText,
-        ),
+        Caption(label, color: AppColor.lightText),
         horizontalSpace(16),
         Expanded(
           child: Row(
@@ -418,12 +397,12 @@ class _PaymentRequestDetailsSheetState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: iconColor.withAlpha(30),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, size: 16, color: iconColor),
+          child: Icon(icon, size: 14, color: iconColor),
         ),
         horizontalSpace(12),
         Expanded(

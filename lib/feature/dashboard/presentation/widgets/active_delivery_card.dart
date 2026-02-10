@@ -37,7 +37,7 @@ class ActiveDeliveryCard extends StatelessWidget {
             Row(
               children: [
                 _buildTag(
-                  'In Transit',
+                  deliveryData['status'] ?? 'In Transit',
                   AppColor.pendingBalanceBackground,
                   AppColor.primary,
                 ),
@@ -73,7 +73,7 @@ class ActiveDeliveryCard extends StatelessWidget {
                       deliveryData['buyerName'] ?? 'Buyer Name',
                       fontWeight: FontWeight.w600,
                     ),
-                    const Caption('Buyer'),
+                    Caption(deliveryData['buyerRole'] ?? 'Buyer'),
                   ],
                 ),
               ],
@@ -112,10 +112,15 @@ class ActiveDeliveryCard extends StatelessWidget {
               children: [
                 Icon(Icons.pedal_bike, size: 16, color: AppColor.lightText),
                 horizontalSpace(8),
-
-                Caption('Rider assigned', color: AppColor.lightText),
-                Spacer(),
-                Caption('Dec 30, 4:05PM', color: AppColor.lightText),
+                Caption(
+                  deliveryData['status'] ?? 'Rider assigned',
+                  color: AppColor.lightText,
+                ),
+                const Spacer(),
+                Caption(
+                  deliveryData['timestamp'] ?? '',
+                  color: AppColor.lightText,
+                ),
               ],
             ),
           ],

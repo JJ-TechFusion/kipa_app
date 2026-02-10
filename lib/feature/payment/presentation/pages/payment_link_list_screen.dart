@@ -211,7 +211,17 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
             'dropoff_lat': link.dropoffLat,
             'dropoff_lng': link.dropoffLng,
           },
-          onReuse: () {},
+          onReuse: () {
+            Navigator.pushNamed(
+              context,
+              RouteNames.fulfillmentFormRoute,
+              arguments: {
+                'paymentRequestId': link.id,
+                'itemName': link.itemName,
+                'itemPrice': link.itemPrice,
+              },
+            );
+          },
           onEdit: () {
             Navigator.pushNamed(
               context,
@@ -308,7 +318,17 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
             'dropoff_lat': link.dropoffLat,
             'dropoff_lng': link.dropoffLng,
           },
-          onReuse: () {},
+          onReuse: () {
+            Navigator.pushNamed(
+              context,
+              RouteNames.fulfillmentFormRoute,
+              arguments: {
+                'paymentRequestId': link.id,
+                'itemName': link.itemName,
+                'itemPrice': link.itemPrice,
+              },
+            );
+          },
           onEdit: () {},
           onDelete: () {},
         );

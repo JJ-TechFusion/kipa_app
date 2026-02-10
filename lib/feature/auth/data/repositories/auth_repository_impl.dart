@@ -35,9 +35,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<UserEntity?> getCurrentUser() {
-    // TODO: implement getCurrentUser
-    throw UnimplementedError();
+  Future<NetworkResponse> getCurrentUser() async {
+    return await remoteDataSource.getCurrentUser();
   }
 
   @override

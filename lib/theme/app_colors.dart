@@ -11,7 +11,7 @@ class AppColor {
 
   static const primary = Color(0xFF1E3A8A);
   static const primary2 = Color(0xFF1F9A98);
-  static const green = Color(0xFF2EB872);
+  static const green = Color(0xFF0F766E);
   static const darkPrimary = Color(0xFF36454F);
   static const secondary = Color(0xFFC0F0F3);
   static const neutral = Color(0xFFEAEAEA);
@@ -54,4 +54,5 @@ class AppColor {
   static const scaffoldBackground = Color(0xFFF8F9FA);
   static const processingWindowBackground = Color(0xFFFFF3E0); // Light orange
   static const cardBackground2 = Color(0xFFF3F4F6);
+  static const lightTeal = Color(0xFFE0F2F1);
 }

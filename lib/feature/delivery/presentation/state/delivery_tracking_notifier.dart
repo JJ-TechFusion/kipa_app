@@ -176,35 +176,8 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
 
       if (response.success && response.data != null) {
         final jobData = response.data as Map<String, dynamic>;
-
-        RiderEntity? rider;
-        if (jobData['rider'] != null) {
-          rider = RiderModel.fromJson(jobData['rider']);
-        }
-
-        if (state.job != null) {
-          final updatedJob = DeliveryJobEntity(
-            id: state.job!.id,
-            paymentRequestId: state.job!.paymentRequestId,
-            status: jobData['status'] as String? ?? state.job!.status,
-            rider: rider,
-            pickupAddress:
-                jobData['pickup_address'] as String? ??
-                state.job!.pickupAddress,
-            dropoffAddress:
-                jobData['dropoff_address'] as String? ??
-                state.job!.dropoffAddress,
-            pickupLat: jobData['pickup_lat'] as double? ?? state.job!.pickupLat,
-            pickupLng: jobData['pickup_lng'] as double? ?? state.job!.pickupLng,
-            dropoffLat:
-                jobData['dropoff_lat'] as double? ?? state.job!.dropoffLat,
-            dropoffLng:
-                jobData['dropoff_lng'] as double? ?? state.job!.dropoffLng,
-            estimatedArrival: state.job!.estimatedArrival,
-            createdAt: state.job!.createdAt,
-          );
-          state = state.copyWith(job: updatedJob);
-        }
+        final updatedJob = DeliveryJobModel.fromJson(jobData);
+        state = state.copyWith(job: updatedJob);
       } else {
         // Job not found - this might be normal if job hasn't been created yet
       }
@@ -238,5 +211,69 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
     await _webSocketService.disconnect();
     _messageSubscription?.cancel();
     _connectionSubscription?.cancel();
+  }
+
+  Future<void> fetchRiderLocation(String deliveryJobId) async {
+    state = state.copyWith(isFetchingLocation: true);
+
+    try {
+      final apiService = getIt<ApiService>();
+      final response = await apiService.getRequest(
+        endpoint: ApiEndpoints.getRiderLocationUrl(deliveryJobId),
+      );
+
+      if (response.success && response.data != null) {
+        final locationData = response.data as Map<String, dynamic>;
+        final location = RiderLocationModel.fromJson(locationData);
+        state = state.copyWith(
+          isFetchingLocation: false,
+          riderLocation: location,
+        );
+      } else {
+        state = state.copyWith(
+          isFetchingLocation: false,
+          errorMessage: response.message,
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isFetchingLocation: false,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  Future<void> fetchLocationHistory(String deliveryJobId) async {
+    state = state.copyWith(isFetchingLocationHistory: true);
+
+    try {
+      final apiService = getIt<ApiService>();
+      final response = await apiService.getRequest(
+        endpoint: ApiEndpoints.getLocationHistoryUrl(deliveryJobId),
+      );
+
+      if (response.success && response.data != null) {
+        final historyData = response.data as Map<String, dynamic>;
+        final history = LocationHistoryModel.fromJson(historyData);
+        state = state.copyWith(
+          isFetchingLocationHistory: false,
+          locationHistory: history,
+        );
+      } else {
+        state = state.copyWith(
+          isFetchingLocationHistory: false,
+          errorMessage: response.message,
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isFetchingLocationHistory: false,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  void clearLocationHistory() {
+    state = state.copyWith(locationHistory: null);
   }
 }

@@ -13,8 +13,15 @@ class DeliveryJobModel {
       pickupLng: _parseDouble(json['pickup_lng']),
       dropoffLat: _parseDouble(json['dropoff_lat']),
       dropoffLng: _parseDouble(json['dropoff_lng']),
+      deliveryFee: _parseDouble(json['delivery_fee']),
+      vehicleType: json['vehicle_type']?.toString(),
+      riderAssigned: json['rider_assigned'] as bool? ?? false,
+      riderId: json['rider_id']?.toString(),
+      acceptedAt: json['accepted_at'] != null
+          ? DateTime.tryParse(json['accepted_at'].toString())
+          : null,
       estimatedArrival: json['estimated_arrival'] != null
-          ? DateTime.tryParse(json['estimated_arrival'])
+          ? DateTime.tryParse(json['estimated_arrival'].toString())
           : null,
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
     );
@@ -48,6 +55,7 @@ class RiderModel {
       vehicleType: json['vehicle_type'] ?? 'motorcycle',
       vehiclePlate: json['vehicle_plate'] ?? json['license_plate'],
       rating: _parseRating(json['rating']),
+      totalDeliveries: json['total_deliveries'] as int? ?? 0,
     );
   }
 
@@ -132,5 +140,36 @@ class NearbyRiderModel {
     return jsonList
         .map((json) => fromJson(json as Map<String, dynamic>))
         .toList();
+  }
+}
+
+class LocationPointModel {
+  static LocationPointEntity fromJson(Map<String, dynamic> json) {
+    return LocationPointEntity(
+      latitude: RiderLocationModel._parseDouble(json['lat']) ?? 0.0,
+      longitude: RiderLocationModel._parseDouble(json['lng']) ?? 0.0,
+      heading: RiderLocationModel._parseDouble(json['heading']),
+      speed: RiderLocationModel._parseDouble(json['speed']),
+      timestamp: json['timestamp'] != null
+          ? DateTime.tryParse(json['timestamp'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+    );
+  }
+
+  static List<LocationPointEntity> fromJsonList(List<dynamic> jsonList) {
+    return jsonList
+        .map((json) => fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+}
+
+class LocationHistoryModel {
+  static LocationHistoryEntity fromJson(Map<String, dynamic> json) {
+    final pointsList = json['points'] as List<dynamic>? ?? [];
+    return LocationHistoryEntity(
+      jobId: json['job_id']?.toString() ?? '',
+      count: json['count'] as int? ?? pointsList.length,
+      points: LocationPointModel.fromJsonList(pointsList),
+    );
   }
 }

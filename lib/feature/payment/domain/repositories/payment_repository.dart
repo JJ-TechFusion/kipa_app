@@ -36,4 +36,8 @@ abstract class PaymentRepository {
   Future<NetworkResponse> getPaymentDetails(String paymentCode);
 
   Future<NetworkResponse> markReadyForPickup(String paymentRequestId);
+
+  Future<NetworkResponse> cancelRiderSearch(String paymentRequestId);
+
+  Future<NetworkResponse> getTransactionStatus(String paymentRequestId);
 }

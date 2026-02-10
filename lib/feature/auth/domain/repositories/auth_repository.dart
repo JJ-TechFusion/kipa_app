@@ -7,7 +7,7 @@ abstract class AuthRepository {
   Future<NetworkResponse> resendOtp(ResendOtpRequest request);
   Future<NetworkResponse> uploadProfilePicture(String filePath);
   Future<NetworkResponse> updateProfile(UpdateProfileRequest request);
-  Future<UserEntity?> getCurrentUser();
+  Future<NetworkResponse> getCurrentUser();
   Future<void> logout();
   Future<void> deleteUser();
 }

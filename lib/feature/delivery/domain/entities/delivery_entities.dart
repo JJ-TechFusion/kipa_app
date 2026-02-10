@@ -10,6 +10,11 @@ class DeliveryJobEntity {
   final double? pickupLng;
   final double? dropoffLat;
   final double? dropoffLng;
+  final double? deliveryFee;
+  final String? vehicleType;
+  final bool riderAssigned;
+  final String? riderId;
+  final DateTime? acceptedAt;
   final DateTime? estimatedArrival;
   final DateTime createdAt;
 
@@ -24,6 +29,11 @@ class DeliveryJobEntity {
     this.pickupLng,
     this.dropoffLat,
     this.dropoffLng,
+    this.deliveryFee,
+    this.vehicleType,
+    this.riderAssigned = false,
+    this.riderId,
+    this.acceptedAt,
     this.estimatedArrival,
     required this.createdAt,
   });
@@ -39,6 +49,11 @@ class DeliveryJobEntity {
     double? pickupLng,
     double? dropoffLat,
     double? dropoffLng,
+    double? deliveryFee,
+    String? vehicleType,
+    bool? riderAssigned,
+    String? riderId,
+    DateTime? acceptedAt,
     DateTime? estimatedArrival,
     DateTime? createdAt,
   }) {
@@ -53,6 +68,11 @@ class DeliveryJobEntity {
       pickupLng: pickupLng ?? this.pickupLng,
       dropoffLat: dropoffLat ?? this.dropoffLat,
       dropoffLng: dropoffLng ?? this.dropoffLng,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
+      vehicleType: vehicleType ?? this.vehicleType,
+      riderAssigned: riderAssigned ?? this.riderAssigned,
+      riderId: riderId ?? this.riderId,
+      acceptedAt: acceptedAt ?? this.acceptedAt,
       estimatedArrival: estimatedArrival ?? this.estimatedArrival,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -68,6 +88,7 @@ class RiderEntity {
   final String vehicleType;
   final String? vehiclePlate;
   final double rating;
+  final int totalDeliveries;
 
   const RiderEntity({
     required this.id,
@@ -77,6 +98,7 @@ class RiderEntity {
     required this.vehicleType,
     this.vehiclePlate,
     required this.rating,
+    this.totalDeliveries = 0,
   });
 }
 
@@ -136,5 +158,35 @@ class NearbyRiderEntity {
     this.heading,
     this.speed,
     required this.distanceKm,
+  });
+}
+
+/// Entity representing a location point in history
+class LocationPointEntity {
+  final double latitude;
+  final double longitude;
+  final double? heading;
+  final double? speed;
+  final DateTime timestamp;
+
+  const LocationPointEntity({
+    required this.latitude,
+    required this.longitude,
+    this.heading,
+    this.speed,
+    required this.timestamp,
+  });
+}
+
+/// Entity representing location history for a delivery job
+class LocationHistoryEntity {
+  final String jobId;
+  final int count;
+  final List<LocationPointEntity> points;
+
+  const LocationHistoryEntity({
+    required this.jobId,
+    required this.count,
+    required this.points,
   });
 }

@@ -11,6 +11,8 @@ import '../../domain/usecases/send_otp_usecase.dart';
 import '../../domain/usecases/upload_profile_picture_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
 import '../../domain/usecases/verify_otp_usecase.dart';
+import '../../domain/usecases/get_current_user_usecase.dart';
+import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import 'auth_state.dart';
 
@@ -20,6 +22,7 @@ class AuthNotifier extends Notifier<AuthState> {
   late final ResendOtpUseCase _resendOtpUseCase;
   late final UploadProfilePictureUseCase _uploadProfilePictureUseCase;
   late final UpdateProfileUseCase _updateProfileUseCase;
+  late final GetCurrentUserUseCase _getCurrentUserUseCase;
   late final DeviceInfoService _deviceInfoService;
 
   @override
@@ -31,6 +34,7 @@ class AuthNotifier extends Notifier<AuthState> {
       uploadProfilePictureUseCaseProvider,
     );
     _updateProfileUseCase = ref.read(updateProfileUseCaseProvider);
+    _getCurrentUserUseCase = ref.read(getCurrentUserUseCaseProvider);
     _deviceInfoService = ref.read(deviceInfoServiceProvider);
     return const AuthState();
   }
@@ -214,6 +218,31 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         isUpdatingProfile: false,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  Future<void> fetchCurrentUser() async {
+    state = state.copyWith(isFetchingUser: true, errorMessage: null);
+
+    try {
+      final response = await _getCurrentUserUseCase();
+
+      if (response.success && response.data != null) {
+        state = state.copyWith(
+          isFetchingUser: false,
+          currentUser: response.data as UserEntity,
+        );
+      } else {
+        state = state.copyWith(
+          isFetchingUser: false,
+          errorMessage: response.message,
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isFetchingUser: false,
         errorMessage: e.toString(),
       );
     }

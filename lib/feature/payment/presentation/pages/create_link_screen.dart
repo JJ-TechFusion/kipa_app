@@ -322,17 +322,30 @@ class _CreateLinkActionScreenState
 
     int processingHours = _processingTimeMap[_processingTime!] ?? 24;
 
-    await ref
-        .read(paymentNotifierProvider.notifier)
-        .createPaymentRequest(
-          itemName: _nameController.text,
-          itemDescription: _descController.text,
-          itemPrice: double.tryParse(_priceController.text) ?? 0.0,
-          itemImages: _selectedImage != null ? [_selectedImage!.path] : [],
-          processingTimeHours: processingHours,
-          isReusable: linkExpiry == 'reusable',
-          maxUses: linkExpiry == 'reusable' ? 5 : null,
-        );
+    if (widget.isEdit && widget.paymentRequest != null) {
+      // Update existing payment request
+      await ref.read(paymentNotifierProvider.notifier).updatePaymentRequest(
+            id: widget.paymentRequest!['id'] as String,
+            itemName: _nameController.text,
+            itemDescription: _descController.text,
+            itemPrice: double.tryParse(_priceController.text) ?? 0.0,
+            itemImages: _selectedImage != null ? [_selectedImage!.path] : null,
+            processingTimeHours: processingHours,
+            isReusable: linkExpiry == 'reusable',
+            maxUses: linkExpiry == 'reusable' ? 5 : null,
+          );
+    } else {
+      // Create new payment request
+      await ref.read(paymentNotifierProvider.notifier).createPaymentRequest(
+            itemName: _nameController.text,
+            itemDescription: _descController.text,
+            itemPrice: double.tryParse(_priceController.text) ?? 0.0,
+            itemImages: _selectedImage != null ? [_selectedImage!.path] : [],
+            processingTimeHours: processingHours,
+            isReusable: linkExpiry == 'reusable',
+            maxUses: linkExpiry == 'reusable' ? 5 : null,
+          );
+    }
 
     final paymentState = ref.read(paymentNotifierProvider);
 

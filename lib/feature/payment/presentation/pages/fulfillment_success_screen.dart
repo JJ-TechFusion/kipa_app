@@ -179,10 +179,18 @@ class _FulfillmentSuccessScreenState
               padding: const EdgeInsets.symmetric(horizontal: 42),
               child: AnimatedButton(
                 onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    RouteNames.transactionStatusRoute,
-                  );
+                  final fulfillmentResponse = ref
+                      .read(paymentNotifierProvider)
+                      .fulfillmentResponse;
+                  if (fulfillmentResponse != null) {
+                    Navigator.pushNamed(
+                      context,
+                      RouteNames.transactionStatusRoute,
+                      arguments: {
+                        'paymentRequestId': fulfillmentResponse.paymentRequestId,
+                      },
+                    );
+                  }
                 },
                 child: CustomButton(
                   title: 'View Transaction Status',

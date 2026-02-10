@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:kipa/feature/dashboard/presentation/provider/dashboard_provider.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/active_deliveries_list.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/balance_card.dart';
@@ -8,8 +9,10 @@ import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_bottom_nav
 import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_header.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/promo_banner.dart';
 import 'package:kipa/feature/wallet/presentation/providers/wallet_provider.dart';
+import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/utils/constant.dart';
+import '../../../delivery/presentation/pages/deliveries_list_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -23,7 +26,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authNotifierProvider.notifier).fetchCurrentUser();
       ref.read(walletNotifierProvider.notifier).getWallet();
+      ref.read(dashboardProvider.notifier).fetchActiveDeliveries();
     });
   }
 
@@ -32,19 +37,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final state = ref.watch(dashboardProvider);
     final controller = ref.read(dashboardProvider.notifier);
     final walletState = ref.watch(walletNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
 
-    // Mock active deliveries data
-    final activeDeliveries = [
-      {
-        'buyerName': 'Grace Ikpang',
-        'buyerImage': 'user_grace.png', // Assuming assets
-        'itemName': 'iPhone 17 Pro Max',
-        'itemSpecs': 'Brand new 512GB/8GB RAM',
-        'price': 3500000.00,
-        'status': 'In Transit',
-      },
-      // Add more if needed for horizontal scroll check
-    ];
+    final activeDeliveries =
+        state.activeDeliveries?.map((delivery) {
+          final dateFormat = DateFormat('MMM dd, h:mma');
+          final timestamp = delivery.acceptedAt ?? delivery.createdAt;
+          return {
+            'buyerName': delivery.counterparty.name,
+            'buyerImage': delivery.counterparty.imageUrl,
+            'itemName': delivery.itemName,
+            'itemSpecs': delivery.itemDescription,
+            'price': delivery.itemPrice,
+            'status': delivery.riderStatusText,
+            'deliveryJobId': delivery.deliveryJobId,
+            'paymentRequestId': delivery.paymentRequestId,
+            'timestamp': dateFormat.format(timestamp),
+            'buyerRole': delivery.counterparty.role,
+          };
+        }).toList() ??
+        [];
 
     return Scaffold(
       body: SafeArea(
@@ -61,7 +73,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         DashboardHeader(
-                          userName: 'Grace',
+                          userName: authState.currentUser?.firstName ?? 'User',
                           onNotificationTap: () {},
                           onProfileTap: () {},
                         ),
@@ -112,12 +124,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ActiveDeliveriesList(
                           deliveries: activeDeliveries,
                           onViewAllTap: () {},
-                          onDeliveryTap: (index) {},
+                          onDeliveryTap: (index) {
+                            final delivery = activeDeliveries[index];
+                            if (delivery['deliveryJobId'] != null) {
+                              Navigator.pushNamed(
+                                context,
+                                RouteNames.deliveryDetailsRoute,
+                                arguments: {
+                                  'deliveryJobId': delivery['deliveryJobId'],
+                                },
+                              );
+                            }
+                          },
                         ),
                       ],
                     ),
                   ),
-                  const Center(child: Text('Deliveries Screen')),
+                  const DeliveriesListScreen(),
                   const Center(child: Text('Wallet Screen')),
                   const Center(child: Text('Support Screen')),
                   const Center(child: Text('Profile Screen')),

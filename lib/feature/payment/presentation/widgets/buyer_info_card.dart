@@ -10,6 +10,9 @@ class BuyerInfoCard extends StatelessWidget {
   final VoidCallback onCall;
   final String? title;
   final String? roleLabel;
+  final IconData? chatIcon;
+  final VoidCallback? onChat;
+  final String? imageUrl;
 
   const BuyerInfoCard({
     super.key,
@@ -19,6 +22,9 @@ class BuyerInfoCard extends StatelessWidget {
     required this.onCall,
     this.title = 'Buyer Information',
     this.roleLabel = 'Buyer',
+    this.chatIcon,
+    this.onChat,
+    this.imageUrl,
   });
 
   @override
@@ -35,7 +41,6 @@ class BuyerInfoCard extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(color: AppColor.kipaGrey.withAlpha(50)),
             borderRadius: BorderRadius.circular(16),
-            color: Colors.white,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,23 +48,65 @@ class BuyerInfoCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFC62828), // Dark Red for avatar
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        name.substring(0, 2).toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                  if (imageUrl != null && imageUrl!.isNotEmpty)
+                    ClipOval(
+                      child: SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: Image.network(
+                          imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFC62828), // Dark Red for avatar
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  name.isNotEmpty
+                                      ? name
+                                            .substring(
+                                              0,
+                                              name.length >= 2 ? 2 : 1,
+                                            )
+                                            .toUpperCase()
+                                      : '?',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFC62828), // Dark Red for avatar
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          name.isNotEmpty
+                              ? name
+                                    .substring(0, name.length >= 2 ? 2 : 1)
+                                    .toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   horizontalSpace(12),
                   Expanded(
                     child: Column(
@@ -74,40 +121,61 @@ class BuyerInfoCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  GestureDetector(
-                    onTap: onCall,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColor.cardBackground2,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.call,
-                            size: 14,
-                            color: AppColor.primaryText,
+                  Row(
+                    children: [
+                      if (chatIcon != null) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                          horizontalSpace(8),
-                          const Caption(
-                            'Call',
-                            fontWeight: FontWeight.w600,
-                            color: AppColor.primaryText,
+                          decoration: BoxDecoration(
+                            color: AppColor.cardBackground2,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        ],
+                          child: GestureDetector(
+                            onTap: onChat,
+                            child: Icon(
+                              chatIcon,
+                              size: 14,
+                              color: AppColor.primaryText,
+                            ),
+                          ),
+                        ),
+                        horizontalSpace(8),
+                      ],
+                      GestureDetector(
+                        onTap: onCall,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColor.cardBackground2,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.call,
+                                size: 14,
+                                color: AppColor.primaryText,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
               verticalSpace(16),
               _buildInfoRow('Phone Number', phone),
-              verticalSpace(12),
-              _buildInfoRow('Email', email),
+              if (email.isNotEmpty) ...[
+                verticalSpace(12),
+                _buildInfoRow('Email', email),
+              ],
             ],
           ),
         ),
@@ -125,7 +193,7 @@ class BuyerInfoCard extends StatelessWidget {
           color: AppColor.primaryText,
           fontWeight: FontWeight.w600,
         ),
-        Caption(value, color: AppColor.lightText),
+        Caption(value.isNotEmpty ? value : 'N/A', color: AppColor.lightText),
       ],
     );
   }
