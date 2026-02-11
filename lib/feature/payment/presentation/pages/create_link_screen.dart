@@ -322,25 +322,42 @@ class _CreateLinkActionScreenState
 
     int processingHours = _processingTimeMap[_processingTime!] ?? 24;
 
+    // Upload image first if one was selected
+    List<String> itemImageUrls = [];
+    if (_selectedImage != null) {
+      final bytes = await _selectedImage!.readAsBytes();
+      final fileName = _selectedImage!.path.split('/').last;
+      final url = await ref.read(paymentNotifierProvider.notifier).uploadItemImage(
+            fileName: fileName,
+            fileBytes: bytes,
+          );
+      if (url != null) {
+        itemImageUrls = [url];
+      } else if (mounted) {
+        // Upload failed — show error and abort
+        final errorMessage = ref.read(paymentNotifierProvider).errorMessage ?? 'Failed to upload image';
+        _showError(errorMessage);
+        return;
+      }
+    }
+
     if (widget.isEdit && widget.paymentRequest != null) {
-      // Update existing payment request
       await ref.read(paymentNotifierProvider.notifier).updatePaymentRequest(
             id: widget.paymentRequest!['id'] as String,
             itemName: _nameController.text,
             itemDescription: _descController.text,
             itemPrice: double.tryParse(_priceController.text) ?? 0.0,
-            itemImages: _selectedImage != null ? [_selectedImage!.path] : null,
+            itemImages: itemImageUrls.isNotEmpty ? itemImageUrls : null,
             processingTimeHours: processingHours,
             isReusable: linkExpiry == 'reusable',
             maxUses: linkExpiry == 'reusable' ? 5 : null,
           );
     } else {
-      // Create new payment request
       await ref.read(paymentNotifierProvider.notifier).createPaymentRequest(
             itemName: _nameController.text,
             itemDescription: _descController.text,
             itemPrice: double.tryParse(_priceController.text) ?? 0.0,
-            itemImages: _selectedImage != null ? [_selectedImage!.path] : [],
+            itemImages: itemImageUrls,
             processingTimeHours: processingHours,
             isReusable: linkExpiry == 'reusable',
             maxUses: linkExpiry == 'reusable' ? 5 : null,

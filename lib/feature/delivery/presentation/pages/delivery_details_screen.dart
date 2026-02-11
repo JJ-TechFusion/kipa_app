@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:kipa/core/shared/widgets/custom_snackbar.dart';
-import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/feature/delivery/domain/enums/delivery_status.dart';
 import 'package:kipa/feature/delivery/presentation/providers/delivery_provider.dart';
 import 'package:kipa/feature/delivery/presentation/widgets/delivery_status_widgets.dart';
@@ -53,14 +52,12 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
         .read(deliveryTrackingProvider.notifier)
         .startTracking(jobId: widget.deliveryJobId);
 
-    // Fetch purchase detail if buyer and we have purchase ID
     if (widget.isBuyer && widget.purchaseId != null) {
       ref
           .read(purchasesNotifierProvider.notifier)
           .fetchPurchaseById(widget.purchaseId!);
     }
 
-    // Fetch sale detail if seller and we have sale ID
     if (!widget.isBuyer && widget.saleId != null) {
       ref.read(salesNotifierProvider.notifier).fetchSaleById(widget.saleId!);
     }
@@ -104,16 +101,19 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
 
     if (job == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Transaction Details')),
+        appBar: AppBar(title: const BodyText('Transaction Details')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              BodyText(
                 trackingState.errorMessage ?? 'Failed to load delivery details',
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
+              verticalSpace(16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 42),
+                child: CustomButton(title: 'Retry', onTap: _loadData),
+              ),
             ],
           ),
         ),
@@ -178,18 +178,45 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     final String codeTitle;
     final String codeSubtitle;
 
+    // Check if this is a return flow based on timeline.phase
+    final isReturnFlow = widget.isBuyer
+        ? purchasesState.purchaseDetail?.timeline?.phase?.toLowerCase() ==
+              'return'
+        : salesState.saleDetail?.timeline?.phase?.toLowerCase() == 'return';
+
     if (widget.isBuyer) {
-      displayCode =
-          purchasesState.purchaseDetail?.delivery?.dropoffCode ??
-          purchasesState.purchaseDetail?.timeline?.dropoffCode;
-      codeTitle = 'Your Drop-off Code';
-      codeSubtitle = 'Share this code with your rider';
+      if (isReturnFlow) {
+        // During return: buyer has pickup code from timeline (they're sending item back)
+        displayCode = purchasesState.purchaseDetail?.timeline?.pickupCode;
+        codeTitle = 'Your Pickup Code';
+        codeSubtitle = 'Share this code with the rider picking up';
+      } else {
+        // Normal delivery: buyer has dropoff code
+        displayCode =
+            purchasesState.purchaseDetail?.delivery?.dropoffCode ??
+            purchasesState.purchaseDetail?.timeline?.dropoffCode;
+        codeTitle = 'Your Drop-off Code';
+        codeSubtitle = 'Share this code with your rider';
+      }
     } else {
-      displayCode =
-          salesState.saleDetail?.delivery?.pickupCode ??
-          salesState.saleDetail?.timeline?.pickupCode;
-      codeTitle = 'Your Pickup Code';
-      codeSubtitle = 'Share this code with your rider';
+      final isForcedReturn =
+          salesState.saleDetail?.delivery?.status.toLowerCase() ==
+          'forced_return';
+      if (isReturnFlow || isForcedReturn) {
+        // During return or forced return: seller has dropoff code (they're receiving item back)
+        displayCode =
+            salesState.saleDetail?.timeline?.dropoffCode ??
+            salesState.saleDetail?.delivery?.dropoffCode;
+        codeTitle = 'Your Drop-off Code';
+        codeSubtitle = 'Share this code with the rider returning the item';
+      } else {
+        // Normal delivery: seller has pickup code
+        displayCode =
+            salesState.saleDetail?.delivery?.pickupCode ??
+            salesState.saleDetail?.timeline?.pickupCode;
+        codeTitle = 'Your Pickup Code';
+        codeSubtitle = 'Share this code with your rider';
+      }
     }
 
     final riderStatusText = getRiderStatusText(status, isBuyer: widget.isBuyer);
@@ -237,12 +264,55 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                 verticalSpace(24),
               ],
 
-              // Map Preview
-              _buildMapPreview(job),
+              Builder(
+                builder: (ctx) {
+                  bool isReturnConfirmed = false;
+                  if (widget.isBuyer) {
+                    isReturnConfirmed =
+                        purchasesState.purchaseDetail?.timeline?.steps.any(
+                          (s) =>
+                              (s.step == 'return_confirmed' ||
+                                  s.title.toLowerCase().contains(
+                                    'return confirmed',
+                                  )) &&
+                              (s.status == 'completed' || s.status == 'done'),
+                        ) ==
+                        true;
+                  } else {
+                    isReturnConfirmed =
+                        salesState.saleDetail?.timeline?.steps.any(
+                          (s) =>
+                              (s.step == 'return_confirmed' ||
+                                  s.title.toLowerCase().contains(
+                                    'return confirmed',
+                                  )) &&
+                              (s.status == 'completed' || s.status == 'done'),
+                        ) ==
+                        true;
+                  }
+
+                  final isMapDisabled =
+                      orderStatus?.toLowerCase() == 'completed' ||
+                      isReturnConfirmed;
+
+                  return _buildMapPreview(
+                    job,
+                    isReturnFlow: isReturnFlow,
+                    trackingJobId: isReturnFlow
+                        ? (widget.isBuyer
+                              ? purchasesState
+                                    .purchaseDetail
+                                    ?.delivery
+                                    ?.returnJobId
+                              : salesState.saleDetail?.delivery?.returnJobId)
+                        : null,
+                    disabled: isMapDisabled,
+                  );
+                },
+              ),
               verticalSpace(24),
             ],
 
-            // Product Details Card
             _buildProductDetailsCard(
               itemName: itemName,
               itemSpecs: itemDesc,
@@ -255,13 +325,11 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
             ),
             verticalSpace(24),
 
-            // Processing Status (Only for Screen 1 flow mainly)
             if (!isPickupInitiated) ...[
               const ProcessingStatusCard(daysLeft: 3),
               verticalSpace(24),
             ],
 
-            // Timeline
             _buildTimeline(
               widget.isBuyer
                   ? purchasesState.purchaseDetail?.timeline
@@ -269,14 +337,13 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
             ),
             verticalSpace(24),
 
-            // Seller/Buyer/Rider Information
             if (widget.isBuyer) ...[
               if (job.rider != null) ...[
                 BuyerInfoCard(
                   title: 'Rider Information',
                   roleLabel: 'Rider',
                   name: job.rider!.name,
-                  email: '', // Riders don't have email in the entity
+                  email: '',
                   phone: job.rider!.phone,
                   imageUrl: job.rider!.photoUrl,
                   onCall: () {},
@@ -302,20 +369,29 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
               ],
             ],
 
-            // Safe Funds Banner
             SafeFundsBanner(amount: escrowAmount, customText: escrowText),
             verticalSpace(24),
 
-            // Delivery Actions (for buyers when delivered and not completed)
             if (widget.isBuyer &&
                 job.status.toLowerCase() == 'delivered' &&
                 purchasesState.purchaseDetail?.status.toLowerCase() !=
-                    'completed') ...[
+                    'completed' &&
+                purchasesState.purchaseDetail?.status.toLowerCase() !=
+                    'disputed') ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 42),
                 child: CustomButton(
                   title: 'Open Dispute',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      RouteNames.disputeRoute,
+                      arguments: {
+                        'purchaseId': widget.purchaseId,
+                        'itemName': purchasesState.purchaseDetail?.itemName,
+                      },
+                    );
+                  },
                   color: AppColor.kipaGrey.withAlpha(50),
                   textColor: AppColor.primaryText,
                   borderRadius: 30,
@@ -340,7 +416,6 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                             'Delivery confirmed. Payment released to seller.',
                         type: SnackBarType.success,
                       );
-                      // Refresh purchase detail
                       ref
                           .read(purchasesNotifierProvider.notifier)
                           .fetchPurchaseById(widget.purchaseId!);
@@ -358,6 +433,136 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                   icon: CupertinoIcons.checkmark_circle,
                   borderRadius: 30,
                 ),
+              ),
+              verticalSpace(16),
+            ],
+
+            if (widget.isBuyer &&
+                purchasesState.purchaseDetail?.prStatus?.toLowerCase() ==
+                    'return_required') ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 42),
+                child: CustomButton(
+                  title: 'Confirm Return',
+                  isLoading: purchasesState.isInitiatingReturn,
+                  onTap: () async {
+                    if (widget.purchaseId == null) return;
+
+                    final response = await ref
+                        .read(purchasesNotifierProvider.notifier)
+                        .readyForReturn(widget.purchaseId!);
+
+                    if (response != null && context.mounted) {
+                      Navigator.pushNamed(
+                        context,
+                        RouteNames.deliveryTrackingRoute,
+                        arguments: {
+                          'deliveryJobId': response.returnJobId,
+                          'isReturnFlow': true,
+                        },
+                      );
+                    } else if (context.mounted) {
+                      final errorMessage =
+                          ref.read(purchasesNotifierProvider).errorMessage ??
+                          'Failed to initiate return';
+                      CustomSnackBar.show(
+                        context,
+                        message: errorMessage,
+                        type: SnackBarType.error,
+                      );
+                    }
+                  },
+                  icon: Icons.assignment_return,
+                  borderRadius: 30,
+                ),
+              ),
+              verticalSpace(16),
+            ],
+
+            // Buyer: Rebook rider when buyer was unavailable
+            if (widget.isBuyer &&
+                purchasesState.purchaseDetail?.prStatus?.toLowerCase() ==
+                    'pending_rebook' &&
+                purchasesState.purchaseDetail?.delivery?.status.toLowerCase() ==
+                    'buyer_unavailable') ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 42),
+                child: CustomButton(
+                  title: 'Rebook Rider',
+                  isLoading: purchasesState.isRebooking,
+                  onTap: () async {
+                    if (widget.purchaseId == null) return;
+
+                    final success = await ref
+                        .read(purchasesNotifierProvider.notifier)
+                        .rebookDelivery(widget.purchaseId!);
+
+                    if (success && context.mounted) {
+                      CustomSnackBar.show(
+                        context,
+                        message:
+                            'Delivery rebooked! Rider will continue to your location.',
+                        type: SnackBarType.success,
+                      );
+                      ref
+                          .read(purchasesNotifierProvider.notifier)
+                          .fetchPurchaseById(widget.purchaseId!);
+                    } else if (context.mounted) {
+                      final errorMessage =
+                          ref.read(purchasesNotifierProvider).errorMessage ??
+                          'Failed to rebook delivery';
+                      CustomSnackBar.show(
+                        context,
+                        message: errorMessage,
+                        type: SnackBarType.error,
+                      );
+                    }
+                  },
+                  icon: Icons.refresh,
+                  borderRadius: 30,
+                ),
+              ),
+              verticalSpace(16),
+            ],
+
+            // Seller: Confirm return when return_delivered step is completed
+            if (!widget.isBuyer && widget.saleId != null) ...[
+              Builder(
+                builder: (context) {
+                  final timeline = salesState.saleDetail?.timeline;
+                  final currentStep = timeline?.currentStep ?? '';
+
+                  final isReturnDelivered =
+                      currentStep == 'return_delivered' ||
+                      currentStep == 'return_confirmed';
+
+                  final isReturnAlreadyConfirmed = (timeline?.steps ?? []).any(
+                    (s) =>
+                        (s.step == 'return_confirmed' ||
+                            s.title.toLowerCase().contains(
+                              'return confirmed',
+                            )) &&
+                        (s.status == 'completed' || s.status == 'done'),
+                  );
+
+                  if (isReturnDelivered && !isReturnAlreadyConfirmed) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 42),
+                      child: CustomButton(
+                        title: 'Confirm Return',
+                        isLoading: salesState.isConfirmingReturn,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          RouteNames.confirmReturnRoute,
+                          arguments: {'saleId': widget.saleId},
+                        ),
+                        icon: Icons.check_circle,
+                        borderRadius: 30,
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
               verticalSpace(16),
             ],
@@ -383,7 +588,6 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
       decimalDigits: 2,
     );
 
-    // Determine status badge based on actual delivery status
     String? statusText;
     Color? statusBgColor;
     Color? statusTextColor;
@@ -420,6 +624,21 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
         statusBgColor = const Color(0xFFFFF3E0);
         statusTextColor = const Color(0xFFE65100);
         statusIcon = Icons.search;
+      } else if (normalizedStatus == 'buyer_unavailable') {
+        statusText = 'Buyer Unavailable';
+        statusBgColor = const Color(0xFFFFF3E0);
+        statusTextColor = const Color(0xFFE65100);
+        statusIcon = Icons.person_off;
+      } else if (normalizedStatus == 'forced_return') {
+        statusText = 'Returning to Seller';
+        statusBgColor = const Color(0xFFFFEBEE);
+        statusTextColor = const Color(0xFFC62828);
+        statusIcon = Icons.assignment_return;
+      } else if (normalizedStatus == 'forced_return_done') {
+        statusText = 'Returned - Refund Processing';
+        statusBgColor = const Color(0xFFE8F5E9);
+        statusTextColor = const Color(0xFF2E7D32);
+        statusIcon = Icons.payments;
       }
     }
 
@@ -532,20 +751,38 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     );
   }
 
-  Widget _buildMapPreview(dynamic job) {
+  Widget _buildMapPreview(
+    dynamic job, {
+    String? trackingJobId,
+    bool isReturnFlow = false,
+    bool disabled = false,
+  }) {
     // Determine lat/lng from job
     final lat = job.pickupLat ?? 6.5244;
     final lng = job.pickupLng ?? 3.3792;
+    final jobIdToTrack = trackingJobId ?? job.id;
+
+    // During return the item travels back: dropoff becomes origin, pickup becomes destination
+    final topAddress = isReturnFlow
+        ? (job.dropoffAddress.isNotEmpty ? job.dropoffAddress : 'Pickup Point')
+        : (job.pickupAddress.isNotEmpty ? job.pickupAddress : 'Pickup Point');
+    final bottomAddress = isReturnFlow
+        ? (job.pickupAddress.isNotEmpty ? job.pickupAddress : 'Destination')
+        : (job.dropoffAddress.isNotEmpty ? job.dropoffAddress : 'Destination');
 
     return GestureDetector(
-      onTap: () {
-        // Navigate to delivery tracking screen
-        Navigator.pushNamed(
-          context,
-          RouteNames.deliveryTrackingRoute,
-          arguments: {'deliveryJobId': job.id, 'initialJob': job},
-        );
-      },
+      onTap: disabled
+          ? null
+          : () {
+              Navigator.pushNamed(
+                context,
+                RouteNames.deliveryTrackingRoute,
+                arguments: {
+                  'deliveryJobId': jobIdToTrack,
+                  if (trackingJobId != null) 'initialJob': null,
+                },
+              );
+            },
       child: SizedBox(
         height: 200,
         child: ClipRRect(
@@ -565,47 +802,47 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                       mapToolbarEnabled: false,
                       liteModeEnabled: true,
                     ),
-                    // Overlay to indicate it's clickable
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColor.primary,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withAlpha(30),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.my_location,
-                              size: 14,
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Track Delivery',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                    if (!disabled)
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColor.primary,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(30),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.my_location,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Track Delivery',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -651,9 +888,7 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            job.pickupAddress.isNotEmpty
-                                ? job.pickupAddress
-                                : 'Pickup Point',
+                            topAddress,
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -663,9 +898,7 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                           ),
                           const SizedBox(height: 29),
                           Text(
-                            job.dropoffAddress.isNotEmpty
-                                ? job.dropoffAddress
-                                : 'Destination',
+                            bottomAddress,
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,

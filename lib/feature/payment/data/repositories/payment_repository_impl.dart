@@ -88,4 +88,15 @@ class PaymentRepositoryImpl implements PaymentRepository {
   Future<NetworkResponse> getTransactionStatus(String paymentRequestId) async {
     return await remoteDataSource.getTransactionStatus(paymentRequestId);
   }
+
+  @override
+  Future<NetworkResponse> uploadItemImage({
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    return await remoteDataSource.uploadItemImage(
+      fileName: fileName,
+      fileBytes: fileBytes,
+    );
+  }
 }

@@ -6,6 +6,8 @@ import '../../data/repositories/sales_repository_impl.dart';
 import '../../domain/repositories/sales_repository.dart';
 import '../../domain/usecases/get_sales_usecase.dart';
 import '../../domain/usecases/get_sale_by_id_usecase.dart';
+import '../../domain/usecases/confirm_return_usecase.dart';
+import '../../domain/usecases/upload_damage_evidence_usecase.dart';
 import '../state/sales_notifier.dart';
 import '../state/sales_state.dart';
 
@@ -26,6 +28,14 @@ final getSalesUseCaseProvider = Provider<GetSalesUseCase>((ref) {
 
 final getSaleByIdUseCaseProvider = Provider<GetSaleByIdUseCase>((ref) {
   return GetSaleByIdUseCase(ref.read(salesRepositoryProvider));
+});
+
+final confirmReturnUseCaseProvider = Provider<ConfirmReturnUseCase>((ref) {
+  return ConfirmReturnUseCase(ref.read(salesRepositoryProvider));
+});
+
+final uploadDamageEvidenceUseCaseProvider = Provider<UploadDamageEvidenceUseCase>((ref) {
+  return UploadDamageEvidenceUseCase(ref.read(salesRepositoryProvider));
 });
 
 // Notifier

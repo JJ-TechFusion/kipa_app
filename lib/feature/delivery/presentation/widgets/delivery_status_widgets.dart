@@ -28,6 +28,12 @@ String getRiderStatusText(DeliveryStatus status, {bool isBuyer = true}) {
           : 'Rider is delivering your item';
     case DeliveryStatus.delivered:
       return 'Item has been delivered';
+    case DeliveryStatus.buyerUnavailable:
+      return 'Buyer was unavailable at delivery location';
+    case DeliveryStatus.forcedReturn:
+      return 'Item is being returned to seller';
+    case DeliveryStatus.forcedReturnDone:
+      return 'Item returned. Refund processing';
     default:
       return isBuyer ? 'Your rider is on the way' : 'Rider is on the way';
   }

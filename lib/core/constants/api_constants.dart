@@ -1,6 +1,6 @@
 class ApiEndpoints {
   static const String baseUrl =
-      'https://bdcc-102-90-100-233.ngrok-free.app/api/v1';
+      'https://62fd-102-88-113-150.ngrok-free.app/api/v1';
 
   static const String sendOtpUrl = '/auth/otp/send';
   static const String verifyOtpUrl = '/auth/otp/verify';
@@ -60,6 +60,22 @@ class ApiEndpoints {
       '/purchases/$purchaseId';
   static String confirmDeliveryUrl(String purchaseId) =>
       '/purchases/$purchaseId/confirm';
+
+  static String readyForReturnUrl(String purchaseId) =>
+      '/purchases/$purchaseId/ready-for-return';
+
+  static String rebookDeliveryUrl(String purchaseId) =>
+      '/purchases/$purchaseId/rebook';
+
+  static String confirmReturnUrl(String orderId) =>
+      '/seller/sales/$orderId/confirm-return';
+
+  // Dispute endpoints
+  static String openDisputeUrl(String purchaseId) =>
+      '/purchases/$purchaseId/dispute';
+
+  static const String uploadDisputeEvidenceUrl = '/uploads/dispute-evidence';
+  static const String uploadItemImageUrl = '/uploads/item-image';
 
   // Active deliveries endpoint
   static const String activeDeliveriesUrl = '/transactions/active-deliveries';

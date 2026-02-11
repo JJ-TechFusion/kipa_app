@@ -70,6 +70,7 @@ class PaymentDetailsModel extends PaymentDetailsEntity {
     super.seller,
     super.items,
     super.fulfillment,
+    super.processingTimeHours,
   });
 
   factory PaymentDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -119,6 +120,7 @@ class PaymentDetailsModel extends PaymentDetailsEntity {
       seller: seller,
       items: items,
       fulfillment: fulfillment,
+      processingTimeHours: json['processing_time_hours'] as int?,
     );
   }
 }

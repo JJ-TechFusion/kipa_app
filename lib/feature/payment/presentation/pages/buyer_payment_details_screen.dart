@@ -45,6 +45,16 @@ class _BuyerPaymentDetailsScreenState
     return '₦${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}';
   }
 
+  String _formatProcessingTime(int? hours) {
+    if (hours == null) {
+      return 'It will take within 0-3 days for your seller to dispatch your item for delivery. You will be refunded if your item is not dispatched within this time-frame';
+    }
+    final timeLabel = hours < 24
+        ? '$hours hour${hours == 1 ? '' : 's'}'
+        : '${(hours / 24).ceil()} day${(hours / 24).ceil() == 1 ? '' : 's'}';
+    return 'It will take within $timeLabel for your seller to dispatch your item for delivery. You will be refunded if your item is not dispatched within this time-frame';
+  }
+
   @override
   Widget build(BuildContext context) {
     final paymentState = ref.watch(paymentNotifierProvider);
@@ -164,8 +174,8 @@ class _BuyerPaymentDetailsScreenState
                           ],
                         ),
                         verticalSpace(8),
-                        const Caption(
-                          'It will take within 0-3 days for your seller to dispatch your item for delivery. You will be refunded if your item is not dispatched within this time-frame',
+                        Caption(
+                          _formatProcessingTime(details?.processingTimeHours),
                           fontSize: 11,
                           color: AppColor.kipaGrey2,
                         ),
@@ -295,7 +305,9 @@ class _BuyerPaymentDetailsScreenState
                                 RouteNames.buyerPaymentSuccessRoute,
                                 (route) => route.isFirst,
                                 arguments: {
-                                  'paymentRequestId': verifyState.verifyPaymentResponse!.paymentRequestId,
+                                  'paymentRequestId': verifyState
+                                      .verifyPaymentResponse!
+                                      .paymentRequestId,
                                 },
                               );
                             }

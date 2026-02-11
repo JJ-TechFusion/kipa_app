@@ -17,6 +17,7 @@ import '../../domain/usecases/verify_payment_usecase.dart';
 import '../../domain/usecases/get_payment_details_usecase.dart';
 import '../../domain/usecases/mark_ready_for_pickup_usecase.dart';
 import '../../domain/usecases/cancel_rider_search_usecase.dart';
+import '../../domain/usecases/upload_item_image_usecase.dart';
 
 class PaymentNotifier extends Notifier<PaymentState> {
   late final CreatePaymentRequestUseCase _createPaymentRequestUseCase;
@@ -31,6 +32,7 @@ class PaymentNotifier extends Notifier<PaymentState> {
   late final GetPaymentDetailsUseCase _getPaymentDetailsUseCase;
   late final MarkReadyForPickupUseCase _markReadyForPickupUseCase;
   late final CancelRiderSearchUseCase _cancelRiderSearchUseCase;
+  late final UploadItemImageUseCase _uploadItemImageUseCase;
 
   @override
   PaymentState build() {
@@ -56,6 +58,7 @@ class PaymentNotifier extends Notifier<PaymentState> {
     _getPaymentDetailsUseCase = ref.read(getPaymentDetailsUseCaseProvider);
     _markReadyForPickupUseCase = ref.read(markReadyForPickupUseCaseProvider);
     _cancelRiderSearchUseCase = ref.read(cancelRiderSearchUseCaseProvider);
+    _uploadItemImageUseCase = ref.read(uploadItemImageUseCaseProvider);
     return const PaymentState();
   }
 
@@ -451,6 +454,37 @@ class PaymentNotifier extends Notifier<PaymentState> {
         errorMessage: e.toString(),
       );
       return false;
+    }
+  }
+
+  Future<String?> uploadItemImage({
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    state = state.copyWith(isUploadingItemImage: true, errorMessage: null);
+
+    try {
+      final response = await _uploadItemImageUseCase(
+        fileName: fileName,
+        fileBytes: fileBytes,
+      );
+
+      if (response.success && response.data != null) {
+        state = state.copyWith(isUploadingItemImage: false);
+        return response.data as String;
+      } else {
+        state = state.copyWith(
+          isUploadingItemImage: false,
+          errorMessage: response.message,
+        );
+        return null;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isUploadingItemImage: false,
+        errorMessage: e.toString(),
+      );
+      return null;
     }
   }
 }

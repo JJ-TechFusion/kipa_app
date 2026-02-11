@@ -14,6 +14,10 @@ class SaleModel {
   final String? deliveryJobId;
   final DateTime createdAt;
   final DateTime? paidAt;
+  final String? pickupAddress;
+  final String? dropoffAddress;
+  final String? prStatus;
+  final String? returnJobId;
 
   const SaleModel({
     required this.id,
@@ -29,6 +33,10 @@ class SaleModel {
     this.deliveryJobId,
     required this.createdAt,
     this.paidAt,
+    this.pickupAddress,
+    this.dropoffAddress,
+    this.prStatus,
+    this.returnJobId,
   });
 
   factory SaleModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +66,10 @@ class SaleModel {
       paidAt: json['paid_at'] != null
           ? DateTime.tryParse(json['paid_at'].toString())
           : null,
+      pickupAddress: json['pickup_address']?.toString(),
+      dropoffAddress: json['dropoff_address']?.toString(),
+      prStatus: json['pr_status']?.toString(),
+      returnJobId: json['return_job_id']?.toString(),
     );
   }
 
@@ -76,6 +88,10 @@ class SaleModel {
       deliveryJobId: deliveryJobId,
       createdAt: createdAt,
       paidAt: paidAt,
+      pickupAddress: pickupAddress,
+      dropoffAddress: dropoffAddress,
+      prStatus: prStatus,
+      returnJobId: returnJobId,
     );
   }
 }
@@ -200,13 +216,21 @@ class SaleDeliveryModel {
   final String jobId;
   final String status;
   final String? pickupCode;
+  final String? dropoffCode;
   final bool riderAssigned;
+  final String? phase;
+  final String? returnStatus;
+  final String? returnJobId;
 
   const SaleDeliveryModel({
     required this.jobId,
     required this.status,
     this.pickupCode,
+    this.dropoffCode,
     required this.riderAssigned,
+    this.phase,
+    this.returnStatus,
+    this.returnJobId,
   });
 
   factory SaleDeliveryModel.fromJson(Map<String, dynamic> json) {
@@ -214,7 +238,11 @@ class SaleDeliveryModel {
       jobId: json['job_id']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       pickupCode: json['pickup_code']?.toString(),
+      dropoffCode: json['dropoff_code']?.toString(),
       riderAssigned: json['rider_assigned'] as bool? ?? false,
+      phase: json['phase']?.toString(),
+      returnStatus: json['return_status']?.toString(),
+      returnJobId: json['return_job_id']?.toString(),
     );
   }
 
@@ -223,7 +251,11 @@ class SaleDeliveryModel {
       jobId: jobId,
       status: status,
       pickupCode: pickupCode,
+      dropoffCode: dropoffCode,
       riderAssigned: riderAssigned,
+      phase: phase,
+      returnStatus: returnStatus,
+      returnJobId: returnJobId,
     );
   }
 }
@@ -273,6 +305,8 @@ class TimelineModel {
   final double totalAmount;
   final String deliveryType;
   final String? pickupCode;
+  final String? dropoffCode;
+  final String? phase;
 
   const TimelineModel({
     required this.steps,
@@ -281,6 +315,8 @@ class TimelineModel {
     required this.totalAmount,
     required this.deliveryType,
     this.pickupCode,
+    this.dropoffCode,
+    this.phase,
   });
 
   factory TimelineModel.fromJson(Map<String, dynamic> json) {
@@ -302,6 +338,8 @@ class TimelineModel {
       totalAmount: parseDouble(json['total_amount']),
       deliveryType: json['delivery_type']?.toString() ?? '',
       pickupCode: json['pickup_code']?.toString(),
+      dropoffCode: json['dropoff_code']?.toString(),
+      phase: json['phase']?.toString(),
     );
   }
 
@@ -313,6 +351,8 @@ class TimelineModel {
       totalAmount: totalAmount,
       deliveryType: deliveryType,
       pickupCode: pickupCode,
+      dropoffCode: dropoffCode,
+      phase: phase,
     );
   }
 }

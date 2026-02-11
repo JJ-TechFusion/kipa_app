@@ -58,6 +58,7 @@ class PaymentDetailsEntity {
   final SellerInfoEntity? seller;
   final List<PaymentItemEntity> items;
   final FulfillmentInfoEntity? fulfillment;
+  final int? processingTimeHours;
 
   PaymentDetailsEntity({
     required this.id,
@@ -70,6 +71,7 @@ class PaymentDetailsEntity {
     this.seller,
     this.items = const [],
     this.fulfillment,
+    this.processingTimeHours,
   });
 }
 

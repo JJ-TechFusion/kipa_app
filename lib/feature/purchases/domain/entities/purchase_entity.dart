@@ -7,6 +7,9 @@ class PurchaseDeliveryEntity {
   final String? dropoffAddress;
   final DateTime? pickedUpAt;
   final DateTime? deliveredAt;
+  final String? phase;
+  final String? returnStatus;
+  final String? returnJobId;
 
   const PurchaseDeliveryEntity({
     required this.jobId,
@@ -17,6 +20,9 @@ class PurchaseDeliveryEntity {
     this.dropoffAddress,
     this.pickedUpAt,
     this.deliveredAt,
+    this.phase,
+    this.returnStatus,
+    this.returnJobId,
   });
 }
 
@@ -40,6 +46,8 @@ class PurchaseEntity {
   final PurchaseDeliveryEntity? delivery;
   final String? pickupAddress;
   final String? dropoffAddress;
+  final String? prStatus;
+  final String? returnJobId;
 
   const PurchaseEntity({
     required this.id,
@@ -61,6 +69,8 @@ class PurchaseEntity {
     this.delivery,
     this.pickupAddress,
     this.dropoffAddress,
+    this.prStatus,
+    this.returnJobId,
   });
 }
 
@@ -115,6 +125,8 @@ class PurchaseTimelineEntity {
   final double totalAmount;
   final String deliveryType;
   final String? dropoffCode;
+  final String? pickupCode;
+  final String? phase;
 
   const PurchaseTimelineEntity({
     required this.steps,
@@ -123,6 +135,8 @@ class PurchaseTimelineEntity {
     required this.totalAmount,
     required this.deliveryType,
     this.dropoffCode,
+    this.pickupCode,
+    this.phase,
   });
 }
 
@@ -145,6 +159,7 @@ class PurchaseDetailEntity {
   final DateTime createdAt;
   final PurchaseDeliveryEntity? delivery;
   final PurchaseTimelineEntity? timeline;
+  final String? prStatus;
 
   const PurchaseDetailEntity({
     required this.id,
@@ -165,5 +180,6 @@ class PurchaseDetailEntity {
     required this.createdAt,
     this.delivery,
     this.timeline,
+    this.prStatus,
   });
 }

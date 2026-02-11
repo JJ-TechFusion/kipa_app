@@ -33,4 +33,6 @@ class RouteNames {
   static const String riderSearchRoute = '/rider-search';
   static const String deliveryTrackingRoute = '/delivery-tracking';
   static const String deliveryDetailsRoute = '/delivery-details';
+  static const String disputeRoute = '/dispute';
+  static const String confirmReturnRoute = '/confirm-return';
 }

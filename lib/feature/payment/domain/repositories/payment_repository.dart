@@ -40,4 +40,9 @@ abstract class PaymentRepository {
   Future<NetworkResponse> cancelRiderSearch(String paymentRequestId);
 
   Future<NetworkResponse> getTransactionStatus(String paymentRequestId);
+
+  Future<NetworkResponse> uploadItemImage({
+    required String fileName,
+    required List<int> fileBytes,
+  });
 }

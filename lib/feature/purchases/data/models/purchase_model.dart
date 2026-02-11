@@ -9,6 +9,9 @@ class PurchaseDeliveryModel {
   final String? dropoffAddress;
   final DateTime? pickedUpAt;
   final DateTime? deliveredAt;
+  final String? phase;
+  final String? returnStatus;
+  final String? returnJobId;
 
   const PurchaseDeliveryModel({
     required this.jobId,
@@ -19,6 +22,9 @@ class PurchaseDeliveryModel {
     this.dropoffAddress,
     this.pickedUpAt,
     this.deliveredAt,
+    this.phase,
+    this.returnStatus,
+    this.returnJobId,
   });
 
   factory PurchaseDeliveryModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +41,9 @@ class PurchaseDeliveryModel {
       deliveredAt: json['delivered_at'] != null
           ? DateTime.tryParse(json['delivered_at'].toString())
           : null,
+      phase: json['phase']?.toString(),
+      returnStatus: json['return_status']?.toString(),
+      returnJobId: json['return_job_id']?.toString(),
     );
   }
 
@@ -48,6 +57,9 @@ class PurchaseDeliveryModel {
       dropoffAddress: dropoffAddress,
       pickedUpAt: pickedUpAt,
       deliveredAt: deliveredAt,
+      phase: phase,
+      returnStatus: returnStatus,
+      returnJobId: returnJobId,
     );
   }
 }
@@ -72,6 +84,8 @@ class PurchaseModel {
   final PurchaseDeliveryModel? delivery;
   final String? pickupAddress;
   final String? dropoffAddress;
+  final String? prStatus;
+  final String? returnJobId;
 
   const PurchaseModel({
     required this.id,
@@ -93,6 +107,8 @@ class PurchaseModel {
     this.delivery,
     this.pickupAddress,
     this.dropoffAddress,
+    this.prStatus,
+    this.returnJobId,
   });
 
   factory PurchaseModel.fromJson(Map<String, dynamic> json) {
@@ -132,6 +148,8 @@ class PurchaseModel {
           : null,
       pickupAddress: json['pickup_address']?.toString(),
       dropoffAddress: json['dropoff_address']?.toString(),
+      prStatus: json['pr_status']?.toString(),
+      returnJobId: json['return_job_id']?.toString(),
     );
   }
 
@@ -156,6 +174,8 @@ class PurchaseModel {
       delivery: delivery?.toEntity(),
       pickupAddress: pickupAddress,
       dropoffAddress: dropoffAddress,
+      prStatus: prStatus,
+      returnJobId: returnJobId,
     );
   }
 }
@@ -276,6 +296,8 @@ class PurchaseTimelineModel {
   final double totalAmount;
   final String deliveryType;
   final String? dropoffCode;
+  final String? pickupCode;
+  final String? phase;
 
   const PurchaseTimelineModel({
     required this.steps,
@@ -284,6 +306,8 @@ class PurchaseTimelineModel {
     required this.totalAmount,
     required this.deliveryType,
     this.dropoffCode,
+    this.pickupCode,
+    this.phase,
   });
 
   factory PurchaseTimelineModel.fromJson(Map<String, dynamic> json) {
@@ -310,6 +334,8 @@ class PurchaseTimelineModel {
       totalAmount: parseDouble(json['total_amount']),
       deliveryType: json['delivery_type']?.toString() ?? '',
       dropoffCode: json['dropoff_code']?.toString(),
+      pickupCode: json['pickup_code']?.toString(),
+      phase: json['phase']?.toString(),
     );
   }
 
@@ -321,6 +347,8 @@ class PurchaseTimelineModel {
       totalAmount: totalAmount,
       deliveryType: deliveryType,
       dropoffCode: dropoffCode,
+      pickupCode: pickupCode,
+      phase: phase,
     );
   }
 }
@@ -344,6 +372,7 @@ class PurchaseDetailModel {
   final DateTime createdAt;
   final PurchaseDeliveryModel? delivery;
   final PurchaseTimelineModel? timeline;
+  final String? prStatus;
 
   const PurchaseDetailModel({
     required this.id,
@@ -364,6 +393,7 @@ class PurchaseDetailModel {
     required this.createdAt,
     this.delivery,
     this.timeline,
+    this.prStatus,
   });
 
   factory PurchaseDetailModel.fromJson(Map<String, dynamic> json) {
@@ -406,6 +436,7 @@ class PurchaseDetailModel {
               json['timeline'] as Map<String, dynamic>,
             )
           : null,
+      prStatus: json['pr_status']?.toString(),
     );
   }
 
@@ -429,6 +460,7 @@ class PurchaseDetailModel {
       createdAt: createdAt,
       delivery: delivery?.toEntity(),
       timeline: timeline?.toEntity(),
+      prStatus: prStatus,
     );
   }
 }

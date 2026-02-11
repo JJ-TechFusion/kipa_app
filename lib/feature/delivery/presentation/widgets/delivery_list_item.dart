@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:kipa/core/shared/widgets/custom_text.dart';
-import 'package:kipa/feature/delivery/presentation/providers/delivery_provider.dart';
 import 'package:kipa/feature/purchases/domain/entities/purchase_entity.dart';
 import 'package:kipa/feature/sales/domain/entities/sale_entity.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 
-class DeliveryListItem extends ConsumerStatefulWidget {
+class DeliveryListItem extends StatelessWidget {
   final PurchaseEntity? purchase;
   final SaleEntity? sale;
   final VoidCallback onTap;
@@ -24,52 +22,17 @@ class DeliveryListItem extends ConsumerStatefulWidget {
        );
 
   @override
-  ConsumerState<DeliveryListItem> createState() => _DeliveryListItemState();
-}
-
-class _DeliveryListItemState extends ConsumerState<DeliveryListItem> {
-  @override
-  void initState() {
-    super.initState();
-    final deliveryJobId =
-        widget.purchase?.delivery?.jobId ?? widget.sale?.deliveryJobId;
-    if (deliveryJobId != null && deliveryJobId.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(deliveryTrackingProvider.notifier)
-            .fetchJobDetails(deliveryJobId);
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final trackingState = ref.watch(deliveryTrackingProvider);
-    final deliveryJobId =
-        widget.purchase?.delivery?.jobId ?? widget.sale?.deliveryJobId;
-    final job = trackingState.job;
+    final itemName = purchase?.itemName ?? sale?.itemName ?? '';
+    final itemDescription = purchase?.itemDescription ?? '';
+    final totalAmount = purchase?.totalAmount ?? sale?.totalAmount ?? 0.0;
+    final buyerServiceFee = purchase?.buyerServiceFee ?? 0.0;
+    final createdAt = purchase?.createdAt ?? sale?.createdAt ?? DateTime.now();
+    final orderStatus = purchase?.status ?? sale?.orderStatus ?? '';
+    final prStatus = purchase?.prStatus ?? sale?.prStatus ?? '';
 
-    final itemName = widget.purchase?.itemName ?? widget.sale?.itemName ?? '';
-    final itemDescription = widget.purchase?.itemDescription ?? '';
-    final totalAmount =
-        widget.purchase?.totalAmount ?? widget.sale?.totalAmount ?? 0.0;
-    final buyerServiceFee = widget.purchase?.buyerServiceFee ?? 0.0;
-    final createdAt =
-        widget.purchase?.createdAt ?? widget.sale?.createdAt ?? DateTime.now();
-    final deliveryStatus = widget.purchase?.delivery?.status;
-    final orderStatus =
-        widget.purchase?.status ?? widget.sale?.orderStatus ?? '';
-
-    final pickupAddress = (job != null && job.id == deliveryJobId)
-        ? job.pickupAddress
-        : (widget.purchase?.pickupAddress ??
-              widget.purchase?.delivery?.pickupAddress ??
-              'Pickup Point');
-    final dropoffAddress = (job != null && job.id == deliveryJobId)
-        ? job.dropoffAddress
-        : (widget.purchase?.dropoffAddress ??
-              widget.purchase?.delivery?.dropoffAddress ??
-              'Destination');
+    final pickupAddress = purchase?.pickupAddress ?? sale?.pickupAddress ?? 'Pickup Point';
+    final dropoffAddress = purchase?.dropoffAddress ?? sale?.dropoffAddress ?? 'Destination';
 
     final currencyFormatter = NumberFormat.currency(
       symbol: '₦',
@@ -78,24 +41,8 @@ class _DeliveryListItemState extends ConsumerState<DeliveryListItem> {
     final dateFormatter = DateFormat('MMM d, yyyy');
     final timeFormatter = DateFormat('h:mm a');
 
-    Color statusBgColor = AppColor.pendingBalanceBackground;
-    Color statusTextColor = AppColor.primary;
-    String statusText = (deliveryStatus ?? orderStatus)
-        .replaceAll('_', ' ')
-        .capitalize();
-
-    if (statusText.toLowerCase() == 'completed' ||
-        statusText.toLowerCase() == 'delivered') {
-      statusBgColor = AppColor.kipaProtectedBackground;
-      statusTextColor = AppColor.green;
-    } else if (statusText.toLowerCase() == 'cancelled' ||
-        statusText.toLowerCase() == 'failed') {
-      statusBgColor = Colors.red.withValues(alpha: 0.1);
-      statusTextColor = Colors.red;
-    }
-
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -114,8 +61,14 @@ class _DeliveryListItemState extends ConsumerState<DeliveryListItem> {
           children: [
             Row(
               children: [
-                _buildTag(statusText, statusBgColor, statusTextColor),
-                horizontalSpace(8),
+                if (orderStatus.isNotEmpty)
+                  _buildStatusTag(orderStatus),
+                if (orderStatus.isNotEmpty && prStatus.isNotEmpty)
+                  horizontalSpace(6),
+                if (prStatus.isNotEmpty)
+                  _buildStatusTag(prStatus),
+                if (prStatus.isNotEmpty || orderStatus.isNotEmpty)
+                  horizontalSpace(6),
                 _buildTag(
                   'Kipa Protected',
                   AppColor.kipaProtectedBackground,
@@ -184,6 +137,24 @@ class _DeliveryListItemState extends ConsumerState<DeliveryListItem> {
         ),
       ),
     );
+  }
+
+  Widget _buildStatusTag(String rawStatus) {
+    final text = rawStatus.replaceAll('_', ' ').capitalize();
+    final lower = text.toLowerCase();
+    Color bg;
+    Color fg;
+    if (lower == 'completed' || lower == 'delivered' || lower == 'refunded') {
+      bg = AppColor.kipaProtectedBackground;
+      fg = AppColor.green;
+    } else if (lower == 'disputed' || lower == 'cancelled' || lower == 'failed') {
+      bg = Colors.red.withValues(alpha: 0.1);
+      fg = Colors.red;
+    } else {
+      bg = AppColor.pendingBalanceBackground;
+      fg = AppColor.primary;
+    }
+    return _buildTag(text, bg, fg);
   }
 
   Widget _buildTag(

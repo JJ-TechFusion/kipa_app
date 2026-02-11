@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/services/network/api_services.dart';
 import '../../../../core/services/network/network_response.dart';
@@ -243,6 +245,36 @@ class PaymentRemoteDataSource {
           message: 'Failed to parse transaction status: ${e.toString()}',
         );
       }
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> uploadItemImage({
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    final mimeType = DioMediaType('image', fileName.split('.').last);
+    final response = await apiService.requestWithFile(
+      endpoint: ApiEndpoints.uploadItemImageUrl,
+      fileName: 'file',
+      fileBytes: fileBytes,
+      mimeType: mimeType,
+      otherFieldsInRequest: {
+        'file': MultipartFile.fromBytes(
+          fileBytes,
+          filename: fileName,
+          contentType: mimeType,
+        ),
+      },
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: dataMap['url']?.toString() ?? '',
+        message: response.message,
+      );
     }
     return response;
   }

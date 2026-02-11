@@ -7,6 +7,7 @@ import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 import '../../../../core/shared/widgets/buttons/animated_button.dart';
+import '../../../../core/shared/widgets/custom_snackbar.dart';
 import '../providers/payment_provider.dart';
 
 class FulfillmentSuccessScreen extends ConsumerStatefulWidget {
@@ -187,7 +188,8 @@ class _FulfillmentSuccessScreenState
                       context,
                       RouteNames.transactionStatusRoute,
                       arguments: {
-                        'paymentRequestId': fulfillmentResponse.paymentRequestId,
+                        'paymentRequestId':
+                            fulfillmentResponse.paymentRequestId,
                       },
                     );
                   }
@@ -220,9 +222,14 @@ class _FulfillmentSuccessScreenState
 
   void _copyContent() {
     Clipboard.setData(ClipboardData(text: _contentToCopy));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("${_selectedTab == 0 ? 'Link' : 'Code'} copied!")),
+    CustomSnackBar.show(
+      context,
+      message: "${_selectedTab == 0 ? 'Link' : 'Code'} copied!",
+      type: SnackBarType.success,
     );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text("${_selectedTab == 0 ? 'Link' : 'Code'} copied!")),
+    // );
   }
 
   Widget _buildTabButton(String title, int index) {

@@ -647,10 +647,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
                   _buildRiderCard(job!.rider!)
                 else
                   _buildLoadingRiderCard(),
-
-                verticalSpace(16),
-
-                _buildStatusTimeline(job?.status ?? ''),
               ],
             ),
           ),
@@ -666,12 +662,18 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
         CircleAvatar(
           radius: 30,
           backgroundColor: AppColor.primary.withAlpha(30),
-          backgroundImage: rider.photoUrl != null
-              ? NetworkImage(rider.photoUrl!)
-              : null,
-          child: rider.photoUrl == null
-              ? Icon(Icons.person, color: AppColor.primary, size: 30)
-              : null,
+          child: rider.photoUrl != null
+              ? ClipOval(
+                  child: Image.network(
+                    rider.photoUrl!,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, error, stackTrace) =>
+                        Icon(Icons.person, color: AppColor.primary, size: 30),
+                  ),
+                )
+              : Icon(Icons.person, color: AppColor.primary, size: 30),
         ),
 
         horizontalSpace(16),
@@ -680,42 +682,48 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyText(rider.name, fontWeight: FontWeight.w600),
-              verticalSpace(4),
-              if (rider.vehiclePlate != null) ...[
-                verticalSpace(4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFE0E7FF),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Caption(
-                    rider.vehiclePlate!,
-                    color: AppColor.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
               Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  Column(
+                    spacing: 4,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.two_wheeler,
-                        color: AppColor.lightText,
-                        size: 16,
+                      BodyText(rider.name, fontWeight: FontWeight.w600),
+
+                      if (rider.vehiclePlate != null) ...[
+                        verticalSpace(4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFE0E7FF),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Caption(
+                            rider.vehiclePlate!,
+                            color: AppColor.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.two_wheeler,
+                            color: AppColor.lightText,
+                            size: 16,
+                          ),
+                          horizontalSpace(4),
+                          Caption(rider.vehicleType),
+                        ],
                       ),
-                      horizontalSpace(4),
-                      Caption(rider.vehicleType),
                     ],
                   ),
-                  const Spacer(),
                   _buildActionButtons(rider),
                 ],
               ),
@@ -818,76 +826,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
           ),
         ],
       ],
-    );
-  }
-
-  Widget _buildStatusTimeline(String currentStatus) {
-    final deliveryStatus = DeliveryStatus.fromString(currentStatus);
-
-    final statuses = [
-      ('Searching', DeliveryStatus.searching),
-      ('En Route', DeliveryStatus.enRoutePickup),
-      ('Picked Up', DeliveryStatus.pickedUp),
-      ('Delivered', DeliveryStatus.delivered),
-    ];
-
-    int currentIndex = -1;
-    for (int i = 0; i < statuses.length; i++) {
-      if (deliveryStatus.isAtOrAfter(statuses[i].$2)) {
-        currentIndex = i;
-      }
-    }
-
-    return Row(
-      children: List.generate(statuses.length * 2 - 1, (index) {
-        if (index.isOdd) {
-          // Connector line
-          final stepIndex = index ~/ 2;
-          final isCompleted = stepIndex < currentIndex;
-          return Expanded(
-            child: Container(
-              height: 3,
-              color: isCompleted ? AppColor.primary : Colors.grey[300],
-            ),
-          );
-        } else {
-          // Step circle
-          final stepIndex = index ~/ 2;
-          final isCompleted = stepIndex <= currentIndex;
-          final isCurrent = stepIndex == currentIndex;
-
-          return AnimatedBuilder(
-            animation: _pulseController,
-            builder: (context, child) {
-              final scale = isCurrent
-                  ? 1.0 + (_pulseController.value * 0.2)
-                  : 1.0;
-              return Transform.scale(
-                scale: scale,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: isCompleted ? AppColor.primary : Colors.grey[300],
-                    shape: BoxShape.circle,
-                    boxShadow: isCurrent
-                        ? [
-                            BoxShadow(
-                              color: AppColor.primary.withAlpha(100),
-                              blurRadius: 8,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: isCompleted
-                      ? const Icon(Icons.check, color: Colors.white, size: 14)
-                      : null,
-                ),
-              );
-            },
-          );
-        }
-      }),
     );
   }
 

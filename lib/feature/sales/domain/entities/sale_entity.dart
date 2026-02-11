@@ -12,6 +12,10 @@ class SaleEntity {
   final String? deliveryJobId;
   final DateTime createdAt;
   final DateTime? paidAt;
+  final String? pickupAddress;
+  final String? dropoffAddress;
+  final String? prStatus;
+  final String? returnJobId;
 
   const SaleEntity({
     required this.id,
@@ -27,6 +31,10 @@ class SaleEntity {
     this.deliveryJobId,
     required this.createdAt,
     this.paidAt,
+    this.pickupAddress,
+    this.dropoffAddress,
+    this.prStatus,
+    this.returnJobId,
   });
 }
 
@@ -78,13 +86,21 @@ class SaleDeliveryEntity {
   final String jobId;
   final String status;
   final String? pickupCode;
+  final String? dropoffCode;
   final bool riderAssigned;
+  final String? phase;
+  final String? returnStatus;
+  final String? returnJobId;
 
   const SaleDeliveryEntity({
     required this.jobId,
     required this.status,
     this.pickupCode,
+    this.dropoffCode,
     required this.riderAssigned,
+    this.phase,
+    this.returnStatus,
+    this.returnJobId,
   });
 }
 
@@ -111,6 +127,8 @@ class TimelineEntity {
   final double totalAmount;
   final String deliveryType;
   final String? pickupCode;
+  final String? dropoffCode;
+  final String? phase;
 
   const TimelineEntity({
     required this.steps,
@@ -119,6 +137,8 @@ class TimelineEntity {
     required this.totalAmount,
     required this.deliveryType,
     this.pickupCode,
+    this.dropoffCode,
+    this.phase,
   });
 }
 
