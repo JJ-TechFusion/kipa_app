@@ -129,7 +129,11 @@ class ChatMessageEntity {
   final String senderId;
   final String receiverId;
   final String message;
+  final String? mediaUrl;
+  final String mediaType; // 'text' or 'image'
+  final String status; // 'sent', 'delivered', 'read'
   final bool isFromRider;
+  final bool isMe;
   final DateTime timestamp;
 
   const ChatMessageEntity({
@@ -137,9 +141,15 @@ class ChatMessageEntity {
     required this.senderId,
     required this.receiverId,
     required this.message,
+    this.mediaUrl,
+    this.mediaType = 'text',
+    this.status = 'sent',
     required this.isFromRider,
+    this.isMe = false,
     required this.timestamp,
   });
+
+  bool get isImage => mediaType == 'image' && mediaUrl != null;
 }
 
 /// Entity representing a nearby available rider

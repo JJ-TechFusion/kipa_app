@@ -1,4 +1,4 @@
-package com.example.kipa
+package com.kipa.app
 
 import io.flutter.embedding.android.FlutterActivity
 

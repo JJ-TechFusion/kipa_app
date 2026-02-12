@@ -12,6 +12,7 @@ class UserModel {
   final bool isRider;
   final bool sellerVerified;
   final DateTime createdAt;
+  final String? profileImageUrl;
 
   const UserModel({
     required this.id,
@@ -25,6 +26,7 @@ class UserModel {
     required this.isRider,
     required this.sellerVerified,
     required this.createdAt,
+    this.profileImageUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,7 @@ class UserModel {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),
+      profileImageUrl: json['profile_photo_url'],
     );
   }
 
@@ -59,6 +62,7 @@ class UserModel {
       isRider: entity.isRider,
       sellerVerified: entity.sellerVerified,
       createdAt: entity.createdAt,
+      profileImageUrl: entity.profileImageUrl,
     );
   }
 
@@ -76,6 +80,7 @@ class UserModel {
       isRider: isRider,
       sellerVerified: sellerVerified,
       createdAt: createdAt,
+      profileImageUrl: profileImageUrl,
     );
   }
 
@@ -93,6 +98,7 @@ class UserModel {
       'is_rider': isRider,
       'seller_verified': sellerVerified,
       'created_at': createdAt.toIso8601String(),
+      if (profileImageUrl != null) 'profile_photo_url': profileImageUrl,
     };
   }
 }

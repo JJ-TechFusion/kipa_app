@@ -79,4 +79,12 @@ class ApiEndpoints {
 
   // Active deliveries endpoint
   static const String activeDeliveriesUrl = '/transactions/active-deliveries';
+
+  // Device token registration
+  static const String registerDeviceTokenUrl = '/users/device-token';
+
+  // Chat endpoints
+  static String chatHistoryUrl(String jobId) => '/chat/$jobId/history';
+  static String markReadUrl(String jobId) => '/chat/$jobId/read';
+  static String unreadCountUrl(String jobId) => '/chat/$jobId/unread';
 }

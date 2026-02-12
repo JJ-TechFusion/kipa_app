@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/routes/route_names.dart';
+import '../../../../core/services/notification/notification_service.dart';
+import '../../../../core/services/notification/notification_remote_datasource.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../utils/constant.dart';
 import '../providers/splash_provider.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -32,9 +35,48 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     } else if (appState.needsProfileCompletion) {
       Navigator.of(context).pushReplacementNamed(RouteNames.userInfoRoute);
     } else if (appState.isAuthenticated) {
+      // Initialize notifications for authenticated users (fire and forget)
+      debugPrint('[FCM] User is authenticated, initializing notifications...');
+      _initializeNotifications();
       Navigator.of(context).pushReplacementNamed(RouteNames.homeRoute);
     } else {
       Navigator.of(context).pushReplacementNamed(RouteNames.loginRoute);
+    }
+  }
+
+  Future<void> _initializeNotifications() async {
+    try {
+      debugPrint('[FCM] Starting notification service initialization...');
+
+      final notificationService = getIt<NotificationService>();
+      final notificationDatasource = getIt<NotificationRemoteDatasource>();
+
+      await notificationService.initialize();
+      debugPrint('[FCM] Notification service initialized');
+
+      final token = await notificationService.getToken();
+      debugPrint('[FCM] FCM Token: $token');
+
+      if (token != null) {
+        final registered = await notificationDatasource.registerDeviceToken(
+          token: token,
+          platform: notificationService.platform,
+        );
+        debugPrint('[FCM] Token registered with backend: $registered');
+      } else {
+        debugPrint('[FCM] No FCM token available');
+      }
+
+      notificationService.onTokenRefresh((newToken) {
+        debugPrint('[FCM] Token refreshed: $newToken');
+        notificationDatasource.registerDeviceToken(
+          token: newToken,
+          platform: notificationService.platform,
+        );
+      });
+    } catch (e, stack) {
+      debugPrint('[FCM] Error initializing notifications: $e');
+      debugPrint('[FCM] Stack trace: $stack');
     }
   }
 

@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/services/network/api_services.dart';
 import '../core/services/network/app_dio.dart';
 import '../core/services/network/auth_token_service.dart';
+import '../core/services/notification/notification_service.dart';
+import '../core/services/notification/notification_remote_datasource.dart';
 import '../core/services/storage/secure_storage.dart';
 
 final getIt = GetIt.instance;
@@ -41,6 +43,13 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<AppDio>(AppDio.fromConfig);
 
   getIt.registerLazySingleton<ApiService>(() => ApiService(getIt<AppDio>()));
+
+  // Notification services
+  getIt.registerLazySingleton<NotificationService>(() => NotificationService());
+
+  getIt.registerLazySingleton<NotificationRemoteDatasource>(
+    () => NotificationRemoteDatasource(getIt<ApiService>()),
+  );
 
   // Property feature dependencies
   // Data sources

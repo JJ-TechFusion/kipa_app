@@ -74,6 +74,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       children: [
                         DashboardHeader(
                           userName: authState.currentUser?.firstName ?? 'User',
+                          profileImageUrl:
+                              authState.currentUser?.profileImageUrl,
                           onNotificationTap: () {},
                           onProfileTap: () {},
                         ),

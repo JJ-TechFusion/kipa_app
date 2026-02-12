@@ -5,6 +5,7 @@ import 'package:kipa/core/services/network/api_services.dart';
 import 'package:kipa/core/services/network/auth_token_service.dart';
 import 'package:kipa/core/services/websocket/websocket_service.dart';
 import 'package:kipa/utils/constant.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/models/delivery_models.dart';
 import '../../domain/entities/delivery_entities.dart';
 import '../../domain/enums/delivery_status.dart';
@@ -135,8 +136,22 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
     }
   }
 
+  String? get _currentUserId {
+    return ref.read(authNotifierProvider).currentUser?.id;
+  }
+
   void _handleChatMessage(Map<String, dynamic> data) {
     final message = ChatMessageModel.fromJson(data);
+    final myId = _currentUserId;
+
+    if (myId != null && message.senderId == myId) return;
+
+    if (myId != null &&
+        message.senderId != myId &&
+        message.receiverId != myId) {
+      return;
+    }
+
     final updatedMessages = [...state.messages, message];
     state = state.copyWith(messages: updatedMessages);
   }
@@ -147,15 +162,17 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
     state = state.copyWith(nearbyRiders: nearbyRiders);
   }
 
-  void sendChatMessage(String message) {
-    _webSocketService.sendChatMessage(message);
+  void sendChatMessage(String content) {
+    _webSocketService.sendChatMessage(content);
 
+    final myId = _currentUserId ?? 'me';
     final localMessage = ChatMessageEntity(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: 'me',
+      senderId: myId,
       receiverId: state.job?.rider?.id ?? '',
-      message: message,
+      message: content,
       isFromRider: false,
+      isMe: true,
       timestamp: DateTime.now(),
     );
 

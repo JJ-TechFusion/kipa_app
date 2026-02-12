@@ -1,9 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kipa/core/routes/app_router.dart';
 import 'package:kipa/core/routes/route_names.dart';
+import 'package:kipa/core/services/notification/notification_service.dart';
 import 'package:kipa/utils/constant.dart';
 
 import 'core/shared/responsive_helper.dart';
@@ -14,6 +17,8 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await initDependencies();
   runApp(const ProviderScope(child: KipaApp()));
 }

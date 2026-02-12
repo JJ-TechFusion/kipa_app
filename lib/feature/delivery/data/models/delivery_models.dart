@@ -39,8 +39,10 @@ class DeliveryJobModel {
 class RiderModel {
   static RiderEntity fromJson(Map<String, dynamic> json) {
     // Handle both first_name+last_name and name formats
-    String name = json['name']?.toString() ?? json['full_name']?.toString() ?? '';
-    if (name.isEmpty && (json['first_name'] != null || json['last_name'] != null)) {
+    String name =
+        json['name']?.toString() ?? json['full_name']?.toString() ?? '';
+    if (name.isEmpty &&
+        (json['first_name'] != null || json['last_name'] != null)) {
       final firstName = json['first_name']?.toString() ?? '';
       final lastName = json['last_name']?.toString() ?? '';
       name = '$firstName $lastName'.trim();
@@ -51,7 +53,10 @@ class RiderModel {
       id: json['id'] ?? json['rider_id'] ?? '',
       name: name,
       phone: json['phone'] ?? json['phone_number'] ?? '',
-      photoUrl: json['photo_url'] ?? json['profile_photo_url'] ?? json['profile_picture'],
+      photoUrl:
+          json['photo_url'] ??
+          json['profile_photo_url'] ??
+          json['profile_picture'],
       vehicleType: json['vehicle_type'] ?? 'motorcycle',
       vehiclePlate: json['vehicle_plate'] ?? json['license_plate'],
       rating: _parseRating(json['rating']),
@@ -116,11 +121,24 @@ class ChatMessageModel {
       senderId: json['sender_id'] ?? '',
       receiverId: json['receiver_id'] ?? '',
       message: json['message'] ?? json['content'] ?? '',
+      mediaUrl: json['media_url'],
+      mediaType: json['media_type'] ?? 'text',
+      status: json['status'] ?? 'sent',
       isFromRider: json['is_from_rider'] ?? json['sender_type'] == 'rider',
-      timestamp:
-          DateTime.tryParse(json['timestamp'] ?? json['created_at'] ?? '') ??
-          DateTime.now(),
+      isMe: json['is_me'] ?? false,
+      timestamp: _parseTimestamp(json['timestamp'] ?? json['created_at']),
     );
+  }
+
+  static DateTime _parseTimestamp(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is int) {
+      return DateTime.fromMillisecondsSinceEpoch(value * 1000);
+    }
+    if (value is String) {
+      return DateTime.tryParse(value) ?? DateTime.now();
+    }
+    return DateTime.now();
   }
 }
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "802148938543",
+    "project_id": "kipa-cf6bc",
+    "storage_bucket": "kipa-cf6bc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:802148938543:android:355c4c2ae51246a0d627da",
+        "android_client_info": {
+          "package_name": "com.kipa.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1K3eQnQu1r1Jycjo8wt8uTqcfVlXcSXY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

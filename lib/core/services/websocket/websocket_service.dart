@@ -226,13 +226,17 @@ class WebSocketService {
   }
 
   /// Send a chat message
-  void sendChatMessage(String message) {
+  void sendChatMessage(
+    String content, {
+    String? mediaUrl,
+    String mediaType = 'text',
+  }) {
     send({
       'type': 'chat_message',
-      'data': {
-        'message': message,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
+      'job_id': _currentJobId,
+      'content': content,
+      if (mediaUrl != null) 'media_url': mediaUrl,
+      'media_type': mediaType,
     });
   }
 

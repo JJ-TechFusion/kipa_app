@@ -46,7 +46,7 @@ class ActiveDeliveriesList extends StatelessWidget {
             separatorBuilder: (context, index) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               return SizedBox(
-                width: 350,
+                width: MediaQuery.of(context).size.width * 0.92,
                 child: ActiveDeliveryCard(
                   deliveryData: deliveries[index],
                   onTap: () => onDeliveryTap(index),

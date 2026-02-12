@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../domain/entities/delivery_entities.dart';
 import '../../domain/enums/delivery_status.dart';
 import '../providers/delivery_provider.dart';
+import '../../../../core/routes/route_names.dart';
 
 const String _googleMapsApiKey = 'AIzaSyDGctg74O3Vwa0IP_o2Eh2xwKe5CSuz-k0';
 
@@ -875,10 +876,16 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
   }
 
   void _openChat() {
-    // TODO: Implement chat modal/screen
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Chat coming soon!')));
+    final trackingState = ref.read(deliveryTrackingProvider);
+    final rider = trackingState.job?.rider;
+    Navigator.of(context).pushNamed(
+      RouteNames.chatRoute,
+      arguments: {
+        'jobId': widget.deliveryJobId,
+        'participantName': rider?.name ?? 'Rider',
+        'participantPhotoUrl': rider?.photoUrl,
+      },
+    );
   }
 
   void _fitMapToBounds() {

@@ -11,6 +11,7 @@ class UserEntity {
     required this.isRider,
     required this.sellerVerified,
     required this.createdAt,
+    this.profileImageUrl,
   });
 
   final String id;
@@ -24,6 +25,7 @@ class UserEntity {
   final bool isRider;
   final bool sellerVerified;
   final DateTime createdAt;
+  final String? profileImageUrl;
 
   String get fullName => '$firstName $lastName';
   bool get isProfileComplete =>

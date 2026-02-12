@@ -20,6 +20,7 @@ import '../../feature/payment/presentation/pages/buyer_payment_success_screen.da
 import '../../feature/payment/presentation/pages/rider_search_screen.dart';
 import '../../feature/delivery/presentation/pages/delivery_tracking_screen.dart';
 import '../../feature/delivery/presentation/pages/delivery_details_screen.dart';
+import '../../feature/delivery/presentation/pages/chat_screen.dart';
 import '../../feature/purchases/presentation/pages/dispute_page.dart';
 import '../../feature/sales/presentation/pages/confirm_return_page.dart';
 
@@ -166,6 +167,16 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
           builder: (_) => ConfirmReturnPage(saleId: args?['saleId'] ?? ''),
+        );
+
+      case RouteNames.chatRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ChatScreen(
+            jobId: args?['jobId'] ?? '',
+            participantName: args?['participantName'] ?? 'Chat',
+            participantPhotoUrl: args?['participantPhotoUrl'],
+          ),
         );
 
       default:
