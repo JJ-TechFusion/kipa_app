@@ -57,4 +57,103 @@ class WalletRemoteDataSource {
     }
     return response;
   }
+
+  Future<NetworkResponse> getTransactions() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.walletTransactionsUrl,
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: WalletTransactionListModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> getPendingFunds() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.walletPendingUrl,
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: PendingFundListModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> getPinStatus() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.walletPinStatusUrl,
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: PinStatusModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> createPin(String pin) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.walletPinUrl,
+      requestBody: CreatePinRequestModel(pin: pin).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: PinResponseModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> verifyPin(String pin) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.walletPinVerifyUrl,
+      requestBody: VerifyPinRequestModel(pin: pin).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: PinResponseModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> changePin(String oldPin, String newPin) async {
+    final response = await apiService.putRequest(
+      endpoint: ApiEndpoints.walletPinUrl,
+      requestBody: ChangePinRequestModel(oldPin: oldPin, newPin: newPin).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: PinResponseModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
 }

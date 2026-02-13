@@ -4,38 +4,84 @@ class WalletState {
   final bool isFetchingWallet;
   final bool isToppingUp;
   final bool isVerifyingTopUp;
+  final bool isFetchingTransactions;
+  final bool isFetchingPendingFunds;
+  final bool isFetchingPinStatus;
+  final bool isCreatingPin;
+  final bool isVerifyingPin;
+  final bool isChangingPin;
   final String? errorMessage;
+  final String? pinErrorMessage;
   final WalletEntity? wallet;
   final TopUpResponseEntity? topUpResponse;
   final VerifyTopUpResponseEntity? verifyTopUpResponse;
+  final List<WalletTransactionEntity> transactions;
+  final List<PendingFundEntity> pendingFunds;
+  final PinStatusEntity? pinStatus;
+  final bool isPinVerified;
 
   const WalletState({
     this.isFetchingWallet = false,
     this.isToppingUp = false,
     this.isVerifyingTopUp = false,
+    this.isFetchingTransactions = false,
+    this.isFetchingPendingFunds = false,
+    this.isFetchingPinStatus = false,
+    this.isCreatingPin = false,
+    this.isVerifyingPin = false,
+    this.isChangingPin = false,
     this.errorMessage,
+    this.pinErrorMessage,
     this.wallet,
     this.topUpResponse,
     this.verifyTopUpResponse,
+    this.transactions = const [],
+    this.pendingFunds = const [],
+    this.pinStatus,
+    this.isPinVerified = false,
   });
 
   WalletState copyWith({
     bool? isFetchingWallet,
     bool? isToppingUp,
     bool? isVerifyingTopUp,
+    bool? isFetchingTransactions,
+    bool? isFetchingPendingFunds,
+    bool? isFetchingPinStatus,
+    bool? isCreatingPin,
+    bool? isVerifyingPin,
+    bool? isChangingPin,
     String? errorMessage,
+    String? pinErrorMessage,
     WalletEntity? wallet,
     TopUpResponseEntity? topUpResponse,
     VerifyTopUpResponseEntity? verifyTopUpResponse,
+    List<WalletTransactionEntity>? transactions,
+    List<PendingFundEntity>? pendingFunds,
+    PinStatusEntity? pinStatus,
+    bool? isPinVerified,
   }) {
     return WalletState(
       isFetchingWallet: isFetchingWallet ?? this.isFetchingWallet,
       isToppingUp: isToppingUp ?? this.isToppingUp,
       isVerifyingTopUp: isVerifyingTopUp ?? this.isVerifyingTopUp,
+      isFetchingTransactions:
+          isFetchingTransactions ?? this.isFetchingTransactions,
+      isFetchingPendingFunds:
+          isFetchingPendingFunds ?? this.isFetchingPendingFunds,
+      isFetchingPinStatus: isFetchingPinStatus ?? this.isFetchingPinStatus,
+      isCreatingPin: isCreatingPin ?? this.isCreatingPin,
+      isVerifyingPin: isVerifyingPin ?? this.isVerifyingPin,
+      isChangingPin: isChangingPin ?? this.isChangingPin,
       errorMessage: errorMessage,
+      pinErrorMessage: pinErrorMessage,
       wallet: wallet ?? this.wallet,
       topUpResponse: topUpResponse ?? this.topUpResponse,
       verifyTopUpResponse: verifyTopUpResponse ?? this.verifyTopUpResponse,
+      transactions: transactions ?? this.transactions,
+      pendingFunds: pendingFunds ?? this.pendingFunds,
+      pinStatus: pinStatus ?? this.pinStatus,
+      isPinVerified: isPinVerified ?? this.isPinVerified,
     );
   }
 }

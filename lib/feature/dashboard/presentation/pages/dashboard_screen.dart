@@ -8,6 +8,7 @@ import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_action_car
 import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_bottom_nav.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_header.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/promo_banner.dart';
+import 'package:kipa/feature/wallet/presentation/pages/wallet_pin_gate_screen.dart';
 import 'package:kipa/feature/wallet/presentation/providers/wallet_provider.dart';
 import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/core/routes/route_names.dart';
@@ -143,7 +144,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   ),
                   const DeliveriesListScreen(),
-                  const Center(child: Text('Wallet Screen')),
+                  const WalletPinGateScreen(),
                   const Center(child: Text('Support Screen')),
                   const Center(child: Text('Profile Screen')),
                 ],

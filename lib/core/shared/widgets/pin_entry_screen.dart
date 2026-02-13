@@ -10,6 +10,10 @@ class PinEntryScreen extends StatefulWidget {
   final int pinLength;
   final Function(String) onSubmit;
   final bool obscurePin;
+  final bool isLoading;
+  final String? errorMessage;
+  final VoidCallback? onErrorDismissed;
+  final bool showBackButton;
 
   const PinEntryScreen({
     super.key,
@@ -18,16 +22,28 @@ class PinEntryScreen extends StatefulWidget {
     this.subtitle,
     this.pinLength = 4,
     this.obscurePin = true,
+    this.isLoading = false,
+    this.errorMessage,
+    this.onErrorDismissed,
+    this.showBackButton = false,
   });
 
   @override
-  State<PinEntryScreen> createState() => _PinEntryScreenState();
+  State<PinEntryScreen> createState() => PinEntryScreenState();
 }
 
-class _PinEntryScreenState extends State<PinEntryScreen> {
+class PinEntryScreenState extends State<PinEntryScreen> {
   String _pin = '';
 
+  void resetPin() {
+    setState(() {
+      _pin = '';
+    });
+  }
+
   void _onNumberSelected(String value) {
+    if (widget.isLoading) return;
+
     if (_pin.length < widget.pinLength) {
       setState(() {
         _pin += value;
@@ -40,6 +56,8 @@ class _PinEntryScreenState extends State<PinEntryScreen> {
   }
 
   void _onBackspace() {
+    if (widget.isLoading) return;
+
     if (_pin.isNotEmpty) {
       setState(() {
         _pin = _pin.substring(0, _pin.length - 1);
@@ -48,6 +66,8 @@ class _PinEntryScreenState extends State<PinEntryScreen> {
   }
 
   void _onClear() {
+    if (widget.isLoading) return;
+
     setState(() {
       _pin = '';
     });
@@ -58,28 +78,75 @@ class _PinEntryScreenState extends State<PinEntryScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: widget.showBackButton,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const BackButton(color: Colors.black),
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   H4(widget.title, textAlign: TextAlign.center),
                   if (widget.subtitle != null) ...[
                     verticalSpace(8),
-                    BodyText(
-                      widget.subtitle!,
-                      textAlign: TextAlign.center,
-                      color: AppColor.lightText,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: BodyText(
+                        widget.subtitle!,
+                        textAlign: TextAlign.center,
+                        color: AppColor.lightText,
+                      ),
                     ),
                   ],
                   verticalSpace(40),
-                  _buildPinDots(),
+                  if (widget.isLoading)
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    _buildPinDots(),
+                  if (widget.errorMessage != null) ...[
+                    verticalSpace(16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: GestureDetector(
+                        onTap: widget.onErrorDismissed,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: Colors.red.shade700,
+                                size: 16,
+                              ),
+                              horizontalSpace(8),
+                              Flexible(
+                                child: Caption(
+                                  widget.errorMessage!,
+                                  color: Colors.red.shade700,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -90,7 +157,7 @@ class _PinEntryScreenState extends State<PinEntryScreen> {
                 onBackspace: _onBackspace,
                 onClear: _onClear,
                 backspaceIcon: Icons.arrow_back_ios_new_rounded,
-                textColor: Colors.black, // Match the design numbers
+                textColor: widget.isLoading ? Colors.grey : Colors.black,
               ),
             ),
           ],

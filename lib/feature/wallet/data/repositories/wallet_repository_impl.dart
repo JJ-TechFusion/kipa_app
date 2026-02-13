@@ -21,4 +21,34 @@ class WalletRepositoryImpl implements WalletRepository {
   Future<NetworkResponse> verifyTopUp(String reference) async {
     return await remoteDataSource.verifyTopUp(reference);
   }
+
+  @override
+  Future<NetworkResponse> getTransactions() async {
+    return await remoteDataSource.getTransactions();
+  }
+
+  @override
+  Future<NetworkResponse> getPendingFunds() async {
+    return await remoteDataSource.getPendingFunds();
+  }
+
+  @override
+  Future<NetworkResponse> getPinStatus() async {
+    return await remoteDataSource.getPinStatus();
+  }
+
+  @override
+  Future<NetworkResponse> createPin(String pin) async {
+    return await remoteDataSource.createPin(pin);
+  }
+
+  @override
+  Future<NetworkResponse> verifyPin(String pin) async {
+    return await remoteDataSource.verifyPin(pin);
+  }
+
+  @override
+  Future<NetworkResponse> changePin(String oldPin, String newPin) async {
+    return await remoteDataSource.changePin(oldPin, newPin);
+  }
 }

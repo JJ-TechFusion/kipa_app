@@ -1,6 +1,6 @@
 class ApiEndpoints {
   static const String baseUrl =
-      'https://62fd-102-88-113-150.ngrok-free.app/api/v1';
+      'https://4a1a-197-210-227-1.ngrok-free.app/api/v1';
 
   static const String sendOtpUrl = '/auth/otp/send';
   static const String verifyOtpUrl = '/auth/otp/verify';
@@ -29,6 +29,13 @@ class ApiEndpoints {
   static const String walletUrl = '/wallet';
   static const String walletTopUpUrl = '/wallet/top-up';
   static const String walletTopUpVerifyUrl = '/wallet/top-up/verify';
+  static const String walletTransactionsUrl = '/wallet/transactions';
+  static const String walletPendingUrl = '/wallet/pending';
+
+  // Wallet PIN endpoints
+  static const String walletPinStatusUrl = '/wallet/pin/status';
+  static const String walletPinUrl = '/wallet/pin';
+  static const String walletPinVerifyUrl = '/wallet/pin/verify';
 
   // Payment request actions
   static String markReadyForPickupUrl(String paymentRequestId) =>
