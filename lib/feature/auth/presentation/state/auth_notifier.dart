@@ -12,6 +12,7 @@ import '../../domain/usecases/upload_profile_picture_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
 import '../../domain/usecases/verify_otp_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
+import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import 'auth_state.dart';
@@ -23,6 +24,7 @@ class AuthNotifier extends Notifier<AuthState> {
   late final UploadProfilePictureUseCase _uploadProfilePictureUseCase;
   late final UpdateProfileUseCase _updateProfileUseCase;
   late final GetCurrentUserUseCase _getCurrentUserUseCase;
+  late final LogoutUseCase _logoutUseCase;
   late final DeviceInfoService _deviceInfoService;
 
   @override
@@ -35,6 +37,7 @@ class AuthNotifier extends Notifier<AuthState> {
     );
     _updateProfileUseCase = ref.read(updateProfileUseCaseProvider);
     _getCurrentUserUseCase = ref.read(getCurrentUserUseCaseProvider);
+    _logoutUseCase = ref.read(logoutUseCaseProvider);
     _deviceInfoService = ref.read(deviceInfoServiceProvider);
     return const AuthState();
   }
@@ -241,10 +244,27 @@ class AuthNotifier extends Notifier<AuthState> {
         );
       }
     } catch (e) {
-      state = state.copyWith(
-        isFetchingUser: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isFetchingUser: false, errorMessage: e.toString());
+    }
+  }
+
+  Future<bool> logout() async {
+    state = state.copyWith(isLoggingOut: true, errorMessage: null);
+    try {
+      final response = await _logoutUseCase();
+
+      final secureStorage = getIt<SecureStorageService>();
+      await secureStorage.clearStore();
+
+      state = const AuthState();
+
+      return response.success;
+    } catch (e) {
+      // Even if API fails, clear local storage
+      final secureStorage = getIt<SecureStorageService>();
+      await secureStorage.clearStore();
+      state = const AuthState();
+      return true;
     }
   }
 }

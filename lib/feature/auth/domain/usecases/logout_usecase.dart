@@ -1,9 +1,12 @@
-// class LogoutUsecase {
-//   final AuthRepository repository;
+import '../../../../core/services/network/network_response.dart';
+import '../repositories/auth_repository.dart';
 
-//   LogoutUsecase({required this.repository});
+class LogoutUseCase {
+  final AuthRepository repository;
 
-//   Future<void> call(NoParams params) async {
-//     return await repository.logout();
-//   }
-// }
+  LogoutUseCase(this.repository);
+
+  Future<NetworkResponse> call() async {
+    return await repository.logout();
+  }
+}

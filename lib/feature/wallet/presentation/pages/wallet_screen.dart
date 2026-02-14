@@ -45,7 +45,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final wallet = walletState.wallet;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const H4("Wallet"),
         centerTitle: true,

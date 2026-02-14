@@ -8,6 +8,6 @@ abstract class AuthRepository {
   Future<NetworkResponse> uploadProfilePicture(String filePath);
   Future<NetworkResponse> updateProfile(UpdateProfileRequest request);
   Future<NetworkResponse> getCurrentUser();
-  Future<void> logout();
-  Future<void> deleteUser();
+  Future<NetworkResponse> logout();
+  Future<NetworkResponse> deleteUser();
 }

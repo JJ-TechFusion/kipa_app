@@ -76,4 +76,12 @@ class AuthRemoteDataSource {
     }
     return response;
   }
+
+  Future<NetworkResponse> logout() async {
+    return await apiService.postRequest(
+      endpoint: ApiEndpoints.logoutUrl,
+      requestBody: {},
+      isProtected: true,
+    );
+  }
 }

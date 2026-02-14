@@ -64,43 +64,10 @@ class _PaymentRequestDetailsSheetState
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: state.isFetchingPaymentRequestDetails
+      child: state.isFetchingPaymentRequestDetails || details == null
           ? const SizedBox(
               height: 400,
               child: Center(child: CircularProgressIndicator()),
-            )
-          : state.errorMessage != null && details == null
-          ? SizedBox(
-              height: 400,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: AppColor.kipaGrey,
-                    ),
-                    verticalSpace(16),
-                    BodyText(
-                      'Error: ${state.errorMessage}',
-                      color: AppColor.kipaGrey,
-                      textAlign: TextAlign.center,
-                    ),
-                    verticalSpace(16),
-                    TextButton(
-                      onPressed: () {
-                        ref
-                            .read(paymentNotifierProvider.notifier)
-                            .fetchPaymentRequestDetails(
-                              widget.paymentRequestId,
-                            );
-                      },
-                      child: const BodySmall('Retry', color: AppColor.primary),
-                    ),
-                  ],
-                ),
-              ),
             )
           : SingleChildScrollView(
               child: Column(
@@ -136,7 +103,7 @@ class _PaymentRequestDetailsSheetState
                                 fontSize: 18,
                               ),
                             ),
-                            _buildStatusBadge(details?.status ?? ''),
+                            _buildStatusBadge(details.status),
                           ],
                         ),
                         verticalSpace(24),
@@ -146,9 +113,8 @@ class _PaymentRequestDetailsSheetState
                         verticalSpace(12),
                         _buildInfoCard(
                           children: [
-                            _buildInfoRow('Item Name', details?.itemName ?? ''),
-                            if (details?.itemDescription != null &&
-                                details!.itemDescription.isNotEmpty) ...[
+                            _buildInfoRow('Item Name', details.itemName),
+                            if (details.itemDescription.isNotEmpty) ...[
                               verticalSpace(12),
                               _buildInfoRow(
                                 'Description',
@@ -158,7 +124,7 @@ class _PaymentRequestDetailsSheetState
                             verticalSpace(12),
                             _buildInfoRow(
                               'Item Price',
-                              _formatAmount(details?.itemPrice ?? 0),
+                              _formatAmount(details.itemPrice),
                               isBold: true,
                             ),
                           ],
@@ -172,18 +138,18 @@ class _PaymentRequestDetailsSheetState
                           children: [
                             _buildInfoRow(
                               'Item Price',
-                              _formatAmount(details?.itemPrice ?? 0),
+                              _formatAmount(details.itemPrice),
                             ),
                             verticalSpace(8),
                             _buildInfoRow(
                               'Service Fee (1%)',
-                              _formatAmount(details?.buyerServiceFee ?? 0),
+                              _formatAmount(details.buyerServiceFee ?? 0),
                             ),
-                            if (details?.estimatedDeliveryFee != null) ...[
+                            if (details.estimatedDeliveryFee != null) ...[
                               verticalSpace(8),
                               _buildInfoRow(
                                 'Delivery Fee',
-                                _formatAmount(details!.estimatedDeliveryFee!),
+                                _formatAmount(details.estimatedDeliveryFee!),
                               ),
                               verticalSpace(4),
                               const Caption(
@@ -201,8 +167,8 @@ class _PaymentRequestDetailsSheetState
                             _buildInfoRow(
                               'Total (in app)',
                               _formatAmount(
-                                (details?.itemPrice ?? 0) +
-                                    (details?.buyerServiceFee ?? 0),
+                                (details.itemPrice) +
+                                    (details.buyerServiceFee ?? 0),
                               ),
                               isBold: true,
                               valueColor: AppColor.primary,
@@ -212,27 +178,27 @@ class _PaymentRequestDetailsSheetState
                         verticalSpace(24),
 
                         // Delivery details
-                        if (details?.pickupAddress != null ||
-                            details?.dropoffAddress != null) ...[
+                        if (details.pickupAddress != null ||
+                            details.dropoffAddress != null) ...[
                           _buildSectionHeader('Delivery Details'),
                           verticalSpace(12),
                           _buildInfoCard(
                             children: [
-                              if (details?.pickupAddress != null) ...[
+                              if (details.pickupAddress != null) ...[
                                 _buildAddressRow(
                                   'Pickup Address',
-                                  details!.pickupAddress!,
+                                  details.pickupAddress!,
                                   Icons.gps_fixed,
                                   AppColor.primary,
                                 ),
                               ],
-                              if (details?.pickupAddress != null &&
-                                  details?.dropoffAddress != null)
+                              if (details.pickupAddress != null &&
+                                  details.dropoffAddress != null)
                                 verticalSpace(16),
-                              if (details?.dropoffAddress != null) ...[
+                              if (details.dropoffAddress != null) ...[
                                 _buildAddressRow(
                                   'Dropoff Address',
-                                  details!.dropoffAddress!,
+                                  details.dropoffAddress!,
                                   Icons.location_on,
                                   AppColor.green,
                                 ),
@@ -247,22 +213,22 @@ class _PaymentRequestDetailsSheetState
                         verticalSpace(12),
                         _buildInfoCard(
                           children: [
-                            if (details?.paymentCode != null) ...[
+                            if (details.paymentCode != null) ...[
                               _buildInfoRowWithCopy(
                                 'Payment Code',
-                                details!.paymentCode!,
+                                details.paymentCode!,
                               ),
                               verticalSpace(12),
                             ],
                             _buildInfoRow(
                               'Created',
-                              _formatDate(details?.createdAt ?? DateTime.now()),
+                              _formatDate(details.createdAt),
                             ),
-                            if (details?.isReusable == true) ...[
+                            if (details.isReusable == true) ...[
                               verticalSpace(12),
                               _buildInfoRow(
                                 'Reusable',
-                                'Yes (${details?.currentUses ?? 0} uses)',
+                                'Yes (${details.currentUses} uses)',
                               ),
                             ],
                           ],
@@ -270,8 +236,8 @@ class _PaymentRequestDetailsSheetState
                         verticalSpace(32),
 
                         // Action button - only show if not completed or if reusable
-                        if (!(details?.status == 'completed' &&
-                            details?.isReusable == false))
+                        if (!(details.status == 'completed' &&
+                            details.isReusable == false))
                           SizedBox(
                             width: double.infinity,
                             child: CustomButton(
@@ -289,11 +255,11 @@ class _PaymentRequestDetailsSheetState
                               borderRadius: 30,
                             ),
                           ),
-                        if (!(details?.status == 'completed' &&
-                            details?.isReusable == false))
+                        if (!(details.status == 'completed' &&
+                            details.isReusable == false))
                           verticalSpace(24),
-                        if (details?.status == 'completed' &&
-                            details?.isReusable == false)
+                        if (details.status == 'completed' &&
+                            details.isReusable == false)
                           verticalSpace(12),
                       ],
                     ),

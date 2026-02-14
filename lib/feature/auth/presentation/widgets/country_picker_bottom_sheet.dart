@@ -98,7 +98,7 @@ class _CountryPickerBottomSheetState extends State<CountryPickerBottomSheet> {
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(32.0),
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator.adaptive(),
                 ),
               )
             else

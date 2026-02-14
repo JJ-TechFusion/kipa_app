@@ -84,26 +84,8 @@ class _BuyerPaymentDetailsScreenState
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: paymentState.isFetchingPaymentDetails
+      body: paymentState.isFetchingPaymentDetails || details == null
           ? const Center(child: CircularProgressIndicator())
-          : paymentState.errorMessage != null && details == null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(paymentState.errorMessage ?? 'Failed to load details'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      ref
-                          .read(paymentNotifierProvider.notifier)
-                          .getPaymentDetails(paymentCode: widget.paymentCode);
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -111,28 +93,28 @@ class _BuyerPaymentDetailsScreenState
                 children: [
                   verticalSpace(10),
                   TransactionDetailsCard(
-                    itemName: details?.items.isNotEmpty == true
-                        ? details!.items.first.name
+                    itemName: details.items.isNotEmpty == true
+                        ? details.items.first.name
                         : 'Payment',
-                    itemSpecs: details?.description ?? '',
+                    itemSpecs: details.description ?? '',
                     itemPrice: _formatAmount(
-                      details?.items.isNotEmpty == true
-                          ? details!.items.first.price
+                      details.items.isNotEmpty == true
+                          ? details.items.first.price
                           : 0,
                     ),
                     buyerFee: _formatAmount(
-                      (details?.totalAmount ?? 0) -
-                          (details?.items.isNotEmpty == true
-                              ? details!.items.first.price
+                      (details.totalAmount) -
+                          (details.items.isNotEmpty == true
+                              ? details.items.first.price
                               : 0),
                     ),
                     deliveryFee:
-                        details?.fulfillment?.estimatedDeliveryFee != null
+                        details.fulfillment?.estimatedDeliveryFee != null
                         ? _formatAmount(
-                            details!.fulfillment!.estimatedDeliveryFee!,
+                            details.fulfillment!.estimatedDeliveryFee!,
                           )
                         : null,
-                    buyerTotal: _formatAmount(details?.totalAmount ?? 0),
+                    buyerTotal: _formatAmount(details.totalAmount),
                     totalLabel: 'You Pay (in app)',
 
                     isReceived: false,
@@ -140,9 +122,9 @@ class _BuyerPaymentDetailsScreenState
                   verticalSpace(32),
 
                   BuyerInfoCard(
-                    name: details?.seller?.name ?? 'Seller',
-                    email: details?.seller?.email ?? '',
-                    phone: details?.seller?.phone ?? '',
+                    name: details.seller?.name ?? 'Seller',
+                    email: details.seller?.email ?? '',
+                    phone: details.seller?.phone ?? '',
                     onCall: () {},
                     title: 'Seller Information',
                     roleLabel: 'Seller',
@@ -175,7 +157,7 @@ class _BuyerPaymentDetailsScreenState
                         ),
                         verticalSpace(8),
                         Caption(
-                          _formatProcessingTime(details?.processingTimeHours),
+                          _formatProcessingTime(details.processingTimeHours),
                           fontSize: 11,
                           color: AppColor.kipaGrey2,
                         ),
@@ -332,7 +314,7 @@ class _BuyerPaymentDetailsScreenState
                           return CustomButton(
                             title: state.isInitializingPayment
                                 ? 'Processing...'
-                                : 'Pay ${_formatAmount(details?.totalAmount ?? 0)}',
+                                : 'Pay ${_formatAmount(details.totalAmount)}',
                             borderRadius: 30,
                             isLoading: state.isInitializingPayment,
                           );

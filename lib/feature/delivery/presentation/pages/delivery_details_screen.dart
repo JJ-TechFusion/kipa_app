@@ -100,24 +100,7 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     }
 
     if (job == null) {
-      return Scaffold(
-        appBar: AppBar(title: const BodyText('Transaction Details')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              BodyText(
-                trackingState.errorMessage ?? 'Failed to load delivery details',
-              ),
-              verticalSpace(16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
-                child: CustomButton(title: 'Retry', onTap: _loadData),
-              ),
-            ],
-          ),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final status = DeliveryStatus.fromString(job.status);

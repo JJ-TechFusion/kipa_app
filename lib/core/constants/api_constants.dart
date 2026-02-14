@@ -8,6 +8,7 @@ class ApiEndpoints {
   static const String uploadProfilePictureUrl = '/uploads/profile-picture';
   static const String updateProfileUrl = '/auth/profile';
   static const String getCurrentUserUrl = '/auth/me';
+  static const String logoutUrl = '/auth/logout';
   static const String createPaymentRequestUrl = '/payment-requests';
   static const String paymentRequestHistoryUrl = '/payment-requests/history';
 
@@ -94,4 +95,11 @@ class ApiEndpoints {
   static String chatHistoryUrl(String jobId) => '/chat/$jobId/history';
   static String markReadUrl(String jobId) => '/chat/$jobId/read';
   static String unreadCountUrl(String jobId) => '/chat/$jobId/unread';
+
+  // Errand endpoints
+  static const String errandsUrl = '/errands';
+  static const String activeErrandUrl = '/errands/active';
+  static String errandByIdUrl(String id) => '/errands/$id';
+  static String confirmErrandUrl(String id) => '/errands/$id/confirm';
+  static String completeErrandUrl(String id) => '/errands/$id/complete';
 }

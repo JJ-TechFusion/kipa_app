@@ -72,54 +72,6 @@ class _TransactionStatusScreenState
       );
     }
 
-    if (state.errorMessage != null && transaction == null) {
-      return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: AppColor.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ),
-          title: const BodyText(
-            'Transaction Status',
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-          centerTitle: true,
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(state.errorMessage!),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  ref
-                      .read(transactionStatusNotifierProvider.notifier)
-                      .fetchTransactionStatus(widget.paymentRequestId);
-                },
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     if (transaction == null) {
       return Scaffold(
         backgroundColor: Colors.white,

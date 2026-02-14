@@ -140,35 +140,9 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
   Widget _buildActiveLinks() {
     final state = ref.watch(paymentNotifierProvider);
 
-    if (state.isFetchingPaymentRequests) {
+    if (state.isFetchingPaymentRequests || state.paymentRequests == null) {
       return const Center(
         child: CircularProgressIndicator(color: AppColor.primary),
-      );
-    }
-
-    if (state.errorMessage != null && state.paymentRequests == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColor.kipaGrey),
-            verticalSpace(16),
-            BodyText(
-              'Error: ${state.errorMessage}',
-              color: AppColor.kipaGrey,
-              textAlign: TextAlign.center,
-            ),
-            verticalSpace(16),
-            TextButton(
-              onPressed: () {
-                ref
-                    .read(paymentNotifierProvider.notifier)
-                    .fetchPaymentRequests();
-              },
-              child: const BodySmall('Retry', color: AppColor.primary),
-            ),
-          ],
-        ),
       );
     }
 
@@ -250,35 +224,9 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
   Widget _buildLinkHistory() {
     final state = ref.watch(paymentNotifierProvider);
 
-    if (state.isFetchingPaymentHistory) {
+    if (state.isFetchingPaymentHistory || state.paymentRequestHistory == null) {
       return const Center(
         child: CircularProgressIndicator(color: AppColor.primary),
-      );
-    }
-
-    if (state.errorMessage != null && state.paymentRequestHistory == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColor.kipaGrey),
-            verticalSpace(16),
-            BodyText(
-              'Error: ${state.errorMessage}',
-              color: AppColor.kipaGrey,
-              textAlign: TextAlign.center,
-            ),
-            verticalSpace(16),
-            TextButton(
-              onPressed: () {
-                ref
-                    .read(paymentNotifierProvider.notifier)
-                    .fetchPaymentRequestHistory();
-              },
-              child: const BodySmall('Retry', color: AppColor.primary),
-            ),
-          ],
-        ),
       );
     }
 

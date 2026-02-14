@@ -7,6 +7,7 @@ class AuthState {
   final bool isUploadingImage;
   final bool isUpdatingProfile;
   final bool isFetchingUser;
+  final bool isLoggingOut;
   final String? errorMessage;
   final NetworkResponse? response;
   final String? verificationId;
@@ -21,6 +22,7 @@ class AuthState {
     this.isUploadingImage = false,
     this.isUpdatingProfile = false,
     this.isFetchingUser = false,
+    this.isLoggingOut = false,
     this.errorMessage,
     this.response,
     this.verificationId,
@@ -36,6 +38,7 @@ class AuthState {
     bool? isUploadingImage,
     bool? isUpdatingProfile,
     bool? isFetchingUser,
+    bool? isLoggingOut,
     String? errorMessage,
     NetworkResponse? response,
     String? verificationId,
@@ -50,6 +53,7 @@ class AuthState {
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,
       isUpdatingProfile: isUpdatingProfile ?? this.isUpdatingProfile,
       isFetchingUser: isFetchingUser ?? this.isFetchingUser,
+      isLoggingOut: isLoggingOut ?? this.isLoggingOut,
       errorMessage: errorMessage,
       response: response ?? this.response,
       verificationId: verificationId ?? this.verificationId,

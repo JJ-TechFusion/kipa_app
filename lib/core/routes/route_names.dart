@@ -37,4 +37,13 @@ class RouteNames {
   static const String confirmReturnRoute = '/confirm-return';
   static const String chatRoute = '/chat';
   static const String walletRoute = '/wallet';
+  static const String personalDetailsRoute = '/personal-details';
+
+  // Errand routes
+  static const String createErrandRoute = '/create-errand';
+  static const String errandSummaryRoute = '/errand-summary';
+  static const String errandSearchingRoute = '/errand-searching';
+  static const String errandTrackingRoute = '/errand-tracking';
+  static const String errandCompleteRoute = '/errand-complete';
+  static const String errandDetailsRoute = '/errand-details';
 }

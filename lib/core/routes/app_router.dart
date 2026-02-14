@@ -24,6 +24,14 @@ import '../../feature/delivery/presentation/pages/delivery_details_screen.dart';
 import '../../feature/delivery/presentation/pages/chat_screen.dart';
 import '../../feature/purchases/presentation/pages/dispute_page.dart';
 import '../../feature/sales/presentation/pages/confirm_return_page.dart';
+import '../../feature/profile/presentation/pages/personal_details_screen.dart';
+import '../../feature/errand/presentation/pages/create_errand_screen.dart';
+import '../../feature/errand/presentation/pages/errand_summary_screen.dart';
+import '../../feature/errand/presentation/pages/errand_searching_screen.dart';
+import '../../feature/errand/presentation/pages/errand_tracking_screen.dart';
+import '../../feature/errand/presentation/pages/errand_complete_screen.dart';
+import '../../feature/errand/presentation/pages/errand_details_screen.dart';
+import '../../feature/errand/domain/entities/errand_entity.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -180,6 +188,52 @@ class AppRouter {
             jobId: args?['jobId'] ?? '',
             participantName: args?['participantName'] ?? 'Chat',
             participantPhotoUrl: args?['participantPhotoUrl'],
+          ),
+        );
+
+      case RouteNames.personalDetailsRoute:
+        return MaterialPageRoute(builder: (_) => const PersonalDetailsScreen());
+
+      case RouteNames.createErrandRoute:
+        return MaterialPageRoute(builder: (_) => const CreateErrandScreen());
+
+      case RouteNames.errandSummaryRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ErrandSummaryScreen(
+            errand: args?['errand'] as ErrandEntity,
+          ),
+        );
+
+      case RouteNames.errandSearchingRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ErrandSearchingScreen(
+            errand: args?['errand'] as ErrandEntity,
+          ),
+        );
+
+      case RouteNames.errandTrackingRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ErrandTrackingScreen(
+            errand: args?['errand'] as ErrandEntity,
+          ),
+        );
+
+      case RouteNames.errandCompleteRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ErrandCompleteScreen(
+            errand: args?['errand'] as ErrandEntity,
+          ),
+        );
+
+      case RouteNames.errandDetailsRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ErrandDetailsScreen(
+            errandId: args?['errandId'] as String? ?? '',
           ),
         );
 

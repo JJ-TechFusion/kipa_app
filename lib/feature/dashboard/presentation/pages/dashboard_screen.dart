@@ -11,9 +11,13 @@ import 'package:kipa/feature/dashboard/presentation/widgets/promo_banner.dart';
 import 'package:kipa/feature/wallet/presentation/pages/wallet_pin_gate_screen.dart';
 import 'package:kipa/feature/wallet/presentation/providers/wallet_provider.dart';
 import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
+import 'package:kipa/feature/profile/presentation/pages/profile_screen.dart';
 import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/utils/constant.dart';
 import '../../../delivery/presentation/pages/deliveries_list_screen.dart';
+import '../../../errand/presentation/providers/errand_provider.dart';
+import '../../../errand/presentation/widgets/active_errand_card.dart';
+import '../../../errand/domain/enums/errand_status.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -27,9 +31,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(authNotifierProvider.notifier).fetchCurrentUser();
       ref.read(walletNotifierProvider.notifier).getWallet();
       ref.read(dashboardProvider.notifier).fetchActiveDeliveries();
+      ref.read(errandNotifierProvider.notifier).fetchActiveErrand();
     });
   }
 
@@ -39,6 +45,39 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final controller = ref.read(dashboardProvider.notifier);
     final walletState = ref.watch(walletNotifierProvider);
     final authState = ref.watch(authNotifierProvider);
+    final errandState = ref.watch(errandNotifierProvider);
+
+    ref.listen(errandNotifierProvider, (prev, next) {
+      if (next.activeErrand != null &&
+          prev?.activeErrand == null &&
+          next.activeErrand!.status.isActive &&
+          next.activeErrand!.status != ErrandStatus.draft) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            final status = next.activeErrand!.status;
+            if (status == ErrandStatus.searching) {
+              Navigator.pushNamed(
+                context,
+                RouteNames.errandSearchingRoute,
+                arguments: {'errand': next.activeErrand},
+              );
+            } else if (status == ErrandStatus.delivered) {
+              Navigator.pushNamed(
+                context,
+                RouteNames.errandCompleteRoute,
+                arguments: {'errand': next.activeErrand},
+              );
+            } else if (status.hasRider) {
+              Navigator.pushNamed(
+                context,
+                RouteNames.errandTrackingRoute,
+                arguments: {'errand': next.activeErrand},
+              );
+            }
+          }
+        });
+      }
+    });
 
     final activeDeliveries =
         state.activeDeliveries?.map((delivery) {
@@ -122,8 +161,78 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ],
                         ),
                         verticalSpace(24),
-                        PromoBanner(onBookRiderTap: () {}),
+                        PromoBanner(
+                          onBookRiderTap: () {
+                            final activeErrand = errandState.activeErrand;
+                            if (activeErrand != null &&
+                                activeErrand.status.isActive &&
+                                activeErrand.status != ErrandStatus.draft) {
+                              // Navigate based on status
+                              if (activeErrand.status ==
+                                  ErrandStatus.searching) {
+                                Navigator.pushNamed(
+                                  context,
+                                  RouteNames.errandSearchingRoute,
+                                  arguments: {'errand': activeErrand},
+                                );
+                              } else if (activeErrand.status ==
+                                  ErrandStatus.delivered) {
+                                Navigator.pushNamed(
+                                  context,
+                                  RouteNames.errandCompleteRoute,
+                                  arguments: {'errand': activeErrand},
+                                );
+                              } else if (activeErrand.status.hasRider) {
+                                Navigator.pushNamed(
+                                  context,
+                                  RouteNames.errandTrackingRoute,
+                                  arguments: {'errand': activeErrand},
+                                );
+                              }
+                            } else {
+                              // Navigate to create errand
+                              Navigator.pushNamed(
+                                context,
+                                RouteNames.createErrandRoute,
+                              );
+                            }
+                          },
+                        ),
                         verticalSpace(24),
+                        // Active Errand Card
+                        if (errandState.activeErrand != null &&
+                            errandState.activeErrand!.status.isActive &&
+                            errandState.activeErrand!.status != ErrandStatus.draft) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 0),
+                            child: ActiveErrandCard(
+                              errand: errandState.activeErrand!,
+                              onTap: () {
+                                final status = errandState.activeErrand!.status;
+                                if (status == ErrandStatus.searching) {
+                                  Navigator.pushNamed(
+                                    context,
+                                    RouteNames.errandSearchingRoute,
+                                    arguments: {'errand': errandState.activeErrand},
+                                  );
+                                } else if (status == ErrandStatus.delivered) {
+                                  Navigator.pushNamed(
+                                    context,
+                                    RouteNames.errandCompleteRoute,
+                                    arguments: {'errand': errandState.activeErrand},
+                                  );
+                                } else if (status.hasRider) {
+                                  Navigator.pushNamed(
+                                    context,
+                                    RouteNames.errandTrackingRoute,
+                                    arguments: {'errand': errandState.activeErrand},
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          verticalSpace(24),
+                        ],
                         ActiveDeliveriesList(
                           deliveries: activeDeliveries,
                           onViewAllTap: () {},
@@ -146,7 +255,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const DeliveriesListScreen(),
                   const WalletPinGateScreen(),
                   const Center(child: Text('Support Screen')),
-                  const Center(child: Text('Profile Screen')),
+                  const ProfileScreen(),
                 ],
               ),
             ),

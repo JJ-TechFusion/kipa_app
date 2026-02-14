@@ -40,13 +40,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> logout() {
-    // TODO: implement logout
-    throw UnimplementedError();
+  Future<NetworkResponse> logout() async {
+    return await remoteDataSource.logout();
   }
 
   @override
-  Future<void> deleteUser() {
+  Future<NetworkResponse> deleteUser() async {
     // TODO: implement deleteUser
     throw UnimplementedError();
   }

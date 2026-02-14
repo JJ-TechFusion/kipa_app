@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kipa/core/shared/widgets/custom_snackbar.dart';
 import '../../../../core/routes/route_names.dart';
 import '../../../../core/shared/widgets/custom_text.dart';
 import '../../../../core/shared/widgets/step_indicator.dart';
@@ -35,20 +36,20 @@ class _VerifyPhonePageState extends ConsumerState<VerifyPhonePage> {
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (previous?.isLoading == true && next.isLoading == false) {
         if (next.errorMessage != null) {
-          ScaffoldMessenger.of(
+          CustomSnackBar.show(
             context,
-          ).showSnackBar(SnackBar(content: Text(next.errorMessage!)));
+            message: next.errorMessage!,
+            type: SnackBarType.error,
+          );
         } else if (next.response?.success == true &&
             _selectedMethod != null &&
             next.response?.data?['verification_id'] != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                _selectedMethod == 'sms'
-                    ? 'SMS code sent!'
-                    : 'Voice call initiated!',
-              ),
-            ),
+          CustomSnackBar.show(
+            context,
+            message: _selectedMethod == 'sms'
+                ? 'SMS code sent!'
+                : 'Voice call initiated!',
+            type: SnackBarType.success,
           );
 
           Future.delayed(const Duration(milliseconds: 500), () {
@@ -135,7 +136,7 @@ class _VerifyPhonePageState extends ConsumerState<VerifyPhonePage> {
 
             if (authState.isLoading) ...[
               verticalSpace(24),
-              const Center(child: CircularProgressIndicator()),
+              const Center(child: CircularProgressIndicator.adaptive()),
             ],
 
             const Spacer(),
