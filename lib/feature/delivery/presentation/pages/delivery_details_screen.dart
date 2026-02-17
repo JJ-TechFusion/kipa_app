@@ -39,6 +39,10 @@ class DeliveryDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
+  bool _deliveryConfirmed = false;
+  bool _disputeOpened = false;
+  bool _returnConfirmed = false;
+
   @override
   void initState() {
     super.initState();
@@ -356,6 +360,8 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
             verticalSpace(24),
 
             if (widget.isBuyer &&
+                !_deliveryConfirmed &&
+                !_disputeOpened &&
                 job.status.toLowerCase() == 'delivered' &&
                 purchasesState.purchaseDetail?.status.toLowerCase() !=
                     'completed' &&
@@ -365,8 +371,8 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 42),
                 child: CustomButton(
                   title: 'Open Dispute',
-                  onTap: () {
-                    Navigator.pushNamed(
+                  onTap: () async {
+                    await Navigator.pushNamed(
                       context,
                       RouteNames.disputeRoute,
                       arguments: {
@@ -374,6 +380,12 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                         'itemName': purchasesState.purchaseDetail?.itemName,
                       },
                     );
+                    if (mounted && widget.purchaseId != null) {
+                      setState(() => _disputeOpened = true);
+                      ref
+                          .read(purchasesNotifierProvider.notifier)
+                          .fetchPurchaseById(widget.purchaseId!);
+                    }
                   },
                   color: AppColor.kipaGrey.withAlpha(50),
                   textColor: AppColor.primaryText,
@@ -393,6 +405,7 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                         .confirmDelivery(widget.purchaseId!);
 
                     if (confirmed && context.mounted) {
+                      setState(() => _deliveryConfirmed = true);
                       CustomSnackBar.show(
                         context,
                         message:
@@ -421,6 +434,7 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
             ],
 
             if (widget.isBuyer &&
+                !_returnConfirmed &&
                 purchasesState.purchaseDetail?.prStatus?.toLowerCase() ==
                     'return_required') ...[
               Padding(
@@ -436,6 +450,7 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
                         .readyForReturn(widget.purchaseId!);
 
                     if (response != null && context.mounted) {
+                      setState(() => _returnConfirmed = true);
                       Navigator.pushNamed(
                         context,
                         RouteNames.deliveryTrackingRoute,

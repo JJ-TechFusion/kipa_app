@@ -1,6 +1,6 @@
 class ApiEndpoints {
   static const String baseUrl =
-      'https://4a1a-197-210-227-1.ngrok-free.app/api/v1';
+      'https://5b04-102-89-46-161.ngrok-free.app/api/v1';
 
   static const String sendOtpUrl = '/auth/otp/send';
   static const String verifyOtpUrl = '/auth/otp/verify';
@@ -81,6 +81,9 @@ class ApiEndpoints {
   // Dispute endpoints
   static String openDisputeUrl(String purchaseId) =>
       '/purchases/$purchaseId/dispute';
+
+  static const String disputesUrl = '/disputes';
+  static String disputeByIdUrl(String id) => '/disputes/$id';
 
   static const String uploadDisputeEvidenceUrl = '/uploads/dispute-evidence';
   static const String uploadItemImageUrl = '/uploads/item-image';

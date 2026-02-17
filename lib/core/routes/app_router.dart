@@ -32,6 +32,7 @@ import '../../feature/errand/presentation/pages/errand_tracking_screen.dart';
 import '../../feature/errand/presentation/pages/errand_complete_screen.dart';
 import '../../feature/errand/presentation/pages/errand_details_screen.dart';
 import '../../feature/errand/domain/entities/errand_entity.dart';
+import '../../feature/disputes/presentation/pages/dispute_detail_screen.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -226,6 +227,14 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => ErrandCompleteScreen(
             errand: args?['errand'] as ErrandEntity,
+          ),
+        );
+
+      case RouteNames.disputeDetailRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => DisputeDetailScreen(
+            disputeId: args?['disputeId'] as String? ?? '',
           ),
         );
 

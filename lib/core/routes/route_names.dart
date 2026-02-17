@@ -39,6 +39,8 @@ class RouteNames {
   static const String walletRoute = '/wallet';
   static const String personalDetailsRoute = '/personal-details';
 
+  static const String disputeDetailRoute = '/dispute-detail';
+
   // Errand routes
   static const String createErrandRoute = '/create-errand';
   static const String errandSummaryRoute = '/errand-summary';

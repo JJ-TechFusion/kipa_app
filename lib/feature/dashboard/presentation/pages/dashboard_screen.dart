@@ -8,6 +8,7 @@ import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_action_car
 import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_bottom_nav.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_header.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/promo_banner.dart';
+import 'package:kipa/feature/support/presentation/pages/support_screen.dart';
 import 'package:kipa/feature/wallet/presentation/pages/wallet_pin_gate_screen.dart';
 import 'package:kipa/feature/wallet/presentation/providers/wallet_provider.dart';
 import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
@@ -202,7 +203,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         // Active Errand Card
                         if (errandState.activeErrand != null &&
                             errandState.activeErrand!.status.isActive &&
-                            errandState.activeErrand!.status != ErrandStatus.draft) ...[
+                            errandState.activeErrand!.status !=
+                                ErrandStatus.draft) ...[
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 0),
                             child: ActiveErrandCard(
@@ -213,19 +215,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   Navigator.pushNamed(
                                     context,
                                     RouteNames.errandSearchingRoute,
-                                    arguments: {'errand': errandState.activeErrand},
+                                    arguments: {
+                                      'errand': errandState.activeErrand,
+                                    },
                                   );
                                 } else if (status == ErrandStatus.delivered) {
                                   Navigator.pushNamed(
                                     context,
                                     RouteNames.errandCompleteRoute,
-                                    arguments: {'errand': errandState.activeErrand},
+                                    arguments: {
+                                      'errand': errandState.activeErrand,
+                                    },
                                   );
                                 } else if (status.hasRider) {
                                   Navigator.pushNamed(
                                     context,
                                     RouteNames.errandTrackingRoute,
-                                    arguments: {'errand': errandState.activeErrand},
+                                    arguments: {
+                                      'errand': errandState.activeErrand,
+                                    },
                                   );
                                 }
                               },
@@ -254,7 +262,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                   const DeliveriesListScreen(),
                   const WalletPinGateScreen(),
-                  const Center(child: Text('Support Screen')),
+                  const SupportScreen(),
                   const ProfileScreen(),
                 ],
               ),
