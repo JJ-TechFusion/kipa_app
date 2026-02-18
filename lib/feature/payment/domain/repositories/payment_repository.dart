@@ -2,6 +2,7 @@ import '../../../../core/services/network/network_response.dart';
 import '../../../location/domain/entities/fulfillment_entity.dart';
 import '../entities/payment_buyer_entities.dart';
 import '../entities/payment_request_entity.dart';
+import '../entities/ship_logistics_entity.dart';
 
 abstract class PaymentRepository {
   Future<NetworkResponse> createPaymentRequest(
@@ -42,6 +43,16 @@ abstract class PaymentRepository {
   Future<NetworkResponse> getTransactionStatus(String paymentRequestId);
 
   Future<NetworkResponse> uploadItemImage({
+    required String fileName,
+    required List<int> fileBytes,
+  });
+
+  Future<NetworkResponse> shipLogisticsDelivery(
+    String logisticsDeliveryId,
+    ShipLogisticsEntity request,
+  );
+
+  Future<NetworkResponse> uploadShipmentReceipt({
     required String fileName,
     required List<int> fileBytes,
   });

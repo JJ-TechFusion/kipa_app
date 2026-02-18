@@ -18,6 +18,8 @@ import '../../domain/usecases/mark_ready_for_pickup_usecase.dart';
 import '../../domain/usecases/cancel_rider_search_usecase.dart';
 import '../../domain/usecases/get_transaction_status_usecase.dart';
 import '../../domain/usecases/upload_item_image_usecase.dart';
+import '../../domain/usecases/ship_logistics_delivery_usecase.dart';
+import '../../domain/usecases/upload_shipment_receipt_usecase.dart';
 import '../state/payment_notifier.dart';
 import '../state/payment_state.dart';
 import '../state/transaction_status_notifier.dart';
@@ -110,6 +112,16 @@ final getTransactionStatusUseCaseProvider =
 
 final uploadItemImageUseCaseProvider = Provider<UploadItemImageUseCase>((ref) {
   return UploadItemImageUseCase(ref.read(paymentRepositoryProvider));
+});
+
+final shipLogisticsDeliveryUseCaseProvider =
+    Provider<ShipLogisticsDeliveryUseCase>((ref) {
+  return ShipLogisticsDeliveryUseCase(ref.read(paymentRepositoryProvider));
+});
+
+final uploadShipmentReceiptUseCaseProvider =
+    Provider<UploadShipmentReceiptUseCase>((ref) {
+  return UploadShipmentReceiptUseCase(ref.read(paymentRepositoryProvider));
 });
 
 final paymentNotifierProvider = NotifierProvider<PaymentNotifier, PaymentState>(

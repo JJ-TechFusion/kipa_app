@@ -200,6 +200,7 @@ class _FulfillmentSuccessScreenState
                 ),
               ),
             ),
+
             verticalSpace(20),
           ],
         ),

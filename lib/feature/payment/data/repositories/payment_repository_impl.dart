@@ -4,6 +4,7 @@ import '../../domain/entities/payment_request_entity.dart';
 import '../../domain/repositories/payment_repository.dart';
 import '../datasources/payment_remote_datasource.dart';
 import '../../domain/entities/payment_buyer_entities.dart';
+import '../../domain/entities/ship_logistics_entity.dart';
 
 class PaymentRepositoryImpl implements PaymentRepository {
   final PaymentRemoteDataSource remoteDataSource;
@@ -95,6 +96,28 @@ class PaymentRepositoryImpl implements PaymentRepository {
     required List<int> fileBytes,
   }) async {
     return await remoteDataSource.uploadItemImage(
+      fileName: fileName,
+      fileBytes: fileBytes,
+    );
+  }
+
+  @override
+  Future<NetworkResponse> shipLogisticsDelivery(
+    String logisticsDeliveryId,
+    ShipLogisticsEntity request,
+  ) async {
+    return await remoteDataSource.shipLogisticsDelivery(
+      logisticsDeliveryId,
+      request,
+    );
+  }
+
+  @override
+  Future<NetworkResponse> uploadShipmentReceipt({
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    return await remoteDataSource.uploadShipmentReceipt(
       fileName: fileName,
       fileBytes: fileBytes,
     );

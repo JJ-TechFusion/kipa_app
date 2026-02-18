@@ -10,6 +10,8 @@ import '../models/payment_request_model.dart';
 import '../models/fulfillment_model.dart';
 import '../models/payment_buyer_models.dart';
 import '../models/transaction_status_models.dart';
+import '../models/ship_logistics_model.dart';
+import '../../domain/entities/ship_logistics_entity.dart';
 
 class PaymentRemoteDataSource {
   final ApiService apiService;
@@ -256,6 +258,56 @@ class PaymentRemoteDataSource {
     final mimeType = DioMediaType('image', fileName.split('.').last);
     final response = await apiService.requestWithFile(
       endpoint: ApiEndpoints.uploadItemImageUrl,
+      fileName: 'file',
+      fileBytes: fileBytes,
+      mimeType: mimeType,
+      otherFieldsInRequest: {
+        'file': MultipartFile.fromBytes(
+          fileBytes,
+          filename: fileName,
+          contentType: mimeType,
+        ),
+      },
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: dataMap['url']?.toString() ?? '',
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> shipLogisticsDelivery(
+    String logisticsDeliveryId,
+    ShipLogisticsEntity request,
+  ) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.shipLogisticsDeliveryUrl(logisticsDeliveryId),
+      requestBody: ShipLogisticsModel.fromEntity(request).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: ShipLogisticsResponseModel.fromJson(dataMap).toEntity(),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> uploadShipmentReceipt({
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    final mimeType = DioMediaType('image', fileName.split('.').last);
+    final response = await apiService.requestWithFile(
+      endpoint: ApiEndpoints.uploadShipmentReceiptUrl,
       fileName: 'file',
       fileBytes: fileBytes,
       mimeType: mimeType,

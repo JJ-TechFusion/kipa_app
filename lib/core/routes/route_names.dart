@@ -31,6 +31,8 @@ class RouteNames {
   static const String buyerPaymentDetailsRoute = '/buyer-payment-details';
   static const String buyerPaymentSuccessRoute = '/buyer-payment-success';
   static const String riderSearchRoute = '/rider-search';
+  static const String shipLogisticsFormRoute = '/ship-logistics-form';
+  static const String deliveriesListRoute = '/deliveries-list';
   static const String deliveryTrackingRoute = '/delivery-tracking';
   static const String deliveryDetailsRoute = '/delivery-details';
   static const String disputeRoute = '/dispute';
@@ -40,6 +42,7 @@ class RouteNames {
   static const String personalDetailsRoute = '/personal-details';
 
   static const String disputeDetailRoute = '/dispute-detail';
+  static const String logisticsDeliveryDetailsRoute = '/logistics-delivery-details';
 
   // Errand routes
   static const String createErrandRoute = '/create-errand';

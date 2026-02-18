@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/core/shared/widgets/buttons/roundedbutton.dart';
-import 'package:kipa/core/shared/widgets/custom_snackbar.dart' show CustomSnackBar, SnackBarType;
+import 'package:kipa/core/shared/widgets/custom_snackbar.dart'
+    show CustomSnackBar, SnackBarType;
 import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/core/shared/widgets/textfields/custom_field.dart';
 import 'package:kipa/feature/location/domain/entities/location_entity.dart';
@@ -90,8 +91,9 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
           : _notesController.text.trim(),
     );
 
-    final errand =
-        await ref.read(errandNotifierProvider.notifier).createErrand(params);
+    final errand = await ref
+        .read(errandNotifierProvider.notifier)
+        .createErrand(params);
 
     if (errand != null && mounted) {
       Navigator.pushNamed(
@@ -107,7 +109,8 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
     final state = ref.watch(errandNotifierProvider);
 
     ref.listen(errandNotifierProvider, (prev, next) {
-      if (next.errorMessage != null && prev?.errorMessage != next.errorMessage) {
+      if (next.errorMessage != null &&
+          prev?.errorMessage != next.errorMessage) {
         CustomSnackBar.show(
           context,
           message: next.errorMessage!,
@@ -124,10 +127,11 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColor.darkPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back, color: AppColor.darkPrimary),
+        //   onPressed: () => Navigator.pop(context),
+        // ),
+        automaticallyImplyLeading: false,
         title: const BodyText(
           'Book a Rider',
           fontWeight: FontWeight.w600,
@@ -142,7 +146,11 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const BodyText('Pickup Details', fontWeight: FontWeight.w600, color: AppColor.darkPrimary),
+              const BodyText(
+                'Pickup Details',
+                fontWeight: FontWeight.w600,
+                color: AppColor.darkPrimary,
+              ),
               verticalSpace(12),
               LocationInputCard(
                 title: 'Pickup Location',
@@ -163,7 +171,11 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
                 phoneHint: '+234 xxx xxx xxxx',
               ),
               verticalSpace(24),
-              const BodyText('Dropoff Details', fontWeight: FontWeight.w600, color: AppColor.darkPrimary),
+              const BodyText(
+                'Dropoff Details',
+                fontWeight: FontWeight.w600,
+                color: AppColor.darkPrimary,
+              ),
               verticalSpace(12),
               LocationInputCard(
                 title: 'Dropoff Location',
@@ -184,7 +196,11 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
                 phoneHint: '+234 xxx xxx xxxx',
               ),
               verticalSpace(24),
-              const BodyText('Package Details', fontWeight: FontWeight.w600, color: AppColor.darkPrimary),
+              const BodyText(
+                'Package Details',
+                fontWeight: FontWeight.w600,
+                color: AppColor.darkPrimary,
+              ),
               verticalSpace(12),
               PackageSizeSelector(
                 selectedSize: _packageSize,

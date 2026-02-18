@@ -18,6 +18,9 @@ import '../../domain/usecases/get_payment_details_usecase.dart';
 import '../../domain/usecases/mark_ready_for_pickup_usecase.dart';
 import '../../domain/usecases/cancel_rider_search_usecase.dart';
 import '../../domain/usecases/upload_item_image_usecase.dart';
+import '../../domain/usecases/ship_logistics_delivery_usecase.dart';
+import '../../domain/usecases/upload_shipment_receipt_usecase.dart';
+import '../../domain/entities/ship_logistics_entity.dart';
 
 class PaymentNotifier extends Notifier<PaymentState> {
   late final CreatePaymentRequestUseCase _createPaymentRequestUseCase;
@@ -33,6 +36,8 @@ class PaymentNotifier extends Notifier<PaymentState> {
   late final MarkReadyForPickupUseCase _markReadyForPickupUseCase;
   late final CancelRiderSearchUseCase _cancelRiderSearchUseCase;
   late final UploadItemImageUseCase _uploadItemImageUseCase;
+  late final ShipLogisticsDeliveryUseCase _shipLogisticsDeliveryUseCase;
+  late final UploadShipmentReceiptUseCase _uploadShipmentReceiptUseCase;
 
   @override
   PaymentState build() {
@@ -59,6 +64,8 @@ class PaymentNotifier extends Notifier<PaymentState> {
     _markReadyForPickupUseCase = ref.read(markReadyForPickupUseCaseProvider);
     _cancelRiderSearchUseCase = ref.read(cancelRiderSearchUseCaseProvider);
     _uploadItemImageUseCase = ref.read(uploadItemImageUseCaseProvider);
+    _shipLogisticsDeliveryUseCase = ref.read(shipLogisticsDeliveryUseCaseProvider);
+    _uploadShipmentReceiptUseCase = ref.read(uploadShipmentReceiptUseCaseProvider);
     return const PaymentState();
   }
 
@@ -267,6 +274,8 @@ class PaymentNotifier extends Notifier<PaymentState> {
     required String paymentRequestId,
     required String deliveryType,
     required String vehicleType,
+    String? pickupState,
+    String? dropoffState,
   }) async {
     final pickup = state.pickupLocation;
     final dropoff = state.dropoffLocation;
@@ -286,6 +295,8 @@ class PaymentNotifier extends Notifier<PaymentState> {
         pickup: pickup,
         dropoff: dropoff,
         vehicleType: vehicleType,
+        pickupState: pickupState,
+        dropoffState: dropoffState,
       );
 
       final response = await _createFulfillmentUseCase(
@@ -485,6 +496,83 @@ class PaymentNotifier extends Notifier<PaymentState> {
         errorMessage: e.toString(),
       );
       return null;
+    }
+  }
+
+  Future<String?> uploadShipmentReceipt({
+    required String fileName,
+    required List<int> fileBytes,
+  }) async {
+    state = state.copyWith(isUploadingShipmentReceipt: true, errorMessage: null);
+
+    try {
+      final response = await _uploadShipmentReceiptUseCase(
+        fileName: fileName,
+        fileBytes: fileBytes,
+      );
+
+      if (response.success && response.data != null) {
+        state = state.copyWith(isUploadingShipmentReceipt: false);
+        return response.data as String;
+      } else {
+        state = state.copyWith(
+          isUploadingShipmentReceipt: false,
+          errorMessage: response.message,
+        );
+        return null;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isUploadingShipmentReceipt: false,
+        errorMessage: e.toString(),
+      );
+      return null;
+    }
+  }
+
+  Future<bool> shipLogisticsDelivery({
+    required String logisticsDeliveryId,
+    required String carrier,
+    String? carrierOtherName,
+    required String trackingNumber,
+    required String trackingUrl,
+    required String shipmentReceiptUrl,
+    required DateTime estimatedDeliveryAt,
+  }) async {
+    state = state.copyWith(isShippingLogistics: true, errorMessage: null);
+
+    try {
+      final request = ShipLogisticsEntity(
+        carrier: carrier,
+        carrierOtherName: carrierOtherName,
+        trackingNumber: trackingNumber,
+        trackingUrl: trackingUrl,
+        shipmentReceiptUrl: shipmentReceiptUrl,
+        estimatedDeliveryAt: estimatedDeliveryAt,
+      );
+
+      final response = await _shipLogisticsDeliveryUseCase(
+        logisticsDeliveryId,
+        request,
+      );
+
+      if (response.success) {
+        state = state.copyWith(isShippingLogistics: false);
+        await fetchPaymentRequests();
+        return true;
+      } else {
+        state = state.copyWith(
+          isShippingLogistics: false,
+          errorMessage: response.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isShippingLogistics: false,
+        errorMessage: e.toString(),
+      );
+      return false;
     }
   }
 }

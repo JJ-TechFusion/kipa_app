@@ -18,6 +18,7 @@ class SaleModel {
   final String? dropoffAddress;
   final String? prStatus;
   final String? returnJobId;
+  final String deliveryType;
 
   const SaleModel({
     required this.id,
@@ -37,6 +38,7 @@ class SaleModel {
     this.dropoffAddress,
     this.prStatus,
     this.returnJobId,
+    this.deliveryType = '',
   });
 
   factory SaleModel.fromJson(Map<String, dynamic> json) {
@@ -70,6 +72,7 @@ class SaleModel {
       dropoffAddress: json['dropoff_address']?.toString(),
       prStatus: json['pr_status']?.toString(),
       returnJobId: json['return_job_id']?.toString(),
+      deliveryType: json['delivery_type']?.toString() ?? '',
     );
   }
 
@@ -92,6 +95,7 @@ class SaleModel {
       dropoffAddress: dropoffAddress,
       prStatus: prStatus,
       returnJobId: returnJobId,
+      deliveryType: deliveryType,
     );
   }
 }

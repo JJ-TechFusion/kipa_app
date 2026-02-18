@@ -5,9 +5,11 @@ class CreateFulfillmentModel {
   final String pickupAddress;
   final double pickupLat;
   final double pickupLng;
+  final String? pickupState;
   final String dropoffAddress;
   final double dropoffLat;
   final double dropoffLng;
+  final String? dropoffState;
   final String vehicleType;
 
   const CreateFulfillmentModel({
@@ -15,9 +17,11 @@ class CreateFulfillmentModel {
     required this.pickupAddress,
     required this.pickupLat,
     required this.pickupLng,
+    this.pickupState,
     required this.dropoffAddress,
     required this.dropoffLat,
     required this.dropoffLng,
+    this.dropoffState,
     required this.vehicleType,
   });
 
@@ -27,23 +31,30 @@ class CreateFulfillmentModel {
       pickupAddress: entity.pickupAddress,
       pickupLat: entity.pickupLat,
       pickupLng: entity.pickupLng,
+      pickupState: entity.pickupState,
       dropoffAddress: entity.dropoffAddress,
       dropoffLat: entity.dropoffLat,
       dropoffLng: entity.dropoffLng,
+      dropoffState: entity.dropoffState,
       vehicleType: entity.vehicleType,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'delivery_type': deliveryType,
-    'pickup_address': pickupAddress,
-    'pickup_lat': pickupLat,
-    'pickup_lng': pickupLng,
-    'dropoff_address': dropoffAddress,
-    'dropoff_lat': dropoffLat,
-    'dropoff_lng': dropoffLng,
-    'vehicle_type': vehicleType,
-  };
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{
+      'delivery_type': deliveryType,
+      'pickup_address': pickupAddress,
+      'pickup_lat': pickupLat,
+      'pickup_lng': pickupLng,
+      'dropoff_address': dropoffAddress,
+      'dropoff_lat': dropoffLat,
+      'dropoff_lng': dropoffLng,
+      'vehicle_type': vehicleType,
+    };
+    if (pickupState != null) map['pickup_state'] = pickupState;
+    if (dropoffState != null) map['dropoff_state'] = dropoffState;
+    return map;
+  }
 }
 
 class FulfillmentResponseModel {

@@ -16,6 +16,7 @@ class SaleEntity {
   final String? dropoffAddress;
   final String? prStatus;
   final String? returnJobId;
+  final String deliveryType;
 
   const SaleEntity({
     required this.id,
@@ -35,6 +36,7 @@ class SaleEntity {
     this.dropoffAddress,
     this.prStatus,
     this.returnJobId,
+    this.deliveryType = '',
   });
 }
 

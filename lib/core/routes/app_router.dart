@@ -19,6 +19,8 @@ import '../../feature/payment/presentation/pages/pay_via_link_screen.dart';
 import '../../feature/payment/presentation/pages/buyer_payment_details_screen.dart';
 import '../../feature/payment/presentation/pages/buyer_payment_success_screen.dart';
 import '../../feature/payment/presentation/pages/rider_search_screen.dart';
+import '../../feature/payment/presentation/pages/ship_logistics_form_screen.dart';
+import '../../feature/delivery/presentation/pages/deliveries_list_screen.dart';
 import '../../feature/delivery/presentation/pages/delivery_tracking_screen.dart';
 import '../../feature/delivery/presentation/pages/delivery_details_screen.dart';
 import '../../feature/delivery/presentation/pages/chat_screen.dart';
@@ -33,6 +35,7 @@ import '../../feature/errand/presentation/pages/errand_complete_screen.dart';
 import '../../feature/errand/presentation/pages/errand_details_screen.dart';
 import '../../feature/errand/domain/entities/errand_entity.dart';
 import '../../feature/disputes/presentation/pages/dispute_detail_screen.dart';
+import '../../feature/delivery/presentation/pages/logistics_delivery_details_screen.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -144,6 +147,21 @@ class AppRouter {
           ),
         );
 
+      case RouteNames.shipLogisticsFormRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ShipLogisticsFormScreen(
+            logisticsDeliveryId: args?['logisticsDeliveryId'] ?? '',
+            paymentRequestId: args?['paymentRequestId'] ?? '',
+          ),
+        );
+
+      case RouteNames.deliveriesListRoute:
+        return MaterialPageRoute(
+          builder: (_) => const DeliveriesListScreen(),
+          settings: settings,
+        );
+
       case RouteNames.deliveryTrackingRoute:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
@@ -243,6 +261,14 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => ErrandDetailsScreen(
             errandId: args?['errandId'] as String? ?? '',
+          ),
+        );
+
+      case RouteNames.logisticsDeliveryDetailsRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => LogisticsDeliveryDetailsScreen(
+            logisticsDeliveryId: args?['logisticsDeliveryId'] as String? ?? '',
           ),
         );
 

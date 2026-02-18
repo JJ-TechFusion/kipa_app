@@ -1,6 +1,6 @@
 class ApiEndpoints {
   static const String baseUrl =
-      'https://5b04-102-89-46-161.ngrok-free.app/api/v1';
+      'https://331e-102-91-72-225.ngrok-free.app/api/v1';
 
   static const String sendOtpUrl = '/auth/otp/send';
   static const String verifyOtpUrl = '/auth/otp/verify';
@@ -105,4 +105,40 @@ class ApiEndpoints {
   static String errandByIdUrl(String id) => '/errands/$id';
   static String confirmErrandUrl(String id) => '/errands/$id/confirm';
   static String completeErrandUrl(String id) => '/errands/$id/complete';
+
+  // Logistics shipping endpoint (interstate delivery)
+  static String shipLogisticsDeliveryUrl(String logisticsDeliveryId) =>
+      '/logistics/$logisticsDeliveryId/ship';
+
+  // Shipment receipt upload
+  static const String uploadShipmentReceiptUrl = '/uploads/shipment-receipt';
+
+  // Logistics deliveries (interstate)
+  static const String logisticsSellerUrl = '/logistics/seller';
+  static const String logisticsBuyerUrl = '/logistics/buyer';
+
+  // Logistics delivery details
+  static String logisticsDetailsUrl(String logisticsDeliveryId) =>
+      '/logistics/$logisticsDeliveryId/details';
+
+  // Logistics buyer actions
+  static String claimLogisticsDeliveryUrl(String logisticsDeliveryId) =>
+      '/logistics/$logisticsDeliveryId/claim-delivery';
+
+  static String confirmLogisticsDeliveryUrl(String logisticsDeliveryId) =>
+      '/logistics/$logisticsDeliveryId/confirm';
+
+  // Delivery proof upload
+  static const String uploadDeliveryProofUrl = '/uploads/shipment-receipt';
+
+  // Logistics dispute
+  static String openLogisticsDisputeUrl(String logisticsDeliveryId) =>
+      '/logistics/$logisticsDeliveryId/dispute';
+
+  // Logistics return flow
+  static String returnShippedUrl(String logisticsDeliveryId) =>
+      '/logistics/$logisticsDeliveryId/return-shipped';
+
+  static String confirmLogisticsReturnUrl(String logisticsDeliveryId) =>
+      '/logistics/$logisticsDeliveryId/confirm-return';
 }

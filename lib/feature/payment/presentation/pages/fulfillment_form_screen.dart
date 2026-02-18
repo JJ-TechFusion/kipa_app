@@ -26,8 +26,20 @@ class FulfillmentFormScreen extends ConsumerStatefulWidget {
 class _FulfillmentFormScreenState extends ConsumerState<FulfillmentFormScreen> {
   String? _deliveryType;
   String? _vehicleType;
+  String? _pickupState;
+  String? _dropoffState;
   bool _pickupSelected = false;
   bool _dropoffSelected = false;
+
+  static const List<String> _nigerianStates = [
+    'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
+    'Borno', 'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu',
+    'FCT', 'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi',
+    'Kogi', 'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun',
+    'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba', 'Yobe', 'Zamfara',
+  ];
+
+  bool get _isInterState => _deliveryType == 'inter_state';
 
   void _submitRequest() async {
     final paymentNotifier = ref.read(paymentNotifierProvider.notifier);
@@ -50,10 +62,21 @@ class _FulfillmentFormScreenState extends ConsumerState<FulfillmentFormScreen> {
       return;
     }
 
+    if (_isInterState && (_pickupState == null || _dropoffState == null)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select pickup and dropoff states for interstate delivery'),
+        ),
+      );
+      return;
+    }
+
     await paymentNotifier.createFulfillment(
       paymentRequestId: widget.paymentRequestId,
       deliveryType: _deliveryType!,
       vehicleType: _vehicleType!,
+      pickupState: _isInterState ? _pickupState : null,
+      dropoffState: _isInterState ? _dropoffState : null,
     );
 
     final updatedState = ref.read(paymentNotifierProvider);
@@ -140,6 +163,19 @@ class _FulfillmentFormScreenState extends ConsumerState<FulfillmentFormScreen> {
               ),
             verticalSpace(16),
 
+            if (_isInterState) ...[
+              DropDownWidget(
+                label: 'Pickup State',
+                hintText: 'Select pickup state',
+                initialValue: _nigerianStates,
+                onSelect: (val) {
+                  setState(() => _pickupState = val);
+                },
+                showSearch: true,
+              ),
+              verticalSpace(16),
+            ],
+
             AddressAutocompleteField(
               label: 'Dropoff Address',
               hintText: 'Enter dropoff address',
@@ -158,6 +194,19 @@ class _FulfillmentFormScreenState extends ConsumerState<FulfillmentFormScreen> {
                 ),
               ),
             verticalSpace(16),
+
+            if (_isInterState) ...[
+              DropDownWidget(
+                label: 'Dropoff State',
+                hintText: 'Select dropoff state',
+                initialValue: _nigerianStates,
+                onSelect: (val) {
+                  setState(() => _dropoffState = val);
+                },
+                showSearch: true,
+              ),
+              verticalSpace(16),
+            ],
 
             DropDownWidget(
               label: 'Vehicle Type',

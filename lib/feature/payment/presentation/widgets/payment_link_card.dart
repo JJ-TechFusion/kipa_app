@@ -25,6 +25,9 @@ class PaymentLinkCard extends ConsumerWidget {
     required this.onDelete,
   });
 
+  bool get _isInterState =>
+      (data['delivery_type'] ?? '').toString() == 'inter_state';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statusString = (data['status'] ?? '').toString();
@@ -92,13 +95,13 @@ class PaymentLinkCard extends ConsumerWidget {
             verticalSpace(16),
 
             // Action buttons based on status
-            if (status.canMarkReady)
+            if (status.canMarkReady && !_isInterState)
               _buildReadyForPickupButton(context, ref)
             else if (status == PaymentRequestStatus.searchingRider)
               _buildSearchingIndicator()
-            else if (status.shouldShowTracking)
+            else if (status.shouldShowTracking && !_isInterState)
               _buildTrackDeliveryButton(context, status)
-            else
+            else if (!_isInterState)
               _buildDefaultActions(),
           ],
         ),
@@ -176,12 +179,10 @@ class PaymentLinkCard extends ConsumerWidget {
             ? 'Track Delivery'
             : 'View Rider',
         onTap: () {
-          // Use a reasonable default status based on payment request state
-          // fetchJobDetails will update with actual status after connecting
           String initialStatus = 'searching';
           if (status == PaymentRequestStatus.riderAssigned ||
               status == PaymentRequestStatus.inDelivery) {
-            initialStatus = 'accepted'; // Better default when rider is assigned
+            initialStatus = 'accepted';
           }
 
           final initialJob = DeliveryJobEntity(
@@ -226,13 +227,15 @@ class PaymentLinkCard extends ConsumerWidget {
     final statusString = (data['status'] ?? '').toString();
     final status = PaymentRequestStatus.fromString(statusString);
     final isReusable = data['isReusable'] == true;
-    final showReuseButton = isReusable && status == PaymentRequestStatus.completed;
+    final showReuseButton =
+        isReusable && status == PaymentRequestStatus.completed;
 
-    // For reusable completed links, show edit/delete so they can modify before reusing
-    final showEdit = status == PaymentRequestStatus.draft ||
-                     (status == PaymentRequestStatus.completed && isReusable);
-    final showDelete = !status.isPaid ||
-                       (status == PaymentRequestStatus.completed && isReusable);
+    final showEdit =
+        status == PaymentRequestStatus.draft ||
+        (status == PaymentRequestStatus.completed && isReusable);
+    final showDelete =
+        !status.isPaid ||
+        (status == PaymentRequestStatus.completed && isReusable);
 
     return Row(
       children: [

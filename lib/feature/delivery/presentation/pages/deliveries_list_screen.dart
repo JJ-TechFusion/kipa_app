@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/core/shared/widgets/custom_text.dart';
+import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
+import 'package:kipa/feature/delivery/presentation/providers/delivery_provider.dart';
 import 'package:kipa/feature/delivery/presentation/widgets/delivery_list_item.dart';
+import 'package:kipa/feature/delivery/presentation/widgets/logistics_delivery_card.dart';
 import 'package:kipa/feature/errand/domain/enums/errand_status.dart';
 import 'package:kipa/feature/errand/presentation/providers/errand_provider.dart';
 import 'package:kipa/feature/errand/presentation/widgets/errand_list_item.dart';
@@ -23,11 +26,12 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedStatus = 'all';
+  int? _initialTabIndex;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       setState(() {
         _selectedStatus = 'all';
@@ -38,7 +42,22 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
       ref.read(purchasesNotifierProvider.notifier).fetchPurchases();
       ref.read(salesNotifierProvider.notifier).fetchSales();
       ref.read(errandNotifierProvider.notifier).fetchErrands();
+      ref.read(logisticsNotifierProvider.notifier).fetchLogisticsDeliveries();
+
+      if (_initialTabIndex != null) {
+        _tabController.animateTo(_initialTabIndex!);
+      }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args['initialTab'] != null) {
+      _initialTabIndex = args['initialTab'] as int;
+    }
   }
 
   @override
@@ -67,8 +86,10 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
           Row(
             children: [
               _buildTabItem(0, "Intra-state"),
-              horizontalSpace(20),
-              _buildTabItem(1, "Errands"),
+              horizontalSpace(12),
+              _buildTabItem(1, "Inter-state"),
+              horizontalSpace(12),
+              _buildTabItem(2, "Errands"),
             ],
           ),
           verticalSpace(16),
@@ -77,7 +98,11 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [_buildIntraStateList(), _buildErrandsList()],
+              children: [
+                _buildIntraStateList(),
+                _buildInterStateList(),
+                _buildErrandsList(),
+              ],
             ),
           ),
         ],
@@ -115,9 +140,36 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
   Widget _buildStatusFilters() {
     if (_tabController.index == 0) {
       return _buildIntraStateStatusFilters();
+    } else if (_tabController.index == 1) {
+      return _buildInterStateStatusFilters();
     } else {
       return _buildErrandStatusFilters();
     }
+  }
+
+  Widget _buildInterStateStatusFilters() {
+    final logisticsState = ref.watch(logisticsNotifierProvider);
+
+    final statuses = [
+      {'label': 'All', 'value': 'all', 'count': logisticsState.allCount},
+      {
+        'label': 'Awaiting',
+        'value': 'awaiting_shipment',
+        'count': logisticsState.awaitingShipmentCount,
+      },
+      {
+        'label': 'Shipped',
+        'value': 'shipped',
+        'count': logisticsState.shippedCount,
+      },
+      {
+        'label': 'Delivered',
+        'value': 'delivered',
+        'count': logisticsState.deliveredCount,
+      },
+    ];
+
+    return _buildFilterPills(statuses);
   }
 
   Widget _buildIntraStateStatusFilters() {
@@ -185,7 +237,6 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
         itemBuilder: (context, index) {
           final status = statuses[index];
           final isSelected = _selectedStatus == status['value'];
-          final count = status['count'] as int;
 
           return GestureDetector(
             onTap: () {
@@ -201,7 +252,7 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
               ),
               child: Center(
                 child: Caption(
-                  '${status['label']} ($count)',
+                  '${status['label']}',
                   color: isSelected ? Colors.white : AppColor.lightText,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
@@ -217,8 +268,12 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
     final purchasesState = ref.watch(purchasesNotifierProvider);
     final salesState = ref.watch(salesNotifierProvider);
 
-    final allPurchases = purchasesState.purchases ?? [];
-    final allSales = salesState.sales ?? [];
+    final allPurchases = (purchasesState.purchases ?? [])
+        .where((p) => p.deliveryType != 'inter_state')
+        .toList();
+    final allSales = (salesState.sales ?? [])
+        .where((s) => s.deliveryType != 'inter_state')
+        .toList();
 
     final purchases = _selectedStatus == 'all'
         ? allPurchases
@@ -363,6 +418,77 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
                     arguments: {'errandId': errand.id},
                   );
               }
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildInterStateList() {
+    final logisticsState = ref.watch(logisticsNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
+    final currentUserId = authState.currentUser?.id ?? '';
+
+    final allDeliveries = logisticsState.deliveries;
+
+    final deliveries = _selectedStatus == 'all'
+        ? allDeliveries
+        : allDeliveries.where((d) => d.status == _selectedStatus).toList();
+
+    final isLoading = logisticsState.isFetchingLogistics;
+
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator.adaptive());
+    }
+
+    if (deliveries.isEmpty) {
+      return _buildEmptyState(
+        'No interstate deliveries found',
+        Icons.local_shipping,
+      );
+    }
+
+    return RefreshIndicator.adaptive(
+      onRefresh: () async {
+        await ref
+            .read(logisticsNotifierProvider.notifier)
+            .fetchLogisticsDeliveries();
+      },
+      child: ListView.separated(
+        itemCount: deliveries.length,
+        separatorBuilder: (context, index) => verticalSpace(16),
+        itemBuilder: (context, index) {
+          final delivery = deliveries[index];
+          final isSeller = delivery.seller.id == currentUserId;
+
+          return LogisticsDeliveryCard(
+            delivery: delivery,
+            currentUserId: currentUserId,
+            onMarkShipped: isSeller && delivery.canMarkShipped
+                ? () {
+                    Navigator.pushNamed(
+                      context,
+                      RouteNames.shipLogisticsFormRoute,
+                      arguments: {
+                        'logisticsDeliveryId': delivery.id,
+                        'paymentRequestId': delivery.paymentRequestId,
+                      },
+                    ).then((result) {
+                      if (result == true) {
+                        ref
+                            .read(logisticsNotifierProvider.notifier)
+                            .fetchLogisticsDeliveries();
+                      }
+                    });
+                  }
+                : null,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                RouteNames.logisticsDeliveryDetailsRoute,
+                arguments: {'logisticsDeliveryId': delivery.id},
+              );
             },
           );
         },

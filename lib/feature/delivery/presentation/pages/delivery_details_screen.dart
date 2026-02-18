@@ -74,7 +74,6 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     final salesState = ref.watch(salesNotifierProvider);
     final job = trackingState.job;
 
-    // Fetch payment details when job is loaded and we have the ID
     ref.listen(deliveryTrackingProvider.select((s) => s.job), (prev, next) {
       if (next != null &&
           (prev == null || prev.paymentRequestId != next.paymentRequestId)) {

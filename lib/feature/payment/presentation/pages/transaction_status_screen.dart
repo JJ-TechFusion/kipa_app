@@ -160,24 +160,40 @@ class _TransactionStatusScreenState
               verticalSpace(32),
               _buildFundsSecuredBanner(transaction, isBuyer, currencyFormat),
               verticalSpace(32),
-              if (transaction.isSeller &&
-                  transaction.status == 'paid_awaiting_fulfillment') ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 42),
-                  child: CustomButton(
-                    title: 'View Payment List',
-                    onTap: () {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        RouteNames.paymentLinkListRoute,
-                      );
-                    },
-                    icon: CupertinoIcons.cube_box,
-                    borderRadius: 30,
-                  ),
+              // if (transaction.isSeller &&
+              //     transaction.status == 'paid_awaiting_fulfillment') ...[
+              //   Padding(
+              //     padding: const EdgeInsets.symmetric(horizontal: 42),
+              //     child: CustomButton(
+              //       title: 'View Payment List',
+              //       onTap: () {
+              //         Navigator.pushReplacementNamed(
+              //           context,
+              //           RouteNames.paymentLinkListRoute,
+              //         );
+              //       },
+              //       icon: CupertinoIcons.cube_box,
+              //       borderRadius: 30,
+              //     ),
+              //   ),
+              //   verticalSpace(16),
+              // ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 42),
+                child: CustomButton(
+                  title: 'Back to Home',
+                  onTap: () {
+                    Navigator.pushReplacementNamed(
+                      context,
+                      RouteNames.homeRoute,
+                    );
+                  },
+                  color: AppColor.primary,
+                  textColor: Colors.white,
+                  borderRadius: 30,
                 ),
-                verticalSpace(16),
-              ],
+              ),
+              verticalSpace(12),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 42),
                 child: CustomButton(
