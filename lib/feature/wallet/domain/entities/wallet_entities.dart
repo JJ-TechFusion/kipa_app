@@ -247,3 +247,25 @@ class PinResponseEntity {
 
   PinResponseEntity({required this.message});
 }
+
+class PinResetRequestResponseEntity {
+  final String message;
+  final DateTime expiresAt;
+  final int retryAfterSeconds;
+
+  PinResetRequestResponseEntity({
+    required this.message,
+    required this.expiresAt,
+    required this.retryAfterSeconds,
+  });
+}
+
+class PinResetConfirmRequestEntity {
+  final String otpCode;
+  final String newPin;
+
+  PinResetConfirmRequestEntity({
+    required this.otpCode,
+    required this.newPin,
+  });
+}

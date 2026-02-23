@@ -12,4 +12,6 @@ abstract class WalletRepository {
   Future<NetworkResponse> createPin(String pin);
   Future<NetworkResponse> verifyPin(String pin);
   Future<NetworkResponse> changePin(String oldPin, String newPin);
+  Future<NetworkResponse> requestPinReset();
+  Future<NetworkResponse> confirmPinReset(String otpCode, String newPin);
 }

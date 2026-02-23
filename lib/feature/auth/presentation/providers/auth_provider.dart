@@ -12,6 +12,7 @@ import '../../domain/usecases/upload_profile_picture_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/delete_user_usecase.dart';
 import '../state/auth_notifier.dart';
 import '../state/auth_state.dart';
 
@@ -58,6 +59,10 @@ final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
 
 final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
   return LogoutUseCase(ref.read(authRepositoryProvider));
+});
+
+final deleteUserUseCaseProvider = Provider<DeleteUserUseCase>((ref) {
+  return DeleteUserUseCase(ref.read(authRepositoryProvider));
 });
 
 // State Notifier

@@ -1,6 +1,5 @@
 class ApiEndpoints {
-  static const String baseUrl =
-      'https://331e-102-91-72-225.ngrok-free.app/api/v1';
+  static const String baseUrl = 'https://staging.getkipa.com/api/v1';
 
   static const String sendOtpUrl = '/auth/otp/send';
   static const String verifyOtpUrl = '/auth/otp/verify';
@@ -9,6 +8,7 @@ class ApiEndpoints {
   static const String updateProfileUrl = '/auth/profile';
   static const String getCurrentUserUrl = '/auth/me';
   static const String logoutUrl = '/auth/logout';
+  static const String deleteAccountUrl = '/auth/account';
   static const String createPaymentRequestUrl = '/payment-requests';
   static const String paymentRequestHistoryUrl = '/payment-requests/history';
 
@@ -37,6 +37,8 @@ class ApiEndpoints {
   static const String walletPinStatusUrl = '/wallet/pin/status';
   static const String walletPinUrl = '/wallet/pin';
   static const String walletPinVerifyUrl = '/wallet/pin/verify';
+  static const String walletPinResetRequestUrl = '/wallet/pin/reset/request';
+  static const String walletPinResetConfirmUrl = '/wallet/pin/reset/confirm';
 
   // Payment request actions
   static String markReadyForPickupUrl(String paymentRequestId) =>

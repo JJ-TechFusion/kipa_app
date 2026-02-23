@@ -239,3 +239,33 @@ class PinResponseModel extends PinResponseEntity {
     return PinResponseModel(message: json['message'] ?? '');
   }
 }
+
+class PinResetRequestResponseModel extends PinResetRequestResponseEntity {
+  PinResetRequestResponseModel({
+    required super.message,
+    required super.expiresAt,
+    required super.retryAfterSeconds,
+  });
+
+  factory PinResetRequestResponseModel.fromJson(Map<String, dynamic> json) {
+    return PinResetRequestResponseModel(
+      message: json['message'] ?? '',
+      expiresAt: DateTime.tryParse(json['expires_at'] ?? '') ?? DateTime.now(),
+      retryAfterSeconds: json['retry_after_seconds'] ?? 60,
+    );
+  }
+}
+
+class PinResetConfirmRequestModel extends PinResetConfirmRequestEntity {
+  PinResetConfirmRequestModel({
+    required super.otpCode,
+    required super.newPin,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'otp_code': otpCode,
+      'new_pin': newPin,
+    };
+  }
+}

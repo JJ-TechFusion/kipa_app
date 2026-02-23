@@ -51,4 +51,14 @@ class WalletRepositoryImpl implements WalletRepository {
   Future<NetworkResponse> changePin(String oldPin, String newPin) async {
     return await remoteDataSource.changePin(oldPin, newPin);
   }
+
+  @override
+  Future<NetworkResponse> requestPinReset() async {
+    return await remoteDataSource.requestPinReset();
+  }
+
+  @override
+  Future<NetworkResponse> confirmPinReset(String otpCode, String newPin) async {
+    return await remoteDataSource.confirmPinReset(otpCode, newPin);
+  }
 }

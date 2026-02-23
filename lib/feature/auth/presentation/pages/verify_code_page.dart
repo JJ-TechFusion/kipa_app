@@ -122,7 +122,6 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration?.copyWith(
-        // border: Border.all(color: AppColor.onboardingPrimary, width: 2),
         color: AppColor.onboardingPrimary.withValues(alpha: 0.1),
       ),
     );
@@ -130,7 +129,6 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
     final submittedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration?.copyWith(
         color: AppColor.onboardingPrimary.withValues(alpha: 0.1),
-        // border: Border.all(color: AppColor.onboardingPrimary),
       ),
     );
 
@@ -202,12 +200,15 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
             const Spacer(),
 
-            AnimatedButton(
-              onTap: authState.isLoading ? () {} : _onVerify,
-              child: CustomButton(
-                title: authState.isLoading ? 'Verifying...' : 'Verify',
-                color: AppColor.onboardingPrimary,
-                borderRadius: 28,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: AnimatedButton(
+                onTap: authState.isLoading ? () {} : _onVerify,
+                child: CustomButton(
+                  title: authState.isLoading ? 'Verifying...' : 'Verify',
+                  color: AppColor.onboardingPrimary,
+                  borderRadius: 28,
+                ),
               ),
             ),
             verticalSpace(16),

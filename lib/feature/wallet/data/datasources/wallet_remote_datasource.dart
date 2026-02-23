@@ -156,4 +156,41 @@ class WalletRemoteDataSource {
     }
     return response;
   }
+
+  Future<NetworkResponse> requestPinReset() async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.walletPinResetRequestUrl,
+      requestBody: {},
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: PinResetRequestResponseModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> confirmPinReset(String otpCode, String newPin) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.walletPinResetConfirmUrl,
+      requestBody: PinResetConfirmRequestModel(
+        otpCode: otpCode,
+        newPin: newPin,
+      ).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: PinResponseModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
 }

@@ -1,9 +1,12 @@
-// class DeleteUserUsecase {
-//   final AuthRepository repository;
+import '../../../../core/services/network/network_response.dart';
+import '../repositories/auth_repository.dart';
 
-//   DeleteUserUsecase(this.repository);
+class DeleteUserUseCase {
+  final AuthRepository repository;
 
-//   Future<void> call(NoParams params) async {
-//     return await repository.deleteUser();
-//   }
-// }
+  DeleteUserUseCase(this.repository);
+
+  Future<NetworkResponse> call() async {
+    return await repository.deleteUser();
+  }
+}

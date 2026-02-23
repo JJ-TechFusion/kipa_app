@@ -8,6 +8,7 @@ class AuthState {
   final bool isUpdatingProfile;
   final bool isFetchingUser;
   final bool isLoggingOut;
+  final bool isDeletingAccount;
   final String? errorMessage;
   final NetworkResponse? response;
   final String? verificationId;
@@ -23,6 +24,7 @@ class AuthState {
     this.isUpdatingProfile = false,
     this.isFetchingUser = false,
     this.isLoggingOut = false,
+    this.isDeletingAccount = false,
     this.errorMessage,
     this.response,
     this.verificationId,
@@ -39,6 +41,7 @@ class AuthState {
     bool? isUpdatingProfile,
     bool? isFetchingUser,
     bool? isLoggingOut,
+    bool? isDeletingAccount,
     String? errorMessage,
     NetworkResponse? response,
     String? verificationId,
@@ -54,6 +57,7 @@ class AuthState {
       isUpdatingProfile: isUpdatingProfile ?? this.isUpdatingProfile,
       isFetchingUser: isFetchingUser ?? this.isFetchingUser,
       isLoggingOut: isLoggingOut ?? this.isLoggingOut,
+      isDeletingAccount: isDeletingAccount ?? this.isDeletingAccount,
       errorMessage: errorMessage,
       response: response ?? this.response,
       verificationId: verificationId ?? this.verificationId,

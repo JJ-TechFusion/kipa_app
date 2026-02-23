@@ -6,6 +6,7 @@ import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/utils/constant.dart';
+import 'package:kipa/feature/profile/presentation/pages/security_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -42,11 +43,46 @@ class ProfileScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _handleDeleteAccount(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog.adaptive(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete Account'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final success = await ref.read(authNotifierProvider.notifier).deleteAccount();
+      if (success && context.mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RouteNames.loginRoute,
+          (route) => false,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.currentUser;
     final isLoggingOut = authState.isLoggingOut;
+    final isDeletingAccount = authState.isDeletingAccount;
 
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
@@ -61,6 +97,21 @@ class ProfileScreen extends ConsumerWidget {
               CircularProgressIndicator(),
               SizedBox(height: 16),
               Text('Signing out...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (isDeletingAccount) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Deleting account...'),
             ],
           ),
         ),
@@ -130,7 +181,14 @@ class ProfileScreen extends ConsumerWidget {
                 context,
                 icon: Icons.shield_outlined,
                 title: "Security & Privacy",
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SecurityScreen(),
+                    ),
+                  );
+                },
               ),
               _buildMenuItem(
                 context,
@@ -165,7 +223,7 @@ class ProfileScreen extends ConsumerWidget {
                 context,
                 icon: Icons.delete_outline,
                 title: "Delete Account",
-                onTap: () {},
+                onTap: () => _handleDeleteAccount(context, ref),
                 isLast: true,
               ),
               verticalSpace(40),

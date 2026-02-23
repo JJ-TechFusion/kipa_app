@@ -84,4 +84,11 @@ class AuthRemoteDataSource {
       isProtected: true,
     );
   }
+
+  Future<NetworkResponse> deleteAccount() async {
+    return await apiService.deleteRequest(
+      endpoint: ApiEndpoints.deleteAccountUrl,
+      isProtected: true,
+    );
+  }
 }

@@ -18,9 +18,6 @@ class AppDio extends DioForNative {
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),
         validateStatus: (status) => true,
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-        },
       ),
     );
     instance.interceptors.add(_AppNetworkInterceptor());

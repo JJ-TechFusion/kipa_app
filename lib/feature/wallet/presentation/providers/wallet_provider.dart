@@ -13,6 +13,8 @@ import '../../domain/usecases/get_pin_status_usecase.dart';
 import '../../domain/usecases/create_pin_usecase.dart';
 import '../../domain/usecases/verify_pin_usecase.dart';
 import '../../domain/usecases/change_pin_usecase.dart';
+import '../../domain/usecases/request_pin_reset_usecase.dart';
+import '../../domain/usecases/confirm_pin_reset_usecase.dart';
 import '../state/wallet_notifier.dart';
 import '../state/wallet_state.dart';
 
@@ -63,6 +65,14 @@ final verifyPinUseCaseProvider = Provider<VerifyPinUseCase>((ref) {
 
 final changePinUseCaseProvider = Provider<ChangePinUseCase>((ref) {
   return ChangePinUseCase(ref.read(walletRepositoryProvider));
+});
+
+final requestPinResetUseCaseProvider = Provider<RequestPinResetUseCase>((ref) {
+  return RequestPinResetUseCase(ref.read(walletRepositoryProvider));
+});
+
+final confirmPinResetUseCaseProvider = Provider<ConfirmPinResetUseCase>((ref) {
+  return ConfirmPinResetUseCase(ref.read(walletRepositoryProvider));
 });
 
 // Notifier

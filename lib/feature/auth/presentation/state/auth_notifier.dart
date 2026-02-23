@@ -13,6 +13,7 @@ import '../../domain/usecases/update_profile_usecase.dart';
 import '../../domain/usecases/verify_otp_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/delete_user_usecase.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import 'auth_state.dart';
@@ -25,6 +26,7 @@ class AuthNotifier extends Notifier<AuthState> {
   late final UpdateProfileUseCase _updateProfileUseCase;
   late final GetCurrentUserUseCase _getCurrentUserUseCase;
   late final LogoutUseCase _logoutUseCase;
+  late final DeleteUserUseCase _deleteUserUseCase;
   late final DeviceInfoService _deviceInfoService;
 
   @override
@@ -38,6 +40,7 @@ class AuthNotifier extends Notifier<AuthState> {
     _updateProfileUseCase = ref.read(updateProfileUseCaseProvider);
     _getCurrentUserUseCase = ref.read(getCurrentUserUseCaseProvider);
     _logoutUseCase = ref.read(logoutUseCaseProvider);
+    _deleteUserUseCase = ref.read(deleteUserUseCaseProvider);
     _deviceInfoService = ref.read(deviceInfoServiceProvider);
     return const AuthState();
   }
@@ -189,9 +192,9 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> updateProfile({
-    required String firstName,
-    required String lastName,
-    required String email,
+    String? firstName,
+    String? lastName,
+    String? email,
     String? profilePhotoUrl,
   }) async {
     state = state.copyWith(isUpdatingProfile: true, errorMessage: null);
@@ -210,6 +213,9 @@ class AuthNotifier extends Notifier<AuthState> {
         // Mark profile as completed
         final secureStorage = getIt<SecureStorageService>();
         await secureStorage.writeData('profile_completed', 'true');
+
+        // Refresh current user data
+        await fetchCurrentUser();
 
         state = state.copyWith(isUpdatingProfile: false, response: response);
       } else {
@@ -265,6 +271,34 @@ class AuthNotifier extends Notifier<AuthState> {
       await secureStorage.clearStore();
       state = const AuthState();
       return true;
+    }
+  }
+
+  Future<bool> deleteAccount() async {
+    state = state.copyWith(isDeletingAccount: true, errorMessage: null);
+    try {
+      final response = await _deleteUserUseCase();
+
+      if (response.success) {
+        // Clear local storage after successful deletion
+        final secureStorage = getIt<SecureStorageService>();
+        await secureStorage.clearStore();
+
+        state = const AuthState();
+        return true;
+      } else {
+        state = state.copyWith(
+          isDeletingAccount: false,
+          errorMessage: response.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isDeletingAccount: false,
+        errorMessage: e.toString(),
+      );
+      return false;
     }
   }
 }

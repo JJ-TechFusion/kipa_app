@@ -10,8 +10,11 @@ class WalletState {
   final bool isCreatingPin;
   final bool isVerifyingPin;
   final bool isChangingPin;
+  final bool isRequestingPinReset;
+  final bool isConfirmingPinReset;
   final String? errorMessage;
   final String? pinErrorMessage;
+  final PinResetRequestResponseEntity? pinResetResponse;
   final WalletEntity? wallet;
   final TopUpResponseEntity? topUpResponse;
   final VerifyTopUpResponseEntity? verifyTopUpResponse;
@@ -30,8 +33,11 @@ class WalletState {
     this.isCreatingPin = false,
     this.isVerifyingPin = false,
     this.isChangingPin = false,
+    this.isRequestingPinReset = false,
+    this.isConfirmingPinReset = false,
     this.errorMessage,
     this.pinErrorMessage,
+    this.pinResetResponse,
     this.wallet,
     this.topUpResponse,
     this.verifyTopUpResponse,
@@ -51,8 +57,11 @@ class WalletState {
     bool? isCreatingPin,
     bool? isVerifyingPin,
     bool? isChangingPin,
+    bool? isRequestingPinReset,
+    bool? isConfirmingPinReset,
     String? errorMessage,
     String? pinErrorMessage,
+    PinResetRequestResponseEntity? pinResetResponse,
     WalletEntity? wallet,
     TopUpResponseEntity? topUpResponse,
     VerifyTopUpResponseEntity? verifyTopUpResponse,
@@ -73,8 +82,11 @@ class WalletState {
       isCreatingPin: isCreatingPin ?? this.isCreatingPin,
       isVerifyingPin: isVerifyingPin ?? this.isVerifyingPin,
       isChangingPin: isChangingPin ?? this.isChangingPin,
+      isRequestingPinReset: isRequestingPinReset ?? this.isRequestingPinReset,
+      isConfirmingPinReset: isConfirmingPinReset ?? this.isConfirmingPinReset,
       errorMessage: errorMessage,
       pinErrorMessage: pinErrorMessage,
+      pinResetResponse: pinResetResponse ?? this.pinResetResponse,
       wallet: wallet ?? this.wallet,
       topUpResponse: topUpResponse ?? this.topUpResponse,
       verifyTopUpResponse: verifyTopUpResponse ?? this.verifyTopUpResponse,

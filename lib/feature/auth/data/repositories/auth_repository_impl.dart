@@ -46,8 +46,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<NetworkResponse> deleteUser() async {
-    // TODO: implement deleteUser
-    // To be done.
-    throw UnimplementedError();
+    return await remoteDataSource.deleteAccount();
   }
 }

@@ -9,6 +9,8 @@ import '../../domain/usecases/get_pin_status_usecase.dart';
 import '../../domain/usecases/create_pin_usecase.dart';
 import '../../domain/usecases/verify_pin_usecase.dart';
 import '../../domain/usecases/change_pin_usecase.dart';
+import '../../domain/usecases/request_pin_reset_usecase.dart';
+import '../../domain/usecases/confirm_pin_reset_usecase.dart';
 import '../providers/wallet_provider.dart';
 import 'wallet_state.dart';
 
@@ -22,6 +24,8 @@ class WalletNotifier extends Notifier<WalletState> {
   late final CreatePinUseCase _createPinUseCase;
   late final VerifyPinUseCase _verifyPinUseCase;
   late final ChangePinUseCase _changePinUseCase;
+  late final RequestPinResetUseCase _requestPinResetUseCase;
+  late final ConfirmPinResetUseCase _confirmPinResetUseCase;
 
   @override
   WalletState build() {
@@ -36,6 +40,8 @@ class WalletNotifier extends Notifier<WalletState> {
     _createPinUseCase = ref.read(createPinUseCaseProvider);
     _verifyPinUseCase = ref.read(verifyPinUseCaseProvider);
     _changePinUseCase = ref.read(changePinUseCaseProvider);
+    _requestPinResetUseCase = ref.read(requestPinResetUseCaseProvider);
+    _confirmPinResetUseCase = ref.read(confirmPinResetUseCaseProvider);
     return const WalletState();
   }
 
@@ -288,5 +294,59 @@ class WalletNotifier extends Notifier<WalletState> {
 
   void resetPinVerification() {
     state = state.copyWith(isPinVerified: false);
+  }
+
+  Future<bool> requestPinReset() async {
+    state = state.copyWith(isRequestingPinReset: true, pinErrorMessage: null);
+
+    try {
+      final response = await _requestPinResetUseCase();
+
+      if (response.success && response.data != null) {
+        state = state.copyWith(
+          isRequestingPinReset: false,
+          pinResetResponse: response.data as PinResetRequestResponseEntity,
+        );
+        return true;
+      } else {
+        state = state.copyWith(
+          isRequestingPinReset: false,
+          pinErrorMessage: response.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isRequestingPinReset: false,
+        pinErrorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> confirmPinReset(String otpCode, String newPin) async {
+    state = state.copyWith(isConfirmingPinReset: true, pinErrorMessage: null);
+
+    try {
+      final response = await _confirmPinResetUseCase(otpCode, newPin);
+
+      if (response.success) {
+        state = state.copyWith(isConfirmingPinReset: false);
+        await getPinStatus();
+        return true;
+      } else {
+        state = state.copyWith(
+          isConfirmingPinReset: false,
+          pinErrorMessage: response.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isConfirmingPinReset: false,
+        pinErrorMessage: e.toString(),
+      );
+      return false;
+    }
   }
 }
