@@ -36,6 +36,7 @@ class ApiEndpoints {
 
   // Wallet subaccount endpoint
   static const String walletSubaccountUrl = '/wallet/flutterwave/subaccount';
+  static const String walletSyncUrl = '/wallet/flutterwave/sync';
 
   // Wallet PIN endpoints
   static const String walletPinStatusUrl = '/wallet/pin/status';
@@ -43,6 +44,15 @@ class ApiEndpoints {
   static const String walletPinVerifyUrl = '/wallet/pin/verify';
   static const String walletPinResetRequestUrl = '/wallet/pin/reset/request';
   static const String walletPinResetConfirmUrl = '/wallet/pin/reset/confirm';
+
+  // Bank Accounts endpoints
+  static const String bankAccountsUrl = '/wallet/bank-accounts';
+  static String setBankAccountDefaultUrl(String id) =>
+      '/wallet/bank-accounts/$id/default';
+  static String deleteBankAccountUrl(String id) => '/wallet/bank-accounts/$id';
+  static const String flutterwaveBanksUrl = '/wallet/flutterwave/banks';
+  static const String resolveAccountUrl = '/wallet/flutterwave/resolve-account';
+  static const String withdrawUrl = '/wallet/flutterwave/withdraw';
 
   // Payment request actions
   static String markReadyForPickupUrl(String paymentRequestId) =>

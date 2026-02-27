@@ -78,7 +78,8 @@ class PinEntryScreenState extends State<PinEntryScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: widget.showBackButton,
+        // automaticallyImplyLeading: widget.showBackButton,
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),

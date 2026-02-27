@@ -293,3 +293,65 @@ class CreateSubaccountRequestModel extends CreateSubaccountRequestEntity {
     return {'email': email};
   }
 }
+
+class WalletSyncResponseModel extends WalletSyncResponseEntity {
+  WalletSyncResponseModel({
+    required super.previousBalance,
+    required super.flutterwaveBalance,
+    required super.newBalance,
+    required super.amountSynced,
+    required super.wasSynced,
+    required super.message,
+  });
+
+  factory WalletSyncResponseModel.fromJson(Map<String, dynamic> json) {
+    return WalletSyncResponseModel(
+      previousBalance: (json['previous_balance'] ?? 0).toDouble(),
+      flutterwaveBalance: (json['flutterwave_balance'] ?? 0).toDouble(),
+      newBalance: (json['new_balance'] ?? 0).toDouble(),
+      amountSynced: (json['amount_synced'] ?? 0).toDouble(),
+      wasSynced: json['was_synced'] ?? false,
+      message: json['message'] ?? '',
+    );
+  }
+}
+
+class WithdrawRequestModel extends WithdrawRequestEntity {
+  WithdrawRequestModel({
+    required super.bankAccountId,
+    required super.amount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'bank_account_id': bankAccountId,
+      'amount': amount,
+    };
+  }
+}
+
+class WithdrawalModel extends WithdrawalEntity {
+  WithdrawalModel({
+    required super.id,
+    required super.amount,
+    required super.fee,
+    required super.netAmount,
+    required super.status,
+    required super.transferRef,
+    required super.paymentProvider,
+    required super.createdAt,
+  });
+
+  factory WithdrawalModel.fromJson(Map<String, dynamic> json) {
+    return WithdrawalModel(
+      id: json['id'] ?? '',
+      amount: (json['amount'] ?? 0).toDouble(),
+      fee: (json['fee'] ?? 0).toDouble(),
+      netAmount: (json['net_amount'] ?? 0).toDouble(),
+      status: json['status'] ?? '',
+      transferRef: json['transfer_ref'] ?? '',
+      paymentProvider: json['payment_provider'] ?? '',
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+    );
+  }
+}

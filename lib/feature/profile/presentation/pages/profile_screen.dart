@@ -202,6 +202,14 @@ class ProfileScreen extends ConsumerWidget {
               ),
               _buildMenuItem(
                 context,
+                icon: Icons.account_balance,
+                title: "Bank Accounts",
+                onTap: () {
+                  Navigator.pushNamed(context, RouteNames.bankAccountsRoute);
+                },
+              ),
+              _buildMenuItem(
+                context,
                 icon: Icons.link,
                 title: "Payment Links",
                 onTap: () {

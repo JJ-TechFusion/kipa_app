@@ -290,3 +290,53 @@ class CreateSubaccountRequestEntity {
 
   CreateSubaccountRequestEntity({required this.email});
 }
+
+class WalletSyncResponseEntity {
+  final double previousBalance;
+  final double flutterwaveBalance;
+  final double newBalance;
+  final double amountSynced;
+  final bool wasSynced;
+  final String message;
+
+  WalletSyncResponseEntity({
+    required this.previousBalance,
+    required this.flutterwaveBalance,
+    required this.newBalance,
+    required this.amountSynced,
+    required this.wasSynced,
+    required this.message,
+  });
+}
+
+class WithdrawRequestEntity {
+  final String bankAccountId;
+  final double amount;
+
+  WithdrawRequestEntity({
+    required this.bankAccountId,
+    required this.amount,
+  });
+}
+
+class WithdrawalEntity {
+  final String id;
+  final double amount;
+  final double fee;
+  final double netAmount;
+  final String status;
+  final String transferRef;
+  final String paymentProvider;
+  final DateTime createdAt;
+
+  WithdrawalEntity({
+    required this.id,
+    required this.amount,
+    required this.fee,
+    required this.netAmount,
+    required this.status,
+    required this.transferRef,
+    required this.paymentProvider,
+    required this.createdAt,
+  });
+}

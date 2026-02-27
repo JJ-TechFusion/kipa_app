@@ -2,6 +2,7 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/services/network/api_services.dart';
 import '../../../../core/services/network/network_response.dart';
 import '../models/wallet_models.dart';
+import '../models/bank_model.dart';
 
 class WalletRemoteDataSource {
   final ApiService apiService;
@@ -229,6 +230,152 @@ class WalletRemoteDataSource {
         return NetworkResponse(
           success: true,
           data: SubaccountModel.fromJson(subaccountData),
+          message: response.message,
+        );
+      }
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> syncWallet() async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.walletSyncUrl,
+      requestBody: {},
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: WalletSyncResponseModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> getBanks() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.flutterwaveBanksUrl,
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      final banksList = (dataMap['banks'] as List<dynamic>?)
+              ?.map((e) => BankModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
+      return NetworkResponse(
+        success: true,
+        data: banksList,
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> getBankAccounts() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.bankAccountsUrl,
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      final accountsList = (dataMap['bank_accounts'] as List<dynamic>?)
+              ?.map((e) => BankAccountModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
+      return NetworkResponse(
+        success: true,
+        data: accountsList,
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> resolveAccount(
+    String accountNumber,
+    String bankCode,
+  ) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.resolveAccountUrl,
+      requestBody: ResolveAccountRequestModel(
+        accountNumber: accountNumber,
+        bankCode: bankCode,
+      ).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: ResolveAccountResponseModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> addBankAccount(
+    String bankCode,
+    String accountNumber,
+  ) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.bankAccountsUrl,
+      requestBody: AddBankAccountRequestModel(
+        bankCode: bankCode,
+        accountNumber: accountNumber,
+      ).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      final accountData = dataMap['bank_account'] as Map<String, dynamic>?;
+      if (accountData != null) {
+        return NetworkResponse(
+          success: true,
+          data: BankAccountModel.fromJson(accountData),
+          message: response.message,
+        );
+      }
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> setDefaultBankAccount(String id) async {
+    final response = await apiService.putRequest(
+      endpoint: ApiEndpoints.setBankAccountDefaultUrl(id),
+      requestBody: {},
+    );
+
+    return response;
+  }
+
+  Future<NetworkResponse> deleteBankAccount(String id) async {
+    final response = await apiService.deleteRequest(
+      endpoint: ApiEndpoints.deleteBankAccountUrl(id),
+    );
+
+    return response;
+  }
+
+  Future<NetworkResponse> withdraw(String bankAccountId, double amount) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.withdrawUrl,
+      requestBody: WithdrawRequestModel(
+        bankAccountId: bankAccountId,
+        amount: amount,
+      ).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      final withdrawalData = dataMap['withdrawal'] as Map<String, dynamic>?;
+      if (withdrawalData != null) {
+        return NetworkResponse(
+          success: true,
+          data: WithdrawalModel.fromJson(withdrawalData),
           message: response.message,
         );
       }

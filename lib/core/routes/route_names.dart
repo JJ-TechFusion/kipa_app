@@ -39,6 +39,7 @@ class RouteNames {
   static const String confirmReturnRoute = '/confirm-return';
   static const String chatRoute = '/chat';
   static const String walletRoute = '/wallet';
+  static const String bankAccountsRoute = '/bank-accounts';
   static const String personalDetailsRoute = '/personal-details';
 
   static const String disputeDetailRoute = '/dispute-detail';

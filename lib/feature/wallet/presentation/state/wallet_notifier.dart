@@ -13,6 +13,8 @@ import '../../domain/usecases/request_pin_reset_usecase.dart';
 import '../../domain/usecases/confirm_pin_reset_usecase.dart';
 import '../../domain/usecases/get_subaccount_usecase.dart';
 import '../../domain/usecases/create_subaccount_usecase.dart';
+import '../../domain/usecases/withdraw_usecase.dart';
+import '../../domain/usecases/sync_wallet_usecase.dart';
 import '../providers/wallet_provider.dart';
 import 'wallet_state.dart';
 
@@ -30,6 +32,8 @@ class WalletNotifier extends Notifier<WalletState> {
   late final ConfirmPinResetUseCase _confirmPinResetUseCase;
   late final GetSubaccountUseCase _getSubaccountUseCase;
   late final CreateSubaccountUseCase _createSubaccountUseCase;
+  late final WithdrawUseCase _withdrawUseCase;
+  late final SyncWalletUseCase _syncWalletUseCase;
 
   @override
   WalletState build() {
@@ -48,6 +52,8 @@ class WalletNotifier extends Notifier<WalletState> {
     _confirmPinResetUseCase = ref.read(confirmPinResetUseCaseProvider);
     _getSubaccountUseCase = ref.read(getSubaccountUseCaseProvider);
     _createSubaccountUseCase = ref.read(createSubaccountUseCaseProvider);
+    _withdrawUseCase = ref.read(withdrawUseCaseProvider);
+    _syncWalletUseCase = ref.read(syncWalletUseCaseProvider);
     return const WalletState();
   }
 
@@ -413,6 +419,58 @@ class WalletNotifier extends Notifier<WalletState> {
     await getSubaccount();
     if (state.subaccount == null) {
       await createSubaccount(email);
+    }
+  }
+
+  Future<bool> withdraw(String bankAccountId, double amount) async {
+    state = state.copyWith(isWithdrawing: true, errorMessage: null);
+
+    try {
+      final response = await _withdrawUseCase(bankAccountId, amount);
+
+      if (response.success) {
+        state = state.copyWith(isWithdrawing: false);
+        await getWallet();
+        return true;
+      } else {
+        state = state.copyWith(
+          isWithdrawing: false,
+          errorMessage: response.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isWithdrawing: false,
+        errorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  Future<WalletSyncResponseEntity?> syncWallet() async {
+    state = state.copyWith(isSyncing: true, errorMessage: null);
+
+    try {
+      final response = await _syncWalletUseCase();
+
+      if (response.success && response.data != null) {
+        state = state.copyWith(isSyncing: false);
+        await getWallet();
+        return response.data as WalletSyncResponseEntity?;
+      } else {
+        state = state.copyWith(
+          isSyncing: false,
+          errorMessage: response.message,
+        );
+        return null;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isSyncing: false,
+        errorMessage: e.toString(),
+      );
+      return null;
     }
   }
 }

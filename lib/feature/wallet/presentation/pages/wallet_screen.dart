@@ -6,10 +6,11 @@ import 'package:kipa/core/shared/widgets/app_webview_page.dart';
 import 'package:kipa/core/shared/widgets/custom_snackbar.dart';
 import 'package:kipa/core/shared/widgets/smart_image.dart';
 import 'package:kipa/feature/payment/presentation/widgets/fund_wallet_sheet.dart';
-import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/core/shared/widgets/number_pad.dart';
 import 'package:kipa/core/shared/widgets/widgets.dart';
+import 'package:kipa/core/shared/widgets/buttons/animated_button.dart';
 import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
+import 'package:kipa/feature/wallet/presentation/providers/bank_accounts_provider.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 
@@ -40,6 +41,17 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       await walletNotifier.ensureSubaccount(currentUser.email);
     }
 
+    // Sync wallet balance from Flutterwave
+    final syncResponse = await walletNotifier.syncWallet();
+    if (mounted && syncResponse != null && syncResponse.amountSynced > 0) {
+      CustomSnackBar.show(
+        context,
+        message:
+            'Wallet synced: ${formatCurrency(syncResponse.amountSynced.toStringAsFixed(2))} added',
+        type: SnackBarType.success,
+      );
+    }
+
     // Fetch wallet data
     walletNotifier.getWallet();
     walletNotifier.getTransactions();
@@ -52,6 +64,18 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const FundWalletSheet(),
+    );
+  }
+
+  void _showWithdrawSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const _WithdrawSheet(),
     );
   }
 
@@ -72,13 +96,19 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () async {
-                await ref.read(walletNotifierProvider.notifier).getWallet();
-                await ref
-                    .read(walletNotifierProvider.notifier)
-                    .getTransactions();
-                await ref
-                    .read(walletNotifierProvider.notifier)
-                    .getPendingFunds();
+                final walletNotifier = ref.read(walletNotifierProvider.notifier);
+                final syncResponse = await walletNotifier.syncWallet();
+                if (mounted && syncResponse != null && syncResponse.amountSynced > 0) {
+                  CustomSnackBar.show(
+                    context,
+                    message:
+                        'Wallet synced: ${formatCurrency(syncResponse.amountSynced.toStringAsFixed(2))} added',
+                    type: SnackBarType.success,
+                  );
+                }
+                await walletNotifier.getWallet();
+                await walletNotifier.getTransactions();
+                await walletNotifier.getPendingFunds();
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -103,7 +133,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       verticalSpace(24),
                       _WalletActionButtons(
                         onTopUp: _showTopUpSheet,
-                        onWithdraw: () {},
+                        onWithdraw: _showWithdrawSheet,
                       ),
                       verticalSpace(24),
                       if (walletState.subaccount != null)
@@ -893,6 +923,254 @@ class _TransactionTile extends StatelessWidget {
             color: isCredit ? AppColor.green : Colors.black,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _WithdrawSheet extends ConsumerStatefulWidget {
+  const _WithdrawSheet();
+
+  @override
+  ConsumerState<_WithdrawSheet> createState() => _WithdrawSheetState();
+}
+
+class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
+  String _amount = '0';
+  String? _selectedBankAccountId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(bankAccountsNotifierProvider.notifier).getBankAccounts();
+    });
+  }
+
+  void _onNumberSelected(String value) {
+    setState(() {
+      if (_amount == '0') {
+        _amount = value;
+      } else {
+        _amount += value;
+      }
+    });
+  }
+
+  void _onBackspace() {
+    setState(() {
+      if (_amount.length > 1) {
+        _amount = _amount.substring(0, _amount.length - 1);
+      } else {
+        _amount = '0';
+      }
+    });
+  }
+
+  void _onClear() {
+    setState(() {
+      _amount = '0';
+    });
+  }
+
+  String get _formattedAmount {
+    final parsed = double.tryParse(_amount) ?? 0;
+    return formatCurrency(parsed.toStringAsFixed(2));
+  }
+
+  Future<void> _handleWithdraw() async {
+    final amount = double.tryParse(_amount) ?? 0;
+    final walletBalance =
+        ref.read(walletNotifierProvider).wallet?.availableBalance ?? 0;
+
+    if (amount <= 0) {
+      CustomSnackBar.show(
+        context,
+        message: 'Please enter a valid amount',
+        type: SnackBarType.error,
+      );
+      return;
+    }
+
+    if (amount > walletBalance) {
+      CustomSnackBar.show(
+        context,
+        message: 'Insufficient balance',
+        type: SnackBarType.error,
+      );
+      return;
+    }
+
+    if (_selectedBankAccountId == null) {
+      CustomSnackBar.show(
+        context,
+        message: 'Please select a bank account',
+        type: SnackBarType.error,
+      );
+      return;
+    }
+
+    Navigator.pop(context);
+
+    final success = await ref
+        .read(walletNotifierProvider.notifier)
+        .withdraw(_selectedBankAccountId!, amount);
+
+    if (mounted) {
+      if (success) {
+        CustomSnackBar.show(
+          context,
+          message: 'Withdrawal initiated successfully',
+          type: SnackBarType.success,
+        );
+      } else {
+        final errorMessage =
+            ref.read(walletNotifierProvider).errorMessage ??
+                'Failed to initiate withdrawal';
+        CustomSnackBar.show(
+          context,
+          message: errorMessage,
+          type: SnackBarType.error,
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bankAccountsState = ref.watch(bankAccountsNotifierProvider);
+    final walletState = ref.watch(walletNotifierProvider);
+    final bankAccounts = bankAccountsState.bankAccounts;
+    final defaultAccount =
+        bankAccounts.where((account) => account.isDefault).firstOrNull;
+
+    if (_selectedBankAccountId == null && defaultAccount != null) {
+      _selectedBankAccountId = defaultAccount.id;
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            verticalSpace(12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            verticalSpace(20),
+            const BodyText("Withdraw Funds"),
+            verticalSpace(8),
+            const Caption("Enter the amount to withdraw"),
+            verticalSpace(24),
+            if (bankAccountsState.isFetchingBankAccounts)
+              const CircularProgressIndicator()
+            else if (bankAccounts.isEmpty)
+              Column(
+                children: [
+                  const Caption(
+                    'No bank account added',
+                    color: AppColor.lightText,
+                  ),
+                  verticalSpace(8),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/bank-accounts');
+                    },
+                    child: const Caption(
+                      'Add Bank Account',
+                      color: AppColor.primary,
+                    ),
+                  ),
+                ],
+              )
+            else
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.account_balance,
+                            color: AppColor.primary,
+                            size: 20,
+                          ),
+                          horizontalSpace(12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BodySmall(
+                                  defaultAccount?.bankName ?? 'Select Account',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                if (defaultAccount != null) ...[
+                                  verticalSpace(2),
+                                  Caption(defaultAccount.accountNumber),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  verticalSpace(24),
+                  H1(_formattedAmount, color: AppColor.primary, fontSize: 36),
+                  verticalSpace(30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: NumberPad(
+                      onNumberSelected: _onNumberSelected,
+                      onBackspace: _onBackspace,
+                      onClear: _onClear,
+                      showDecimal: true,
+                      textColor: Colors.black,
+                    ),
+                  ),
+                  verticalSpace(20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 36.0),
+                    child: AnimatedButton(
+                      onTap: walletState.isWithdrawing ? null : _handleWithdraw,
+                      child: walletState.isWithdrawing
+                          ? Center(
+                              child: const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            )
+                          : const CustomButton(
+                              title: 'Withdraw',
+                              borderRadius: 20,
+                            ),
+                    ),
+                  ),
+                  verticalSpace(20),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }

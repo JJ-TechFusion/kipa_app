@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kipa/feature/wallet/presentation/pages/wallet_pin_gate_screen.dart';
+import 'package:kipa/feature/wallet/presentation/pages/bank_accounts_list_screen.dart';
 import '../../feature/splash/presentation/pages/splash_page.dart';
 import '../../feature/onboarding/presentation/pages/onboarding_page.dart';
 import '../../feature/auth/presentation/pages/register_page.dart';
@@ -193,6 +194,11 @@ class AppRouter {
 
       case RouteNames.walletRoute:
         return MaterialPageRoute(builder: (_) => const WalletPinGateScreen());
+
+      case RouteNames.bankAccountsRoute:
+        return MaterialPageRoute(
+          builder: (_) => const BankAccountsListScreen(),
+        );
 
       case RouteNames.confirmReturnRoute:
         final args = settings.arguments as Map<String, dynamic>?;

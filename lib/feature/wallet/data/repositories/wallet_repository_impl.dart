@@ -71,4 +71,50 @@ class WalletRepositoryImpl implements WalletRepository {
   Future<NetworkResponse> createSubaccount(String email) async {
     return await remoteDataSource.createSubaccount(email);
   }
+
+  @override
+  Future<NetworkResponse> getBanks() async {
+    return await remoteDataSource.getBanks();
+  }
+
+  @override
+  Future<NetworkResponse> getBankAccounts() async {
+    return await remoteDataSource.getBankAccounts();
+  }
+
+  @override
+  Future<NetworkResponse> resolveAccount(
+    String accountNumber,
+    String bankCode,
+  ) async {
+    return await remoteDataSource.resolveAccount(accountNumber, bankCode);
+  }
+
+  @override
+  Future<NetworkResponse> addBankAccount(
+    String bankCode,
+    String accountNumber,
+  ) async {
+    return await remoteDataSource.addBankAccount(bankCode, accountNumber);
+  }
+
+  @override
+  Future<NetworkResponse> setDefaultBankAccount(String id) async {
+    return await remoteDataSource.setDefaultBankAccount(id);
+  }
+
+  @override
+  Future<NetworkResponse> deleteBankAccount(String id) async {
+    return await remoteDataSource.deleteBankAccount(id);
+  }
+
+  @override
+  Future<NetworkResponse> withdraw(String bankAccountId, double amount) async {
+    return await remoteDataSource.withdraw(bankAccountId, amount);
+  }
+
+  @override
+  Future<NetworkResponse> syncWallet() async {
+    return await remoteDataSource.syncWallet();
+  }
 }

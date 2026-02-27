@@ -82,10 +82,8 @@ class _DropDownWidgetState extends State<DropDownWidget> {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     filled: true,
-                    hintStyle: TextStyle(
-                      color: AppColor.kipaGrey.withAlpha(80),
-                    ),
-                    fillColor: AppColor.kipaGrey.withAlpha(60),
+                    hintStyle: TextStyle(color: AppColor.kipaGrey),
+                    fillColor: AppColor.kipaGrey.withAlpha(30),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(color: Colors.transparent),
@@ -119,35 +117,17 @@ class _DropDownWidgetState extends State<DropDownWidget> {
                       if (widget.showSearch)
                         Padding(
                           padding: EdgeInsets.all(6),
-                          child: TextField(
+                          child: TextInputField(
                             controller: searchController,
-                            decoration: InputDecoration(
-                              hintText: 'Search country...',
-                              hintStyle: TextStyle(color: AppColor.kipaGrey),
-                              prefixIcon: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.withAlpha(40),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.withAlpha(40),
-                                ),
-                              ),
-                              fillColor: AppColor.kipaGrey.withAlpha(60),
-                              filled: true,
-                            ),
+                            hintText: "Search",
+                            prefixIcon: const Icon(Icons.search),
                           ),
                         ),
                       ConstrainedBox(
                         constraints: BoxConstraints(
-                          maxHeight: filteredItems.length > 3 ? 150 : filteredItems.length * 56.0,
+                          maxHeight: filteredItems.length > 3
+                              ? 150
+                              : filteredItems.length * 56.0,
                         ),
                         child: ListView.builder(
                           shrinkWrap: true,

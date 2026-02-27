@@ -14,6 +14,8 @@ class WalletState {
   final bool isConfirmingPinReset;
   final bool isFetchingSubaccount;
   final bool isCreatingSubaccount;
+  final bool isWithdrawing;
+  final bool isSyncing;
   final String? errorMessage;
   final String? pinErrorMessage;
   final PinResetRequestResponseEntity? pinResetResponse;
@@ -40,6 +42,8 @@ class WalletState {
     this.isConfirmingPinReset = false,
     this.isFetchingSubaccount = false,
     this.isCreatingSubaccount = false,
+    this.isWithdrawing = false,
+    this.isSyncing = false,
     this.errorMessage,
     this.pinErrorMessage,
     this.pinResetResponse,
@@ -67,6 +71,8 @@ class WalletState {
     bool? isConfirmingPinReset,
     bool? isFetchingSubaccount,
     bool? isCreatingSubaccount,
+    bool? isWithdrawing,
+    bool? isSyncing,
     String? errorMessage,
     String? pinErrorMessage,
     PinResetRequestResponseEntity? pinResetResponse,
@@ -95,6 +101,8 @@ class WalletState {
       isConfirmingPinReset: isConfirmingPinReset ?? this.isConfirmingPinReset,
       isFetchingSubaccount: isFetchingSubaccount ?? this.isFetchingSubaccount,
       isCreatingSubaccount: isCreatingSubaccount ?? this.isCreatingSubaccount,
+      isWithdrawing: isWithdrawing ?? this.isWithdrawing,
+      isSyncing: isSyncing ?? this.isSyncing,
       errorMessage: errorMessage,
       pinErrorMessage: pinErrorMessage,
       pinResetResponse: pinResetResponse ?? this.pinResetResponse,
