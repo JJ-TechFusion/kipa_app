@@ -264,3 +264,29 @@ class PinResetConfirmRequestEntity {
 
   PinResetConfirmRequestEntity({required this.otpCode, required this.newPin});
 }
+
+class SubaccountEntity {
+  final String id;
+  final String accountBank;
+  final String accountNumber;
+  final String accountReference;
+  final String barterId;
+  final String businessName;
+  final bool isActive;
+
+  SubaccountEntity({
+    required this.id,
+    required this.accountBank,
+    required this.accountNumber,
+    required this.accountReference,
+    required this.barterId,
+    required this.businessName,
+    required this.isActive,
+  });
+}
+
+class CreateSubaccountRequestEntity {
+  final String email;
+
+  CreateSubaccountRequestEntity({required this.email});
+}

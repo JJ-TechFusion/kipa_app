@@ -11,6 +11,8 @@ import '../../domain/usecases/verify_pin_usecase.dart';
 import '../../domain/usecases/change_pin_usecase.dart';
 import '../../domain/usecases/request_pin_reset_usecase.dart';
 import '../../domain/usecases/confirm_pin_reset_usecase.dart';
+import '../../domain/usecases/get_subaccount_usecase.dart';
+import '../../domain/usecases/create_subaccount_usecase.dart';
 import '../providers/wallet_provider.dart';
 import 'wallet_state.dart';
 
@@ -26,6 +28,8 @@ class WalletNotifier extends Notifier<WalletState> {
   late final ChangePinUseCase _changePinUseCase;
   late final RequestPinResetUseCase _requestPinResetUseCase;
   late final ConfirmPinResetUseCase _confirmPinResetUseCase;
+  late final GetSubaccountUseCase _getSubaccountUseCase;
+  late final CreateSubaccountUseCase _createSubaccountUseCase;
 
   @override
   WalletState build() {
@@ -42,6 +46,8 @@ class WalletNotifier extends Notifier<WalletState> {
     _changePinUseCase = ref.read(changePinUseCaseProvider);
     _requestPinResetUseCase = ref.read(requestPinResetUseCaseProvider);
     _confirmPinResetUseCase = ref.read(confirmPinResetUseCaseProvider);
+    _getSubaccountUseCase = ref.read(getSubaccountUseCaseProvider);
+    _createSubaccountUseCase = ref.read(createSubaccountUseCaseProvider);
     return const WalletState();
   }
 
@@ -347,6 +353,66 @@ class WalletNotifier extends Notifier<WalletState> {
         pinErrorMessage: e.toString(),
       );
       return false;
+    }
+  }
+
+  Future<void> getSubaccount() async {
+    state = state.copyWith(isFetchingSubaccount: true, errorMessage: null);
+
+    try {
+      final response = await _getSubaccountUseCase();
+
+      if (response.success && response.data != null) {
+        state = state.copyWith(
+          isFetchingSubaccount: false,
+          subaccount: response.data as SubaccountEntity?,
+        );
+      } else {
+        state = state.copyWith(
+          isFetchingSubaccount: false,
+          subaccount: null,
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isFetchingSubaccount: false,
+        subaccount: null,
+      );
+    }
+  }
+
+  Future<bool> createSubaccount(String email) async {
+    state = state.copyWith(isCreatingSubaccount: true, errorMessage: null);
+
+    try {
+      final response = await _createSubaccountUseCase(email);
+
+      if (response.success && response.data != null) {
+        state = state.copyWith(
+          isCreatingSubaccount: false,
+          subaccount: response.data as SubaccountEntity?,
+        );
+        return true;
+      } else {
+        state = state.copyWith(
+          isCreatingSubaccount: false,
+          errorMessage: response.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isCreatingSubaccount: false,
+        errorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  Future<void> ensureSubaccount(String email) async {
+    await getSubaccount();
+    if (state.subaccount == null) {
+      await createSubaccount(email);
     }
   }
 }

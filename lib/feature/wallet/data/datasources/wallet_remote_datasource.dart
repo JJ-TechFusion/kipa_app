@@ -143,7 +143,10 @@ class WalletRemoteDataSource {
   Future<NetworkResponse> changePin(String oldPin, String newPin) async {
     final response = await apiService.putRequest(
       endpoint: ApiEndpoints.walletPinUrl,
-      requestBody: ChangePinRequestModel(oldPin: oldPin, newPin: newPin).toJson(),
+      requestBody: ChangePinRequestModel(
+        oldPin: oldPin,
+        newPin: newPin,
+      ).toJson(),
     );
 
     if (response.success && response.data != null) {
@@ -190,6 +193,45 @@ class WalletRemoteDataSource {
         data: PinResponseModel.fromJson(dataMap),
         message: response.message,
       );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> getSubaccount() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.walletSubaccountUrl,
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      final subaccountData = dataMap['subaccount'] as Map<String, dynamic>?;
+      if (subaccountData != null) {
+        return NetworkResponse(
+          success: true,
+          data: SubaccountModel.fromJson(subaccountData),
+          message: response.message,
+        );
+      }
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> createSubaccount(String email) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.walletSubaccountUrl,
+      requestBody: CreateSubaccountRequestModel(email: email).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      final subaccountData = dataMap['subaccount'] as Map<String, dynamic>?;
+      if (subaccountData != null) {
+        return NetworkResponse(
+          success: true,
+          data: SubaccountModel.fromJson(subaccountData),
+          message: response.message,
+        );
+      }
     }
     return response;
   }

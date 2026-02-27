@@ -61,4 +61,14 @@ class WalletRepositoryImpl implements WalletRepository {
   Future<NetworkResponse> confirmPinReset(String otpCode, String newPin) async {
     return await remoteDataSource.confirmPinReset(otpCode, newPin);
   }
+
+  @override
+  Future<NetworkResponse> getSubaccount() async {
+    return await remoteDataSource.getSubaccount();
+  }
+
+  @override
+  Future<NetworkResponse> createSubaccount(String email) async {
+    return await remoteDataSource.createSubaccount(email);
+  }
 }

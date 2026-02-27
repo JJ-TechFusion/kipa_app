@@ -15,6 +15,8 @@ import '../../domain/usecases/verify_pin_usecase.dart';
 import '../../domain/usecases/change_pin_usecase.dart';
 import '../../domain/usecases/request_pin_reset_usecase.dart';
 import '../../domain/usecases/confirm_pin_reset_usecase.dart';
+import '../../domain/usecases/get_subaccount_usecase.dart';
+import '../../domain/usecases/create_subaccount_usecase.dart';
 import '../state/wallet_notifier.dart';
 import '../state/wallet_state.dart';
 
@@ -73,6 +75,15 @@ final requestPinResetUseCaseProvider = Provider<RequestPinResetUseCase>((ref) {
 
 final confirmPinResetUseCaseProvider = Provider<ConfirmPinResetUseCase>((ref) {
   return ConfirmPinResetUseCase(ref.read(walletRepositoryProvider));
+});
+
+// Subaccount Use Cases
+final getSubaccountUseCaseProvider = Provider<GetSubaccountUseCase>((ref) {
+  return GetSubaccountUseCase(ref.read(walletRepositoryProvider));
+});
+
+final createSubaccountUseCaseProvider = Provider<CreateSubaccountUseCase>((ref) {
+  return CreateSubaccountUseCase(ref.read(walletRepositoryProvider));
 });
 
 // Notifier

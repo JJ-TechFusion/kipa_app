@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kipa/core/shared/widgets/app_webview_page.dart';
 import 'package:kipa/core/shared/widgets/custom_snackbar.dart';
@@ -8,6 +9,7 @@ import 'package:kipa/feature/payment/presentation/widgets/fund_wallet_sheet.dart
 import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/core/shared/widgets/number_pad.dart';
 import 'package:kipa/core/shared/widgets/widgets.dart';
+import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 
@@ -25,10 +27,23 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(walletNotifierProvider.notifier).getWallet();
-      ref.read(walletNotifierProvider.notifier).getTransactions();
-      ref.read(walletNotifierProvider.notifier).getPendingFunds();
+      _initializeWallet();
     });
+  }
+
+  Future<void> _initializeWallet() async {
+    final walletNotifier = ref.read(walletNotifierProvider.notifier);
+    final currentUser = ref.read(authNotifierProvider).currentUser;
+
+    // Check/create subaccount if user has email
+    if (currentUser?.email != null && currentUser!.email.isNotEmpty) {
+      await walletNotifier.ensureSubaccount(currentUser.email);
+    }
+
+    // Fetch wallet data
+    walletNotifier.getWallet();
+    walletNotifier.getTransactions();
+    walletNotifier.getPendingFunds();
   }
 
   void _showTopUpSheet() {
@@ -90,6 +105,14 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                         onTopUp: _showTopUpSheet,
                         onWithdraw: () {},
                       ),
+                      verticalSpace(24),
+                      if (walletState.subaccount != null)
+                        _BankAccountCard(
+                          bankName: walletState.subaccount!.accountBank,
+                          accountNumber: walletState.subaccount!.accountNumber,
+                          accountName: walletState.subaccount!.businessName,
+                          barterId: walletState.subaccount!.barterId,
+                        ),
                       verticalSpace(30),
                       const BodyText(
                         "Pending Funds",
@@ -427,6 +450,142 @@ class _ActionButton extends StatelessWidget {
           label,
           fontWeight: FontWeight.w500,
           color: AppColor.primaryText,
+        ),
+      ],
+    );
+  }
+}
+
+class _BankAccountCard extends StatelessWidget {
+  final String bankName;
+  final String accountNumber;
+  final String accountName;
+  final String barterId;
+
+  const _BankAccountCard({
+    required this.bankName,
+    required this.accountNumber,
+    required this.accountName,
+    required this.barterId,
+  });
+
+  void _copyAccountNumber(BuildContext context) {
+    // Copy to clipboard
+    final data = ClipboardData(text: accountNumber);
+    Clipboard.setData(data);
+    CustomSnackBar.show(
+      context,
+      message: 'Account number copied',
+      type: SnackBarType.success,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.account_balance,
+                  color: AppColor.green,
+                  size: 20,
+                ),
+              ),
+              horizontalSpace(12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BodySmall(
+                      'Fund via Bank Transfer',
+                      fontWeight: FontWeight.w600,
+                    ),
+                    Caption(
+                      'Transfer to this account to fund your wallet',
+                      color: AppColor.lightText,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          verticalSpace(16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                _AccountDetailRow(label: 'Bank', value: bankName),
+                verticalSpace(8),
+                _AccountDetailRow(
+                  label: 'Account Number',
+                  value: accountNumber,
+                  trailing: GestureDetector(
+                    onTap: () => _copyAccountNumber(context),
+                    child: const Icon(
+                      Icons.copy,
+                      size: 18,
+                      color: AppColor.primary,
+                    ),
+                  ),
+                ),
+                verticalSpace(8),
+                _AccountDetailRow(label: 'Account Name', value: accountName),
+                verticalSpace(8),
+                _AccountDetailRow(label: 'Barter ID', value: barterId),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccountDetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Widget? trailing;
+
+  const _AccountDetailRow({
+    required this.label,
+    required this.value,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Caption(label, color: AppColor.lightText),
+        Row(
+          children: [
+            BodySmall(value, fontWeight: FontWeight.w600),
+            if (trailing != null) ...[
+              horizontalSpace(8),
+              trailing!,
+            ],
+          ],
         ),
       ],
     );

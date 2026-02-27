@@ -261,3 +261,35 @@ class PinResetConfirmRequestModel extends PinResetConfirmRequestEntity {
     return {'otp_code': otpCode, 'new_pin': newPin};
   }
 }
+
+class SubaccountModel extends SubaccountEntity {
+  SubaccountModel({
+    required super.id,
+    required super.accountBank,
+    required super.accountNumber,
+    required super.accountReference,
+    required super.barterId,
+    required super.businessName,
+    required super.isActive,
+  });
+
+  factory SubaccountModel.fromJson(Map<String, dynamic> json) {
+    return SubaccountModel(
+      id: json['id'] ?? '',
+      accountBank: json['account_bank'] ?? '',
+      accountNumber: json['account_number'] ?? '',
+      accountReference: json['account_reference'] ?? '',
+      barterId: json['barter_id'] ?? '',
+      businessName: json['business_name'] ?? '',
+      isActive: json['is_active'] ?? false,
+    );
+  }
+}
+
+class CreateSubaccountRequestModel extends CreateSubaccountRequestEntity {
+  CreateSubaccountRequestModel({required super.email});
+
+  Map<String, dynamic> toJson() {
+    return {'email': email};
+  }
+}

@@ -12,6 +12,8 @@ class WalletState {
   final bool isChangingPin;
   final bool isRequestingPinReset;
   final bool isConfirmingPinReset;
+  final bool isFetchingSubaccount;
+  final bool isCreatingSubaccount;
   final String? errorMessage;
   final String? pinErrorMessage;
   final PinResetRequestResponseEntity? pinResetResponse;
@@ -22,6 +24,7 @@ class WalletState {
   final List<PendingFundEntity> pendingFunds;
   final PinStatusEntity? pinStatus;
   final bool isPinVerified;
+  final SubaccountEntity? subaccount;
 
   const WalletState({
     this.isFetchingWallet = false,
@@ -35,6 +38,8 @@ class WalletState {
     this.isChangingPin = false,
     this.isRequestingPinReset = false,
     this.isConfirmingPinReset = false,
+    this.isFetchingSubaccount = false,
+    this.isCreatingSubaccount = false,
     this.errorMessage,
     this.pinErrorMessage,
     this.pinResetResponse,
@@ -45,6 +50,7 @@ class WalletState {
     this.pendingFunds = const [],
     this.pinStatus,
     this.isPinVerified = false,
+    this.subaccount,
   });
 
   WalletState copyWith({
@@ -59,6 +65,8 @@ class WalletState {
     bool? isChangingPin,
     bool? isRequestingPinReset,
     bool? isConfirmingPinReset,
+    bool? isFetchingSubaccount,
+    bool? isCreatingSubaccount,
     String? errorMessage,
     String? pinErrorMessage,
     PinResetRequestResponseEntity? pinResetResponse,
@@ -69,6 +77,7 @@ class WalletState {
     List<PendingFundEntity>? pendingFunds,
     PinStatusEntity? pinStatus,
     bool? isPinVerified,
+    SubaccountEntity? subaccount,
   }) {
     return WalletState(
       isFetchingWallet: isFetchingWallet ?? this.isFetchingWallet,
@@ -84,6 +93,8 @@ class WalletState {
       isChangingPin: isChangingPin ?? this.isChangingPin,
       isRequestingPinReset: isRequestingPinReset ?? this.isRequestingPinReset,
       isConfirmingPinReset: isConfirmingPinReset ?? this.isConfirmingPinReset,
+      isFetchingSubaccount: isFetchingSubaccount ?? this.isFetchingSubaccount,
+      isCreatingSubaccount: isCreatingSubaccount ?? this.isCreatingSubaccount,
       errorMessage: errorMessage,
       pinErrorMessage: pinErrorMessage,
       pinResetResponse: pinResetResponse ?? this.pinResetResponse,
@@ -94,6 +105,7 @@ class WalletState {
       pendingFunds: pendingFunds ?? this.pendingFunds,
       pinStatus: pinStatus ?? this.pinStatus,
       isPinVerified: isPinVerified ?? this.isPinVerified,
+      subaccount: subaccount ?? this.subaccount,
     );
   }
 }
