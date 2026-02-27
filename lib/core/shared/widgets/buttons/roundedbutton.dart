@@ -12,6 +12,7 @@ class CustomButton extends StatelessWidget {
   final IconData? icon;
   final double? iconSize;
   final bool isLoading;
+  final EdgeInsets? padding;
 
   const CustomButton({
     super.key,
@@ -25,6 +26,7 @@ class CustomButton extends StatelessWidget {
     this.icon,
     this.iconSize,
     this.isLoading = false,
+    this.padding,
   });
 
   @override
@@ -32,7 +34,7 @@ class CustomButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 14),
+        padding: padding ?? EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(borderRadius ?? 11),
           color: color ?? AppColor.primary,

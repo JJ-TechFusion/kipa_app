@@ -44,21 +44,21 @@ class _TransactionStatusScreenState
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          leading: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: AppColor.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ),
+          // leading: IconButton(
+          //   onPressed: () => Navigator.pop(context),
+          //   icon: Container(
+          //     padding: const EdgeInsets.all(8),
+          //     decoration: const BoxDecoration(
+          //       color: AppColor.primary,
+          //       shape: BoxShape.circle,
+          //     ),
+          //     child: const Icon(
+          //       Icons.arrow_back,
+          //       color: Colors.white,
+          //       size: 20,
+          //     ),
+          //   ),
+          // ),
           title: const BodyText(
             'Transaction Status',
             fontWeight: FontWeight.w600,
@@ -111,17 +111,18 @@ class _TransactionStatusScreenState
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: AppColor.primary,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-          ),
-        ),
+        automaticallyImplyLeading: false,
+        // leading: IconButton(
+        //   onPressed: () => Navigator.pop(context),
+        //   icon: Container(
+        //     padding: const EdgeInsets.all(8),
+        //     decoration: const BoxDecoration(
+        //       color: AppColor.primary,
+        //       shape: BoxShape.circle,
+        //     ),
+        //     child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+        //   ),
+        // ),
         title: const BodyText(
           'Transaction Status',
           fontWeight: FontWeight.w600,
@@ -194,16 +195,16 @@ class _TransactionStatusScreenState
                 ),
               ),
               verticalSpace(12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
-                child: CustomButton(
-                  title: 'Report an Issue',
-                  onTap: () {},
-                  color: AppColor.kipaGrey.withAlpha(50),
-                  textColor: AppColor.primaryText,
-                  borderRadius: 30,
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 42),
+              //   child: CustomButton(
+              //     title: 'Report an Issue',
+              //     onTap: () {},
+              //     color: AppColor.kipaGrey.withAlpha(50),
+              //     textColor: AppColor.primaryText,
+              //     borderRadius: 30,
+              //   ),
+              // ),
             ],
           ],
         ),
@@ -429,15 +430,21 @@ class _TransactionStatusScreenState
             ? (transaction.feeInfo.serviceFee ?? 0.0)
             : (transaction.feeInfo.platformFee ?? 0.0),
       ),
-      buyerTotal: currencyFormat.format(transaction.feeInfo.buyerPaysTotal),
+      buyerTotal: currencyFormat.format(
+        transaction.itemPrice +
+            (isBuyer
+                ? (transaction.feeInfo.serviceFee ?? 0.0)
+                : (transaction.feeInfo.platformFee ?? 0.0)),
+      ),
       isReceived: transaction.payment.isPaid,
       youReceive: isBuyer
           ? null
           : currencyFormat.format(transaction.feeInfo.youReceive ?? 0.0),
       totalLabel: isBuyer ? 'Buyer Pays Total' : null,
-      deliveryFee: transaction.deliveryType.toLowerCase() == 'kipa_delivery'
-          ? currencyFormat.format(transaction.feeInfo.estimatedDeliveryFee)
-          : null,
+      feeLabel: isBuyer ? '+% Buyer Fee' : 'Platform Fee',
+      deliveryFee: currencyFormat.format(
+        transaction.feeInfo.estimatedDeliveryFee,
+      ),
     );
   }
 
@@ -453,7 +460,8 @@ class _TransactionStatusScreenState
         isCompleted: step.isCompleted,
         isActive: step.isCurrent,
         extraWidget:
-            step.title.toLowerCase().contains('payment') && step.isCompleted
+            step.step.toLowerCase().contains('payment_received') &&
+                step.isCompleted
             ? Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(

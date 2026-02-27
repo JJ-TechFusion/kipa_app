@@ -182,12 +182,15 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
               ),
             ),
 
-            AnimatedButton(
-              onTap: isLoading ? () {} : _onContinue,
-              child: CustomButton(
-                title: isLoading ? 'Saving...' : 'Complete',
-                color: AppColor.onboardingPrimary,
-                borderRadius: 28,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: AnimatedButton(
+                onTap: isLoading ? () {} : _onContinue,
+                child: CustomButton(
+                  title: isLoading ? 'Saving...' : 'Complete',
+                  color: AppColor.onboardingPrimary,
+                  borderRadius: 28,
+                ),
               ),
             ),
             verticalSpace(16),

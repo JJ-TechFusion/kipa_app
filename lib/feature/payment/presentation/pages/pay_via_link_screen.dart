@@ -16,8 +16,13 @@ class PayViaLinkScreen extends StatefulWidget {
 }
 
 class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
-  int _selectedTab = 0; // 0: Link, 1: Code
   final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +41,7 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
           ),
         ),
         title: const BodyText(
-          'Pay via Link',
+          'Pay via Code',
           fontWeight: FontWeight.w600,
           fontSize: 18,
         ),
@@ -49,12 +54,10 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const H4(
-              'You can paste a payment link or code to proceed with your transaction',
-            ),
+            const H4('Paste a payment code to proceed with your transaction'),
             verticalSpace(8),
             const Caption(
-              'Paste payment link or code shared by the seller',
+              'Paste the payment code shared by the seller',
               color: AppColor.lightText,
             ),
             verticalSpace(32),
@@ -67,20 +70,7 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
               ),
               child: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColor.scaffoldBackground,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(child: _buildTab(0, 'Payment Link')),
-                        Expanded(child: _buildTab(1, 'Payment Code')),
-                      ],
-                    ),
-                  ),
-                  verticalSpace(32),
+                  verticalSpace(8),
 
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -89,7 +79,7 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.link,
+                      Icons.tag,
                       color: AppColor.primary,
                       size: 24,
                     ),
@@ -112,7 +102,7 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
                           child: TextField(
                             controller: _controller,
                             decoration: const InputDecoration(
-                              hintText: 'Paste link here',
+                              hintText: 'Paste code here',
                               hintStyle: TextStyle(
                                 fontSize: 14,
                                 color: AppColor.lightText,
@@ -141,6 +131,7 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
                       ],
                     ),
                   ),
+                  verticalSpace(8),
                 ],
               ),
             ),
@@ -191,18 +182,7 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
                 onTap: () {
                   if (_controller.text.isEmpty) return;
 
-                  String paymentCode = _controller.text.trim();
-                  if (paymentCode.contains('/pay/')) {
-                    paymentCode = paymentCode.split('/pay/').last;
-                    if (paymentCode.contains('/')) {
-                      paymentCode = paymentCode.split('/').first;
-                    }
-                  } else if (paymentCode.contains('http')) {
-                    final uri = Uri.tryParse(paymentCode);
-                    if (uri != null) {
-                      paymentCode = uri.pathSegments.last;
-                    }
-                  }
+                  final paymentCode = _controller.text.trim();
 
                   Navigator.pushNamed(
                     context,
@@ -219,36 +199,6 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
             ),
             verticalSpace(20),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTab(int index, String title) {
-    final isSelected = _selectedTab == index;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedTab = index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(5),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: BodySmall(
-            title,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? AppColor.primaryText : AppColor.lightText,
-          ),
         ),
       ),
     );

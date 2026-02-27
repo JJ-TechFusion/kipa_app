@@ -10,6 +10,7 @@ import '../models/payment_request_model.dart';
 import '../models/fulfillment_model.dart';
 import '../models/payment_buyer_models.dart';
 import '../models/transaction_status_models.dart';
+import '../models/transaction_list_models.dart';
 import '../models/ship_logistics_model.dart';
 import '../../domain/entities/ship_logistics_entity.dart';
 
@@ -327,6 +328,36 @@ class PaymentRemoteDataSource {
         data: dataMap['url']?.toString() ?? '',
         message: response.message,
       );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> getTransactions({String? status}) async {
+    final query = <String, dynamic>{};
+    if (status != null && status.isNotEmpty) {
+      query['status'] = status;
+    }
+
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.transactionsListUrl,
+      query: query.isEmpty ? null : query,
+    );
+
+    if (response.success && response.data != null) {
+      try {
+        final dataMap = response.data as Map<String, dynamic>;
+        return NetworkResponse(
+          success: true,
+          data: TransactionListModel.fromJson(dataMap).toEntityList(),
+          message: response.message,
+        );
+      } catch (e) {
+        return NetworkResponse(
+          success: false,
+          data: null,
+          message: 'Failed to parse transactions: ${e.toString()}',
+        );
+      }
     }
     return response;
   }

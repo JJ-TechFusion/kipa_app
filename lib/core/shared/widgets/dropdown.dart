@@ -108,15 +108,15 @@ class _DropDownWidgetState extends State<DropDownWidget> {
               ),
               if (isMenuOpen)
                 Container(
-                  height: 200,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.grey.withAlpha(40)),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (widget.showSearch) // Conditional search field
+                      if (widget.showSearch)
                         Padding(
                           padding: EdgeInsets.all(6),
                           child: TextField(
@@ -145,8 +145,13 @@ class _DropDownWidgetState extends State<DropDownWidget> {
                             ),
                           ),
                         ),
-                      Expanded(
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: filteredItems.length > 3 ? 150 : filteredItems.length * 56.0,
+                        ),
                         child: ListView.builder(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.zero,
                           itemCount: filteredItems.length,
                           itemBuilder: (context, index) {
                             final value = filteredItems[index];

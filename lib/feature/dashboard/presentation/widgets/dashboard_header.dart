@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/core/shared/widgets/smart_image.dart';
@@ -26,9 +25,7 @@ class DashboardHeader extends StatelessWidget {
           onTap: onProfileTap,
           child: ClipOval(
             child: SmartImage(
-              imageUrl:
-                  profileImageUrl ??
-                  'assets/images/user_placeholder.png', // Fallback handled by SmartImage if needed, but explicit placeholder path is good practice
+              imageUrl: profileImageUrl ?? 'assets/images/user.png',
               width: 48,
               height: 48,
               fit: BoxFit.cover,
@@ -55,14 +52,14 @@ class DashboardHeader extends StatelessWidget {
             ],
           ),
         ),
-        IconButton(
-          onPressed: onNotificationTap,
-          icon: const Icon(
-            CupertinoIcons.bell,
-            color: AppColor.primaryText,
-            size: 24,
-          ),
-        ),
+        // IconButton(
+        //   onPressed: onNotificationTap,
+        //   icon: const Icon(
+        //     CupertinoIcons.bell,
+        //     color: AppColor.primaryText,
+        //     size: 24,
+        //   ),
+        // ),
       ],
     );
   }

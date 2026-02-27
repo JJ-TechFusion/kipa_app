@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:kipa/core/shared/widgets/buttons/roundedbutton.dart';
 import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/theme/app_colors.dart';
-import 'package:kipa/feature/support/data/faq_data.dart';
+import 'package:kipa/feature/support/presentation/pages/faq_screen.dart';
 import 'package:kipa/utils/constant.dart';
 import 'package:kipa/feature/disputes/domain/entities/dispute_entity.dart';
 import 'package:kipa/feature/disputes/presentation/providers/disputes_provider.dart';
 import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/core/routes/route_names.dart';
+import 'package:kipa/feature/disputes/presentation/pages/disputes_list_screen.dart';
 
 class SupportScreen extends ConsumerStatefulWidget {
   const SupportScreen({super.key});
@@ -19,6 +21,9 @@ class SupportScreen extends ConsumerStatefulWidget {
 }
 
 class _SupportScreenState extends ConsumerState<SupportScreen> {
+  static const _supportEmail = 'support@getkipa.com';
+  static const _supportPhone = '+2349000000000';
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +31,24 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
       if (!mounted) return;
       ref.read(disputesNotifierProvider.notifier).fetchDisputes();
     });
+  }
+
+  Future<void> _launchEmail() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: _supportEmail,
+      queryParameters: {'subject': 'Kipa Support Request'},
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Future<void> _launchPhone() async {
+    final uri = Uri(scheme: 'tel', path: _supportPhone);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
   }
 
   @override
@@ -45,11 +68,12 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
               children: [
                 Expanded(
                   child: _buildContactCard(
-                    icon: Icons.chat_bubble,
+                    icon: Icons.email_outlined,
                     color: const Color(0xFFE0E7FF),
                     iconColor: AppColor.primary,
-                    title: "Live Chat",
-                    subtitle: "Chat with support",
+                    title: "Email Us",
+                    subtitle: "Send us an email",
+                    onTap: _launchEmail,
                   ),
                 ),
                 const SizedBox(width: 15),
@@ -60,6 +84,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                     iconColor: AppColor.primary,
                     title: "Call Us",
                     subtitle: "Give us a call",
+                    onTap: _launchPhone,
                   ),
                 ),
               ],
@@ -87,89 +112,92 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Center(
-                  child: Caption("No active disputes"),
-                ),
+                child: const Center(child: Caption("No active disputes")),
               )
-            else
-              ...disputesState.disputes!.map(
-                (dispute) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildDisputeCard(dispute, currentUserId),
-                ),
-              ),
-            const SizedBox(height: 30),
-
-            const BodyText(
-              "Frequently Asked Questions",
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
-            const SizedBox(height: 10),
-            ...kFaqData.map((categoryData) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: BodySmall(
-                      categoryData['category'],
-                      fontWeight: FontWeight.w600,
-                      color: AppColor.kipaGrey,
-                    ),
-                  ),
-                  ...(categoryData['questions'] as List<dynamic>).map((q) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _buildFAQItem(
-                        title: q['question'],
-                        content: q['answer'],
+            else ...[
+              _buildDisputeCard(disputesState.disputes!.first, currentUserId),
+              if (disputesState.disputes!.length > 1) ...[
+                const SizedBox(height: 10),
+                _buildNavRow(
+                  context,
+                  icon: Icons.gavel_outlined,
+                  title:
+                      'View All Disputes (${disputesState.disputes!.length})',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const DisputesListScreen(),
                       ),
                     );
-                  }),
-                  const SizedBox(height: 10),
-                ],
-              );
-            }),
-            const SizedBox(height: 10),
+                  },
+                ),
+              ],
+            ],
+            const SizedBox(height: 30),
+
+            _buildNavRow(
+              context,
+              icon: Icons.help_outline,
+              title: 'Frequently Asked Questions',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FaqScreen()),
+                );
+              },
+            ),
+            verticalSpace(20),
 
             const BodyText(
               "Support Resources",
               fontWeight: FontWeight.w600,
               fontSize: 16,
             ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFE8EAF6),
-                      shape: BoxShape.circle,
+            verticalSpace(10),
+            GestureDetector(
+              onTap: _launchEmail,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE8EAF6),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.email_outlined,
+                        color: AppColor.primary,
+                        size: 18,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.email_outlined,
-                      color: AppColor.primary,
-                      size: 18,
+                    const SizedBox(width: 15),
+                    const Expanded(
+                      child: Column(
+                        spacing: 6,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BodySmall(
+                            "Email Support",
+                            fontWeight: FontWeight.w600,
+                          ),
+                          Caption("support@getkipa.com"),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 15),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BodySmall("Email Support", fontWeight: FontWeight.w600),
-                        Caption("support@kipa.com"),
-                      ],
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 14,
+                      color: AppColor.lightText,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 30),
@@ -187,8 +215,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
     final dateFormatter = DateFormat('MMM d, h:mma');
 
     // role = logged-in user's role; counterparty is the opposite
-    final counterpartyRole =
-        dispute.role == 'buyer' ? 'Seller' : 'Buyer';
+    final counterpartyRole = dispute.role == 'buyer' ? 'Seller' : 'Buyer';
 
     final initials = dispute.counterPartyName
         .trim()
@@ -364,61 +391,64 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
     required Color iconColor,
     required String title,
     required String subtitle,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      height: 180,
-      decoration: BoxDecoration(
-        color: AppColor.cardBackground,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BodyText(title, fontWeight: FontWeight.w500),
-              const SizedBox(height: 5),
-              Caption(subtitle),
-            ],
-          ),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        height: 180,
+        decoration: BoxDecoration(
+          color: AppColor.cardBackground,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              child: Icon(icon, color: iconColor, size: 18),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BodyText(title, fontWeight: FontWeight.w500),
+                const SizedBox(height: 5),
+                Caption(subtitle),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildFAQItem({
+  Widget _buildNavRow(
+    BuildContext context, {
+    required IconData icon,
     required String title,
-    String? subtitle,
-    String? content,
-    bool isExpanded = false,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Theme(
-        data: ThemeData(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          initiallyExpanded: isExpanded,
-          title: BodySmall(title, fontWeight: FontWeight.w600),
-          subtitle: subtitle != null ? Caption(subtitle) : null,
-          childrenPadding: const EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: 16,
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
           children: [
-            if (content != null)
-              BodySmall(content, color: AppColor.kipaGrey2, lineHeight: 1.5),
+            Icon(icon, size: 20, color: AppColor.primary),
+            const SizedBox(width: 12),
+            Expanded(child: BodySmall(title, fontWeight: FontWeight.w500)),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: AppColor.lightText,
+            ),
           ],
         ),
       ),

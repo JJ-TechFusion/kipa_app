@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kipa/core/shared/widgets/buttons/animated_button.dart';
 import '../../../../core/routes/route_names.dart';
-import '../../../../core/shared/widgets/custom_text.dart';
+import '../../../../core/shared/widgets/widgets.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../utils/constant.dart';
 import '../../../../utils/no_params.dart';
@@ -40,14 +41,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     }
   }
 
-  void _onCreateAccount() {
+  void _onContinue() {
     _completeOnboarding();
     Navigator.of(context).pushReplacementNamed(RouteNames.registerRoute);
-  }
-
-  void _onLogin() {
-    _completeOnboarding();
-    Navigator.of(context).pushReplacementNamed(RouteNames.loginRoute);
   }
 
   @override
@@ -99,36 +95,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 verticalSpace(24),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _onCreateAccount,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColor.onboardingPrimary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                      ),
-                      child: const BodyText(
-                        'Create Account',
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: AnimatedButton(
+                    onTap: _onContinue,
+                    child: CustomButton(
+                      title: 'Continue',
+                      color: AppColor.onboardingPrimary,
+                      borderRadius: 28,
                     ),
-                  ),
-                ),
-                verticalSpace(16),
-
-                TextButton(
-                  onPressed: _onLogin,
-                  child: const BodyText(
-                    'Log in',
-                    fontWeight: FontWeight.w500,
-                    color: AppColor.onboardingPrimary,
                   ),
                 ),
                 verticalSpace(24),

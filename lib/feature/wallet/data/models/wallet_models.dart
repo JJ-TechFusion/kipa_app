@@ -36,17 +36,15 @@ class TopUpRequestModel extends TopUpRequestEntity {
 
 class TopUpResponseModel extends TopUpResponseEntity {
   TopUpResponseModel({
-    required super.accessCode,
-    required super.authorizationUrl,
-    required super.paymentReference,
+    required super.link,
+    required super.txRef,
     required super.topUpId,
   });
 
   factory TopUpResponseModel.fromJson(Map<String, dynamic> json) {
     return TopUpResponseModel(
-      accessCode: json['access_code'] ?? '',
-      authorizationUrl: json['authorization_url'] ?? '',
-      paymentReference: json['payment_reference'] ?? '',
+      link: json['authorization_url'] ?? json['link'] ?? '',
+      txRef: json['payment_reference'] ?? json['tx_ref'] ?? '',
       topUpId: json['top_up_id'] ?? '',
     );
   }
@@ -56,7 +54,7 @@ class VerifyTopUpRequestModel extends VerifyTopUpRequestEntity {
   VerifyTopUpRequestModel({required super.reference});
 
   Map<String, dynamic> toJson() {
-    return {'reference': reference};
+    return {'tx_ref': reference};
   }
 }
 
@@ -257,15 +255,9 @@ class PinResetRequestResponseModel extends PinResetRequestResponseEntity {
 }
 
 class PinResetConfirmRequestModel extends PinResetConfirmRequestEntity {
-  PinResetConfirmRequestModel({
-    required super.otpCode,
-    required super.newPin,
-  });
+  PinResetConfirmRequestModel({required super.otpCode, required super.newPin});
 
   Map<String, dynamic> toJson() {
-    return {
-      'otp_code': otpCode,
-      'new_pin': newPin,
-    };
+    return {'otp_code': otpCode, 'new_pin': newPin};
   }
 }

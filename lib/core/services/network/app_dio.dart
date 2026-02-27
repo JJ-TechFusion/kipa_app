@@ -27,6 +27,16 @@ class AppDio extends DioForNative {
 
 class _AppNetworkInterceptor extends Interceptor {
   final AuthTokenService _authTokenService = getIt<AuthTokenService>();
+  static const _excludedFrom401Logout = [
+    '/wallet/pin/verify',
+    '/wallet/pin',
+    '/wallet/pin/status',
+    '/wallet/pin/reset/confirm',
+  ];
+
+  bool _shouldHandleTokenExpiration(String path) {
+    return !_excludedFrom401Logout.any((excluded) => path.contains(excluded));
+  }
 
   @override
   onError(DioException err, ErrorInterceptorHandler handler) {
@@ -36,7 +46,8 @@ class _AppNetworkInterceptor extends Interceptor {
     log("Headers: ${err.requestOptions.headers}");
     log("Data: ${err.requestOptions.data}");
 
-    if (err.response?.statusCode == 401) {
+    if (err.response?.statusCode == 401 &&
+        _shouldHandleTokenExpiration(err.requestOptions.path)) {
       _authTokenService.handleTokenExpiration();
     }
 
@@ -49,7 +60,8 @@ class _AppNetworkInterceptor extends Interceptor {
       "=========> Response from request: ${response.requestOptions.path} ============> \n response: ${response.data} \n statusCode: ${response.statusCode},\n requestBody: ${response.requestOptions.data} ",
     );
 
-    if (response.statusCode == 401) {
+    if (response.statusCode == 401 &&
+        _shouldHandleTokenExpiration(response.requestOptions.path)) {
       _authTokenService.handleTokenExpiration();
     }
 
@@ -61,7 +73,6 @@ class _AppNetworkInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Add auth token if available
     final token = await _authTokenService.getToken();
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';

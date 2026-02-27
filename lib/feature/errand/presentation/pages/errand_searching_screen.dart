@@ -31,7 +31,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
 
   // Animation controllers
   late AnimationController _pulseController;
-  late AnimationController _rotationController;
 
   // Default to Lagos, Nigeria
   static const LatLng _defaultLocation = LatLng(6.5244, 3.3792);
@@ -51,12 +50,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
     // Pulse animation for the search effect
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    )..repeat();
-
-    // Rotation for the center icon
-    _rotationController = AnimationController(
-      duration: const Duration(milliseconds: 3000),
       vsync: this,
     )..repeat();
 
@@ -237,7 +230,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
   @override
   void dispose() {
     _pulseController.dispose();
-    _rotationController.dispose();
     _pollingTimer?.cancel();
     _mapController?.dispose();
     super.dispose();
@@ -275,7 +267,7 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
             ),
             onMapCreated: (controller) {
               _mapController = controller;
-              Future.delayed(const Duration(milliseconds: 500), _fitMapToBounds);
+              _fitMapToBounds();
             },
             markers: _markers,
             circles: _circles,
@@ -493,7 +485,9 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColor.primary.withAlpha((opacity * 150).toInt()),
+                        color: AppColor.primary.withAlpha(
+                          (opacity * 150).toInt(),
+                        ),
                         width: 2,
                       ),
                     ),
@@ -504,33 +498,25 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
           }),
 
           // Center icon
-          AnimatedBuilder(
-            animation: _rotationController,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: _rotationController.value * 2 * pi,
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: AppColor.primary,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColor.primary.withAlpha(80),
-                        blurRadius: 15,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.delivery_dining,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppColor.primary,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColor.primary.withAlpha(80),
+                  blurRadius: 15,
+                  spreadRadius: 2,
                 ),
-              );
-            },
+              ],
+            ),
+            child: const Icon(
+              Icons.delivery_dining,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
         ],
       ),

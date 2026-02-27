@@ -314,9 +314,10 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
         itemBuilder: (context, index) {
           if (index < purchases.length) {
             final item = purchases[index];
+            final riderAssigned = item.delivery?.riderAssigned ?? false;
             return DeliveryListItem(
               purchase: item,
-              onTap: () {
+              onTap: riderAssigned ? () {
                 Navigator.pushNamed(
                   context,
                   RouteNames.deliveryDetailsRoute,
@@ -326,14 +327,16 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
                     'isBuyer': true,
                   },
                 );
-              },
+              } : null,
             );
           } else {
             final saleIndex = index - purchases.length;
             final item = sales[saleIndex];
+            final orderStatus = item.orderStatus.toLowerCase();
+            final riderAssigned = orderStatus == 'in_delivery' || orderStatus == 'completed' || orderStatus == 'delivered';
             return DeliveryListItem(
               sale: item,
-              onTap: () {
+              onTap: riderAssigned ? () {
                 Navigator.pushNamed(
                   context,
                   RouteNames.deliveryDetailsRoute,
@@ -343,7 +346,7 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
                     'isBuyer': false,
                   },
                 );
-              },
+              } : null,
             );
           }
         },

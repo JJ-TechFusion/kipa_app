@@ -13,7 +13,6 @@ import '../../domain/entities/errand_entity.dart';
 import '../providers/errand_provider.dart';
 import '../widgets/contact_input_card.dart';
 import '../widgets/location_input_card.dart';
-import '../widgets/package_size_selector.dart';
 
 const String _googleMapsApiKey = 'AIzaSyDGctg74O3Vwa0IP_o2Eh2xwKe5CSuz-k0';
 
@@ -27,20 +26,22 @@ class CreateErrandScreen extends ConsumerStatefulWidget {
 class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Pickup
   LocationEntity? _pickupLocation;
   final _pickupNameController = TextEditingController();
   final _pickupPhoneController = TextEditingController();
 
-  // Dropoff
   LocationEntity? _dropoffLocation;
   final _dropoffNameController = TextEditingController();
   final _dropoffPhoneController = TextEditingController();
 
-  // Package
-  PackageSize _packageSize = PackageSize.small;
   final _packageDescriptionController = TextEditingController();
   final _notesController = TextEditingController();
+
+  bool _showPickupContact = false;
+  bool _showDropoffContact = false;
+  bool _showPackageDetails = false;
+
+  String _vehicleType = 'motorcycle'; // Default to motorcycle
 
   @override
   void dispose() {
@@ -54,13 +55,7 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
   }
 
   bool get _isFormValid {
-    return _pickupLocation != null &&
-        _pickupNameController.text.isNotEmpty &&
-        _pickupPhoneController.text.isNotEmpty &&
-        _dropoffLocation != null &&
-        _dropoffNameController.text.isNotEmpty &&
-        _dropoffPhoneController.text.isNotEmpty &&
-        _packageDescriptionController.text.isNotEmpty;
+    return _pickupLocation != null && _dropoffLocation != null;
   }
 
   Future<void> _createErrand() async {
@@ -77,15 +72,25 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
       pickupAddress: _pickupLocation!.address,
       pickupLatitude: _pickupLocation!.latitude,
       pickupLongitude: _pickupLocation!.longitude,
-      pickupContactName: _pickupNameController.text.trim(),
-      pickupContactPhone: _pickupPhoneController.text.trim(),
+      pickupContactName: _pickupNameController.text.trim().isEmpty
+          ? null
+          : _pickupNameController.text.trim(),
+      pickupContactPhone: _pickupPhoneController.text.trim().isEmpty
+          ? null
+          : _pickupPhoneController.text.trim(),
       dropoffAddress: _dropoffLocation!.address,
       dropoffLatitude: _dropoffLocation!.latitude,
       dropoffLongitude: _dropoffLocation!.longitude,
-      dropoffContactName: _dropoffNameController.text.trim(),
-      dropoffContactPhone: _dropoffPhoneController.text.trim(),
-      packageDescription: _packageDescriptionController.text.trim(),
-      packageSize: _packageSize,
+      dropoffContactName: _dropoffNameController.text.trim().isEmpty
+          ? null
+          : _dropoffNameController.text.trim(),
+      dropoffContactPhone: _dropoffPhoneController.text.trim().isEmpty
+          ? null
+          : _dropoffPhoneController.text.trim(),
+      packageDescription: _packageDescriptionController.text.trim().isEmpty
+          ? null
+          : _packageDescriptionController.text.trim(),
+      vehicleType: _vehicleType,
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
@@ -102,6 +107,81 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
         arguments: {'errand': errand},
       );
     }
+  }
+
+  Widget _buildOptionalToggle({
+    required String label,
+    required bool isVisible,
+    required VoidCallback onToggle,
+  }) {
+    return GestureDetector(
+      onTap: onToggle,
+      child: Row(
+        children: [
+          Icon(
+            isVisible ? Icons.remove_circle_outline : Icons.add_circle_outline,
+            size: 16,
+            color: AppColor.onboardingPrimary,
+          ),
+          horizontalSpace(6),
+          BodySmall(
+            isVisible ? 'Hide $label' : 'Add $label',
+            color: AppColor.onboardingPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVehicleOption(
+    String value,
+    String title,
+    IconData icon,
+    String description,
+  ) {
+    final isSelected = _vehicleType == value;
+    return GestureDetector(
+      onTap: () => setState(() => _vehicleType = value),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColor.primary.withAlpha(25)
+              : AppColor.scaffoldBackground,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColor.primary : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColor.primary : AppColor.kipaGrey,
+              size: 24,
+            ),
+            horizontalSpace(12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BodySmall(
+                    title,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? AppColor.primary : AppColor.darkPrimary,
+                  ),
+                  Caption(description, color: AppColor.lightText, fontSize: 11),
+                ],
+              ),
+            ),
+            if (isSelected)
+              const Icon(Icons.check_circle, color: AppColor.primary, size: 20),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -127,10 +207,6 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        // leading: IconButton(
-        //   icon: const Icon(Icons.arrow_back, color: AppColor.darkPrimary),
-        //   onPressed: () => Navigator.pop(context),
-        // ),
         automaticallyImplyLeading: false,
         title: const BodyText(
           'Book a Rider',
@@ -163,14 +239,31 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
                 },
               ),
               verticalSpace(12),
-              ContactInputCard(
-                title: 'Pickup Contact',
-                nameController: _pickupNameController,
-                phoneController: _pickupPhoneController,
-                nameHint: 'Who should the rider meet?',
-                phoneHint: '+234 xxx xxx xxxx',
+              _buildOptionalToggle(
+                label: 'Pickup Contact',
+                isVisible: _showPickupContact,
+                onToggle: () =>
+                    setState(() => _showPickupContact = !_showPickupContact),
               ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: _showPickupContact
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: ContactInputCard(
+                          title: 'Pickup Contact',
+                          nameController: _pickupNameController,
+                          phoneController: _pickupPhoneController,
+                          nameHint: 'Who should the rider meet?',
+                          phoneHint: '+234 xxx xxx xxxx',
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+
               verticalSpace(24),
+
               const BodyText(
                 'Dropoff Details',
                 fontWeight: FontWeight.w600,
@@ -188,25 +281,36 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
                 },
               ),
               verticalSpace(12),
-              ContactInputCard(
-                title: 'Dropoff Contact',
-                nameController: _dropoffNameController,
-                phoneController: _dropoffPhoneController,
-                nameHint: 'Who should receive the package?',
-                phoneHint: '+234 xxx xxx xxxx',
+              _buildOptionalToggle(
+                label: 'Dropoff Contact',
+                isVisible: _showDropoffContact,
+                onToggle: () =>
+                    setState(() => _showDropoffContact = !_showDropoffContact),
               ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: _showDropoffContact
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: ContactInputCard(
+                          title: 'Dropoff Contact',
+                          nameController: _dropoffNameController,
+                          phoneController: _dropoffPhoneController,
+                          nameHint: 'Who should receive the package?',
+                          phoneHint: '+234 xxx xxx xxxx',
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+
               verticalSpace(24),
+
+              // Vehicle Type Selection
               const BodyText(
-                'Package Details',
+                'Vehicle Type',
                 fontWeight: FontWeight.w600,
                 color: AppColor.darkPrimary,
-              ),
-              verticalSpace(12),
-              PackageSizeSelector(
-                selectedSize: _packageSize,
-                onSizeSelected: (size) {
-                  setState(() => _packageSize = size);
-                },
               ),
               verticalSpace(12),
               Container(
@@ -218,27 +322,78 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
                 ),
                 child: Column(
                   children: [
-                    TextInputField(
-                      label: 'Package Description',
-                      hintText: 'What are you sending?',
-                      controller: _packageDescriptionController,
-                      maxLines: 2,
+                    _buildVehicleOption(
+                      'motorcycle',
+                      'Motorcycle',
+                      Icons.motorcycle,
+                      'Best for small packages',
                     ),
                     verticalSpace(12),
-                    TextInputField(
-                      label: 'Notes (Optional)',
-                      hintText: 'Any special instructions?',
-                      controller: _notesController,
-                      maxLines: 2,
+                    _buildVehicleOption(
+                      'car',
+                      'Car',
+                      Icons.directions_car,
+                      'Best for larger items',
                     ),
                   ],
                 ),
               ),
+
+              verticalSpace(24),
+
+              _buildOptionalToggle(
+                label: 'Package Details',
+                isVisible: _showPackageDetails,
+                onToggle: () =>
+                    setState(() => _showPackageDetails = !_showPackageDetails),
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: _showPackageDetails
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppColor.kipaGrey.withAlpha(30),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              TextInputField(
+                                label: 'Package Description',
+                                hintText: 'What are you sending?',
+                                controller: _packageDescriptionController,
+                                maxLines: 2,
+                              ),
+                              verticalSpace(12),
+                              TextInputField(
+                                label: 'Pickup Instructions',
+                                hintText:
+                                    'Any special instructions for pickup?',
+                                controller: _notesController,
+                                maxLines: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+
               verticalSpace(32),
-              CustomButton(
-                title: 'Get Estimate',
-                onTap: state.isCreating ? null : _createErrand,
-                isLoading: state.isCreating,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 36.0),
+                child: CustomButton(
+                  title: 'Get Estimate',
+                  onTap: state.isCreating ? null : _createErrand,
+                  isLoading: state.isCreating,
+                  borderRadius: 20,
+                ),
               ),
               verticalSpace(24),
             ],

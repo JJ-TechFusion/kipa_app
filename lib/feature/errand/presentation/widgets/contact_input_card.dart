@@ -43,11 +43,11 @@ class ContactInputCard extends StatelessWidget {
                 child: const Icon(
                   Icons.person_outline,
                   color: AppColor.primary,
-                  size: 20,
+                  size: 16,
                 ),
               ),
               horizontalSpace(12),
-              BodyText(
+              BodySmall(
                 title,
                 fontWeight: FontWeight.w600,
                 color: AppColor.darkPrimary,

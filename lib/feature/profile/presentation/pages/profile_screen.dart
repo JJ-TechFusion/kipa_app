@@ -66,7 +66,9 @@ class ProfileScreen extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final success = await ref.read(authNotifierProvider.notifier).deleteAccount();
+      final success = await ref
+          .read(authNotifierProvider.notifier)
+          .deleteAccount();
       if (success && context.mounted) {
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -150,7 +152,7 @@ class ProfileScreen extends ConsumerWidget {
                           imageUrl:
                               (user.profileImageUrl == null ||
                                   user.profileImageUrl!.isEmpty)
-                              ? 'assets/images/user_placeholder.png'
+                              ? 'assets/images/user.png'
                               : user.profileImageUrl!,
                           width: 80,
                           height: 80,
@@ -192,6 +194,14 @@ class ProfileScreen extends ConsumerWidget {
               ),
               _buildMenuItem(
                 context,
+                icon: Icons.account_balance_wallet_outlined,
+                title: "Wallet",
+                onTap: () {
+                  Navigator.pushNamed(context, RouteNames.walletRoute);
+                },
+              ),
+              _buildMenuItem(
+                context,
                 icon: Icons.link,
                 title: "Payment Links",
                 onTap: () {
@@ -200,16 +210,15 @@ class ProfileScreen extends ConsumerWidget {
               ),
               verticalSpace(24),
 
-              const BodyText("Support", fontWeight: FontWeight.bold),
-              verticalSpace(16),
-              _buildMenuItem(
-                context,
-                icon: Icons.info_outline,
-                title: "Help Centre",
-                onTap: () {},
-              ),
-              verticalSpace(24),
-
+              // const BodyText("Support", fontWeight: FontWeight.bold),
+              // verticalSpace(16),
+              // _buildMenuItem(
+              //   context,
+              //   icon: Icons.info_outline,
+              //   title: "Help Centre",
+              //   onTap: () {},
+              // ),
+              // verticalSpace(24),
               const BodyText("Actions", fontWeight: FontWeight.bold),
               verticalSpace(16),
               _buildMenuItem(

@@ -33,7 +33,7 @@ class OnboardingLocalDataSourceImpl implements OnboardingLocalDataSource {
       const OnboardingPageModel(
         title: 'Your money stays protected',
         description:
-            'Buyer payments are securely held in escrow. Sellers get paid only when delivery is verified.',
+            'Buyer payments are secured with Kipa Protect. Sellers get paid only when delivery is verified.',
         imageAsset: 'assets/images/splash3.png',
         backgroundColor: AppColor.onboardingBackground3,
       ),

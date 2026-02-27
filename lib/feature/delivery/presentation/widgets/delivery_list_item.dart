@@ -9,13 +9,13 @@ import 'package:kipa/utils/constant.dart';
 class DeliveryListItem extends StatelessWidget {
   final PurchaseEntity? purchase;
   final SaleEntity? sale;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const DeliveryListItem({
     super.key,
     this.purchase,
     this.sale,
-    required this.onTap,
+    this.onTap,
   }) : assert(
          purchase != null || sale != null,
          'Either purchase or sale must be provided',
@@ -43,19 +43,21 @@ class DeliveryListItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      child: Opacity(
+        opacity: onTap == null ? 0.6 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -134,6 +136,7 @@ class DeliveryListItem extends StatelessWidget {
               ],
             ),
           ],
+        ),
         ),
       ),
     );

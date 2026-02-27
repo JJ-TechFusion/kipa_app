@@ -69,18 +69,34 @@ class _FundWalletSheetState extends ConsumerState<FundWalletSheet> {
 
     if (state.topUpResponse != null) {
       final response = state.topUpResponse!;
+      bool paymentCompleted = false;
 
       if (!mounted) return;
       await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => AppWebviewPage(pageUrl: response.authorizationUrl),
+          builder: (_) => AppWebviewPage(
+            pageUrl: response.link,
+            onPaymentComplete: () {
+              paymentCompleted = true;
+            },
+          ),
         ),
       );
 
       if (!mounted) return;
 
-      await notifier.verifyTopUp(reference: response.paymentReference);
+      if (!paymentCompleted) {
+        CustomSnackBar.show(
+          context,
+          message: 'Payment was cancelled',
+          type: SnackBarType.warning,
+        );
+        notifier.clearTopUpResponse();
+        return;
+      }
+
+      await notifier.verifyTopUp(reference: response.txRef);
 
       if (!mounted) return;
 
@@ -180,12 +196,16 @@ class _FundWalletSheetState extends ConsumerState<FundWalletSheet> {
         const Align(
           alignment: Alignment.centerLeft,
           child: Caption(
-            'Fund your wallet with Paystack.',
+            'Fund your wallet with Flutterwave.',
             color: AppColor.lightText,
           ),
         ),
         verticalSpace(24),
-        _buildOptionItem(0, 'Paystack', 'For local and international payments'),
+        _buildOptionItem(
+          0,
+          'Flutterwave',
+          'For local and international payments',
+        ),
 
         const Spacer(),
       ],

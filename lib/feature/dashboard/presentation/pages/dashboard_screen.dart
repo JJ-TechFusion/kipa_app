@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -9,13 +10,14 @@ import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_bottom_nav
 import 'package:kipa/feature/dashboard/presentation/widgets/dashboard_header.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/promo_banner.dart';
 import 'package:kipa/feature/support/presentation/pages/support_screen.dart';
-import 'package:kipa/feature/wallet/presentation/pages/wallet_pin_gate_screen.dart';
 import 'package:kipa/feature/wallet/presentation/providers/wallet_provider.dart';
 import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/feature/profile/presentation/pages/profile_screen.dart';
 import 'package:kipa/core/routes/route_names.dart';
+import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 import '../../../delivery/presentation/pages/deliveries_list_screen.dart';
+import '../../../payment/presentation/pages/transactions_list_screen.dart';
 import '../../../errand/presentation/providers/errand_provider.dart';
 import '../../../errand/presentation/widgets/active_errand_card.dart';
 import '../../../errand/domain/enums/errand_status.dart';
@@ -33,11 +35,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(authNotifierProvider.notifier).fetchCurrentUser();
-      ref.read(walletNotifierProvider.notifier).getWallet();
-      ref.read(dashboardProvider.notifier).fetchActiveDeliveries();
-      ref.read(errandNotifierProvider.notifier).fetchActiveErrand();
+      _loadDashboardData();
     });
+  }
+
+  Future<void> _loadDashboardData() async {
+    await Future.wait([
+      ref.read(authNotifierProvider.notifier).fetchCurrentUser(),
+      ref.read(walletNotifierProvider.notifier).getWallet(),
+      ref.read(dashboardProvider.notifier).fetchActiveDeliveries(),
+      ref.read(errandNotifierProvider.notifier).fetchActiveErrand(),
+    ]);
   }
 
   @override
@@ -108,160 +116,166 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               child: IndexedStack(
                 index: state.bottomNavIndex,
                 children: [
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DashboardHeader(
-                          userName: authState.currentUser?.firstName ?? 'User',
-                          profileImageUrl:
-                              authState.currentUser?.profileImageUrl,
-                          onNotificationTap: () {},
-                          onProfileTap: () {},
-                        ),
-                        const SizedBox(height: 24),
-                        BalanceCard(
-                          balance: walletState.wallet?.availableBalance ?? 0,
-                          pendingBalance:
-                              walletState.wallet?.lockedBalance ?? 0,
-                          isVisible: state.isBalanceVisible,
-                          onVisibilityToggle:
-                              controller.toggleBalanceVisibility,
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: DashboardActionCard(
-                                title: 'Create payment link',
-                                subtitle: 'Secure kipa payment',
-                                icon: Icons.link,
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    RouteNames.paymentLinkListRoute,
-                                  );
-                                },
+                  RefreshIndicator(
+                    color: AppColor.primary,
+                    onRefresh: _loadDashboardData,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          DashboardHeader(
+                            userName:
+                                authState.currentUser?.firstName ?? 'User',
+                            profileImageUrl:
+                                authState.currentUser?.profileImageUrl,
+                            onNotificationTap: () {},
+                            onProfileTap: () {},
+                          ),
+                          const SizedBox(height: 24),
+                          BalanceCard(
+                            balance: walletState.wallet?.availableBalance ?? 0,
+                            pendingBalance:
+                                walletState.wallet?.lockedBalance ?? 0,
+                            isVisible: state.isBalanceVisible,
+                            onVisibilityToggle:
+                                controller.toggleBalanceVisibility,
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DashboardActionCard(
+                                  title: 'Create payment link',
+                                  subtitle: 'Secure kipa payment',
+                                  icon: CupertinoIcons.link_circle_fill,
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      RouteNames.paymentLinkListRoute,
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: DashboardActionCard(
-                                title: 'Pay via link',
-                                subtitle: 'Enter code to pay',
-                                icon: Icons.payment,
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    RouteNames.payViaLinkRoute,
-                                  );
-                                },
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: DashboardActionCard(
+                                  title: 'Pay via link',
+                                  subtitle: 'Enter code to pay',
+                                  icon: Icons.wallet,
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      RouteNames.payViaLinkRoute,
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        verticalSpace(24),
-                        PromoBanner(
-                          onBookRiderTap: () {
-                            final activeErrand = errandState.activeErrand;
-                            if (activeErrand != null &&
-                                activeErrand.status.isActive &&
-                                activeErrand.status != ErrandStatus.draft) {
-                              // Navigate based on status
-                              if (activeErrand.status ==
-                                  ErrandStatus.searching) {
-                                Navigator.pushNamed(
-                                  context,
-                                  RouteNames.errandSearchingRoute,
-                                  arguments: {'errand': activeErrand},
-                                );
-                              } else if (activeErrand.status ==
-                                  ErrandStatus.delivered) {
-                                Navigator.pushNamed(
-                                  context,
-                                  RouteNames.errandCompleteRoute,
-                                  arguments: {'errand': activeErrand},
-                                );
-                              } else if (activeErrand.status.hasRider) {
-                                Navigator.pushNamed(
-                                  context,
-                                  RouteNames.errandTrackingRoute,
-                                  arguments: {'errand': activeErrand},
-                                );
-                              }
-                            } else {
-                              // Navigate to create errand
-                              Navigator.pushNamed(
-                                context,
-                                RouteNames.createErrandRoute,
-                              );
-                            }
-                          },
-                        ),
-                        verticalSpace(24),
-                        // Active Errand Card
-                        if (errandState.activeErrand != null &&
-                            errandState.activeErrand!.status.isActive &&
-                            errandState.activeErrand!.status !=
-                                ErrandStatus.draft) ...[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 0),
-                            child: ActiveErrandCard(
-                              errand: errandState.activeErrand!,
-                              onTap: () {
-                                final status = errandState.activeErrand!.status;
-                                if (status == ErrandStatus.searching) {
+                            ],
+                          ),
+                          verticalSpace(24),
+                          PromoBanner(
+                            onBookRiderTap: () {
+                              final activeErrand = errandState.activeErrand;
+                              if (activeErrand != null &&
+                                  activeErrand.status.isActive &&
+                                  activeErrand.status != ErrandStatus.draft) {
+                                if (activeErrand.status ==
+                                    ErrandStatus.searching) {
                                   Navigator.pushNamed(
                                     context,
                                     RouteNames.errandSearchingRoute,
-                                    arguments: {
-                                      'errand': errandState.activeErrand,
-                                    },
+                                    arguments: {'errand': activeErrand},
                                   );
-                                } else if (status == ErrandStatus.delivered) {
+                                } else if (activeErrand.status ==
+                                    ErrandStatus.delivered) {
                                   Navigator.pushNamed(
                                     context,
                                     RouteNames.errandCompleteRoute,
-                                    arguments: {
-                                      'errand': errandState.activeErrand,
-                                    },
+                                    arguments: {'errand': activeErrand},
                                   );
-                                } else if (status.hasRider) {
+                                } else if (activeErrand.status.hasRider) {
                                   Navigator.pushNamed(
                                     context,
                                     RouteNames.errandTrackingRoute,
-                                    arguments: {
-                                      'errand': errandState.activeErrand,
-                                    },
+                                    arguments: {'errand': activeErrand},
                                   );
                                 }
-                              },
-                            ),
+                              } else {
+                                Navigator.pushNamed(
+                                  context,
+                                  RouteNames.createErrandRoute,
+                                );
+                              }
+                            },
                           ),
                           verticalSpace(24),
-                        ],
-                        ActiveDeliveriesList(
-                          deliveries: activeDeliveries,
-                          onViewAllTap: () {},
-                          onDeliveryTap: (index) {
-                            final delivery = activeDeliveries[index];
-                            if (delivery['deliveryJobId'] != null) {
-                              Navigator.pushNamed(
-                                context,
-                                RouteNames.deliveryDetailsRoute,
-                                arguments: {
-                                  'deliveryJobId': delivery['deliveryJobId'],
+                          if (errandState.activeErrand != null &&
+                              errandState.activeErrand!.status.isActive &&
+                              errandState.activeErrand!.status !=
+                                  ErrandStatus.draft) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 0,
+                              ),
+                              child: ActiveErrandCard(
+                                errand: errandState.activeErrand!,
+                                onTap: () {
+                                  final status =
+                                      errandState.activeErrand!.status;
+                                  if (status == ErrandStatus.searching) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      RouteNames.errandSearchingRoute,
+                                      arguments: {
+                                        'errand': errandState.activeErrand,
+                                      },
+                                    );
+                                  } else if (status == ErrandStatus.delivered) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      RouteNames.errandCompleteRoute,
+                                      arguments: {
+                                        'errand': errandState.activeErrand,
+                                      },
+                                    );
+                                  } else if (status.hasRider) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      RouteNames.errandTrackingRoute,
+                                      arguments: {
+                                        'errand': errandState.activeErrand,
+                                      },
+                                    );
+                                  }
                                 },
-                              );
-                            }
-                          },
-                        ),
-                      ],
+                              ),
+                            ),
+                            verticalSpace(24),
+                          ],
+                          ActiveDeliveriesList(
+                            deliveries: activeDeliveries,
+                            onViewAllTap: () {},
+                            onDeliveryTap: (index) {
+                              final delivery = activeDeliveries[index];
+                              if (delivery['deliveryJobId'] != null) {
+                                Navigator.pushNamed(
+                                  context,
+                                  RouteNames.deliveryDetailsRoute,
+                                  arguments: {
+                                    'deliveryJobId': delivery['deliveryJobId'],
+                                  },
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const DeliveriesListScreen(),
-                  const WalletPinGateScreen(),
+                  const TransactionsListScreen(),
                   const SupportScreen(),
                   const ProfileScreen(),
                 ],

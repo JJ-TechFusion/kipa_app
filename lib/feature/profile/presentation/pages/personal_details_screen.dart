@@ -29,6 +29,9 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
     final lastNameController = TextEditingController(text: user.lastName);
 
     showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       context: context,
       isScrollControlled: true,
       builder: (context) => Padding(
@@ -77,10 +80,13 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                       lastName: lastNameController.text,
                     );
               },
-              child: CustomButton(
-                title: 'Save Changes',
-                color: AppColor.onboardingPrimary,
-                borderRadius: 28,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 36),
+                child: CustomButton(
+                  title: 'Save Changes',
+                  color: AppColor.onboardingPrimary,
+                  borderRadius: 28,
+                ),
               ),
             ),
             verticalSpace(16),
@@ -97,6 +103,9 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
     final emailController = TextEditingController(text: user.email);
 
     showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       context: context,
       isScrollControlled: true,
       builder: (context) => Padding(
@@ -144,10 +153,13 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                     .read(authNotifierProvider.notifier)
                     .updateProfile(email: emailController.text);
               },
-              child: CustomButton(
-                title: 'Save Changes',
-                color: AppColor.onboardingPrimary,
-                borderRadius: 28,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 36),
+                child: CustomButton(
+                  title: 'Save Changes',
+                  color: AppColor.onboardingPrimary,
+                  borderRadius: 28,
+                ),
               ),
             ),
             verticalSpace(16),
@@ -159,6 +171,9 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
   void _showEditPhotoDialog() {
     showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       context: context,
       builder: (context) => _EditPhotoSheet(),
     );

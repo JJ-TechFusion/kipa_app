@@ -25,7 +25,6 @@ class NotificationService {
   );
 
   Future<void> initialize() async {
-    await _requestPermissions();
     await _setupLocalNotifications();
 
     await _localNotifications
@@ -44,13 +43,21 @@ class NotificationService {
     }
   }
 
-  Future<void> _requestPermissions() async {
-    await _messaging.requestPermission(
+  Future<bool> requestPermissions() async {
+    final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
       provisional: false,
     );
+    return settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
+  }
+
+  Future<bool> isAuthorized() async {
+    final settings = await _messaging.getNotificationSettings();
+    return settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
   }
 
   Future<void> _setupLocalNotifications() async {

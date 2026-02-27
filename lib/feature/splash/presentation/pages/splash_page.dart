@@ -35,7 +35,6 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     } else if (appState.needsProfileCompletion) {
       Navigator.of(context).pushReplacementNamed(RouteNames.userInfoRoute);
     } else if (appState.isAuthenticated) {
-      // Initialize notifications for authenticated users (fire and forget)
       debugPrint('[FCM] User is authenticated, initializing notifications...');
       _initializeNotifications();
       Navigator.of(context).pushReplacementNamed(RouteNames.homeRoute);
@@ -46,13 +45,20 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
   Future<void> _initializeNotifications() async {
     try {
-      debugPrint('[FCM] Starting notification service initialization...');
+      debugPrint('[FCM] Starting notification setup...');
 
       final notificationService = getIt<NotificationService>();
       final notificationDatasource = getIt<NotificationRemoteDatasource>();
 
-      await notificationService.initialize();
-      debugPrint('[FCM] Notification service initialized');
+      final authorized = await notificationService.requestPermissions();
+      debugPrint('[FCM] Notification permissions authorized: $authorized');
+
+      if (!authorized) {
+        debugPrint(
+          '[FCM] Notifications not authorized, skipping token registration',
+        );
+        return;
+      }
 
       final token = await notificationService.getToken();
       debugPrint('[FCM] FCM Token: $token');

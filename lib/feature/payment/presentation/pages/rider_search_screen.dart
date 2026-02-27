@@ -7,6 +7,7 @@ import 'package:kipa/core/services/location/google_places_service.dart';
 import 'package:kipa/core/shared/widgets/buttons/animated_button.dart';
 import 'package:kipa/core/shared/widgets/buttons/roundedbutton.dart';
 import 'package:kipa/core/shared/widgets/custom_text.dart';
+import 'package:kipa/core/utils/map_marker_generator.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 import 'package:kipa/core/routes/route_names.dart';
@@ -32,7 +33,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
 
   // Animation controllers
   late AnimationController _pulseController;
-  late AnimationController _rotationController;
 
   // Default to Lagos, Nigeria
   static const LatLng _defaultLocation = LatLng(6.5244, 3.3792);
@@ -49,6 +49,10 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
   LatLng? _dropoffLocation;
   bool _isLoadingLocations = true;
 
+  // Custom marker icons
+  BitmapDescriptor? _pickupMarkerIcon;
+  BitmapDescriptor? _dropoffMarkerIcon;
+
   @override
   void initState() {
     super.initState();
@@ -61,15 +65,18 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
       vsync: this,
     )..repeat();
 
-    // Rotation for the center icon
-    _rotationController = AnimationController(
-      duration: const Duration(milliseconds: 3000),
-      vsync: this,
-    )..repeat();
+    // Create custom markers
+    _createCustomMarkers();
 
     // Fetch payment request details and geocode addresses
     _fetchPaymentDetails();
     _startPolling();
+  }
+
+  Future<void> _createCustomMarkers() async {
+    _pickupMarkerIcon = await MapMarkerGenerator.createPickupMarker();
+    _dropoffMarkerIcon = await MapMarkerGenerator.createDropoffMarker();
+    if (mounted) setState(() {});
   }
 
   Future<void> _fetchPaymentDetails() async {
@@ -153,7 +160,8 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
       Marker(
         markerId: const MarkerId('pickup'),
         position: _pickupLocation!,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        anchor: const Offset(0.5, 0.5),
+        icon: _pickupMarkerIcon ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         infoWindow: InfoWindow(
           title: 'Pickup',
           snippet: _pickupAddress ?? 'Pickup location',
@@ -162,7 +170,8 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
       Marker(
         markerId: const MarkerId('dropoff'),
         position: _dropoffLocation!,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        anchor: const Offset(0.5, 0.5),
+        icon: _dropoffMarkerIcon ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         infoWindow: InfoWindow(
           title: 'Dropoff',
           snippet: _dropoffAddress ?? 'Dropoff location',
@@ -288,7 +297,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
   @override
   void dispose() {
     _pulseController.dispose();
-    _rotationController.dispose();
     _pollingTimer?.cancel();
     _mapController?.dispose();
     super.dispose();
@@ -497,8 +505,9 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
           // Cancel button
           Consumer(
             builder: (context, ref, child) {
-              final isCancelling =
-                  ref.watch(paymentNotifierProvider).isCancellingRiderSearch;
+              final isCancelling = ref
+                  .watch(paymentNotifierProvider)
+                  .isCancellingRiderSearch;
               return AnimatedButton(
                 onTap: isCancelling ? null : () => _cancelRiderSearch(),
                 child: CustomButton(
@@ -556,33 +565,25 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
           }),
 
           // Center icon
-          AnimatedBuilder(
-            animation: _rotationController,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: _rotationController.value * 2 * pi,
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: AppColor.primary,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColor.primary.withAlpha(80),
-                        blurRadius: 15,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.delivery_dining,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppColor.primary,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColor.primary.withAlpha(80),
+                  blurRadius: 15,
+                  spreadRadius: 2,
                 ),
-              );
-            },
+              ],
+            ),
+            child: const Icon(
+              Icons.delivery_dining,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
         ],
       ),

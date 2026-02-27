@@ -67,10 +67,10 @@ class ErrandNotifier extends Notifier<ErrandState> {
             : params.pickupAddress,
         pickupLatitude: apiErrand.pickupLatitude ?? params.pickupLatitude,
         pickupLongitude: apiErrand.pickupLongitude ?? params.pickupLongitude,
-        pickupContactName: apiErrand.pickupContactName.isNotEmpty
+        pickupContactName: (apiErrand.pickupContactName != null && apiErrand.pickupContactName!.isNotEmpty)
             ? apiErrand.pickupContactName
             : params.pickupContactName,
-        pickupContactPhone: apiErrand.pickupContactPhone.isNotEmpty
+        pickupContactPhone: (apiErrand.pickupContactPhone != null && apiErrand.pickupContactPhone!.isNotEmpty)
             ? apiErrand.pickupContactPhone
             : params.pickupContactPhone,
         dropoffAddress: apiErrand.dropoffAddress.isNotEmpty
@@ -78,13 +78,13 @@ class ErrandNotifier extends Notifier<ErrandState> {
             : params.dropoffAddress,
         dropoffLatitude: apiErrand.dropoffLatitude ?? params.dropoffLatitude,
         dropoffLongitude: apiErrand.dropoffLongitude ?? params.dropoffLongitude,
-        dropoffContactName: apiErrand.dropoffContactName.isNotEmpty
+        dropoffContactName: (apiErrand.dropoffContactName != null && apiErrand.dropoffContactName!.isNotEmpty)
             ? apiErrand.dropoffContactName
             : params.dropoffContactName,
-        dropoffContactPhone: apiErrand.dropoffContactPhone.isNotEmpty
+        dropoffContactPhone: (apiErrand.dropoffContactPhone != null && apiErrand.dropoffContactPhone!.isNotEmpty)
             ? apiErrand.dropoffContactPhone
             : params.dropoffContactPhone,
-        packageDescription: apiErrand.packageDescription.isNotEmpty
+        packageDescription: (apiErrand.packageDescription != null && apiErrand.packageDescription!.isNotEmpty)
             ? apiErrand.packageDescription
             : params.packageDescription,
         packageSize: apiErrand.packageSize,

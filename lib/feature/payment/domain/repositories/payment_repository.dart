@@ -56,4 +56,6 @@ abstract class PaymentRepository {
     required String fileName,
     required List<int> fileBytes,
   });
+
+  Future<NetworkResponse> getTransactions({String? status});
 }

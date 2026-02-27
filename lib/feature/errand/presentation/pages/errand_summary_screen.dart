@@ -300,19 +300,24 @@ class ErrandSummaryScreen extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          _buildDetailRow('Size', errand.packageSize.displayName),
-          const Divider(height: 24),
-          _buildDetailRow('Description', errand.packageDescription),
-          if (errand.notes != null && errand.notes!.isNotEmpty) ...[
-            const Divider(height: 24),
-            _buildDetailRow('Notes', errand.notes!),
+          if (errand.packageDescription != null && errand.packageDescription!.isNotEmpty) ...[
+            _buildDetailRow('Description', errand.packageDescription!),
+            if (errand.notes != null && errand.notes!.isNotEmpty)
+              const Divider(height: 24),
           ],
+          if (errand.notes != null && errand.notes!.isNotEmpty)
+            _buildDetailRow('Pickup Instructions', errand.notes!),
+          if (errand.packageDescription == null && (errand.notes == null || errand.notes!.isEmpty))
+            const BodySmall('No package details provided', color: AppColor.lightText),
         ],
       ),
     );
   }
 
   Widget _buildContactsCard() {
+    final hasPickupContact = errand.pickupContactName != null || errand.pickupContactPhone != null;
+    final hasDropoffContact = errand.dropoffContactName != null || errand.dropoffContactPhone != null;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -322,19 +327,25 @@ class ErrandSummaryScreen extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          _buildContactRow(
-            'Pickup Contact',
-            errand.pickupContactName,
-            errand.pickupContactPhone,
-            Colors.green,
-          ),
-          const Divider(height: 24),
-          _buildContactRow(
-            'Dropoff Contact',
-            errand.dropoffContactName,
-            errand.dropoffContactPhone,
-            Colors.red,
-          ),
+          if (hasPickupContact) ...[
+            _buildContactRow(
+              'Pickup Contact',
+              errand.pickupContactName ?? 'Not provided',
+              errand.pickupContactPhone ?? 'Not provided',
+              Colors.green,
+            ),
+          ],
+          if (hasPickupContact && hasDropoffContact) const Divider(height: 24),
+          if (hasDropoffContact) ...[
+            _buildContactRow(
+              'Dropoff Contact',
+              errand.dropoffContactName ?? 'Not provided',
+              errand.dropoffContactPhone ?? 'Not provided',
+              Colors.red,
+            ),
+          ],
+          if (!hasPickupContact && !hasDropoffContact)
+            const BodySmall('No contact details provided', color: AppColor.lightText),
         ],
       ),
     );

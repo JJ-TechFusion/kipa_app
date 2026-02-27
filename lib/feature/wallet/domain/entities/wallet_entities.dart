@@ -30,15 +30,13 @@ class TopUpRequestEntity {
 }
 
 class TopUpResponseEntity {
-  final String accessCode;
-  final String authorizationUrl;
-  final String paymentReference;
+  final String link;
+  final String txRef;
   final String topUpId;
 
   TopUpResponseEntity({
-    required this.accessCode,
-    required this.authorizationUrl,
-    required this.paymentReference,
+    required this.link,
+    required this.txRef,
     required this.topUpId,
   });
 }
@@ -264,8 +262,5 @@ class PinResetConfirmRequestEntity {
   final String otpCode;
   final String newPin;
 
-  PinResetConfirmRequestEntity({
-    required this.otpCode,
-    required this.newPin,
-  });
+  PinResetConfirmRequestEntity({required this.otpCode, required this.newPin});
 }

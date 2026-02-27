@@ -40,15 +40,15 @@ class LocationInputCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: iconColor.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: iconColor, size: 20),
+                child: Icon(icon, color: iconColor, size: 16),
               ),
               horizontalSpace(12),
-              BodyText(
+              BodySmall(
                 title,
                 fontWeight: FontWeight.w600,
                 color: AppColor.darkPrimary,

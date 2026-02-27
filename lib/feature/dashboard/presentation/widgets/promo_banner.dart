@@ -14,10 +14,10 @@ class PromoBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 150,
+      height: 135,
       decoration: BoxDecoration(
         color: AppColor.primary,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -52,11 +52,10 @@ class PromoBanner extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.45,
-                    child: const BodyText(
+                    child: const BodySmall(
                       'Request riders for deliveries, pickups, and more',
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
-                      fontSize: 16,
                       maxLines: 3,
                     ),
                   ),
@@ -69,7 +68,8 @@ class PromoBanner extends StatelessWidget {
                       color: Colors.white,
                       textColor: AppColor.primaryText,
                       size: 13,
-                      borderRadius: 20,
+                      borderRadius: 8,
+                      padding: EdgeInsets.symmetric(vertical: 10),
                     ),
                   ),
                 ],

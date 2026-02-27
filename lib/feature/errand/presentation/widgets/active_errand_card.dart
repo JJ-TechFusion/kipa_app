@@ -80,7 +80,7 @@ class ActiveErrandCard extends StatelessWidget {
             ),
             verticalSpace(16),
             BodySmall(
-              errand.packageDescription,
+              errand.packageDescription ?? 'Package delivery',
               fontWeight: FontWeight.w500,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

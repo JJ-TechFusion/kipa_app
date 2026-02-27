@@ -77,10 +77,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             const Center(child: StepIndicator(currentStep: 1, totalSteps: 4)),
             verticalSpace(32),
 
-            const H3(
-              'Create an account with your\nphone number',
-              color: AppColor.primaryText,
-            ),
+            const H3('Enter your phone number', color: AppColor.primaryText),
             verticalSpace(32),
 
             TextInputField(
@@ -116,40 +113,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
             const Spacer(),
 
-            AnimatedButton(
-              onTap: _onNextPressed,
-              child: const CustomButton(
-                title: 'Next',
-                color: AppColor.onboardingPrimary,
-                borderRadius: 28,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: AnimatedButton(
+                onTap: _onNextPressed,
+                child: const CustomButton(
+                  title: 'Next',
+                  color: AppColor.onboardingPrimary,
+                  borderRadius: 28,
+                ),
               ),
             ),
-            verticalSpace(16),
 
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const BodyText(
-                    'Already have an account? ',
-                    color: AppColor.upholdGrey,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        RouteNames.loginRoute,
-                      );
-                    },
-                    child: const BodyText(
-                      'Sign in',
-                      fontWeight: FontWeight.w600,
-                      color: AppColor.onboardingPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
             verticalSpace(24),
           ],
         ),

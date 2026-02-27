@@ -122,4 +122,9 @@ class PaymentRepositoryImpl implements PaymentRepository {
       fileBytes: fileBytes,
     );
   }
+
+  @override
+  Future<NetworkResponse> getTransactions({String? status}) async {
+    return await remoteDataSource.getTransactions(status: status);
+  }
 }

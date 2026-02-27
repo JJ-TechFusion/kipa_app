@@ -34,7 +34,7 @@ class DashboardBottomNav extends StatelessWidget {
             children: [
               _buildNavItem(0, Icons.home_filled, 'Home'),
               _buildNavItem(1, CupertinoIcons.cube_box, 'Deliveries'),
-              _buildNavItem(2, Icons.account_balance_wallet_outlined, 'Wallet'),
+              _buildNavItem(2, Icons.wallet, 'Transactions'),
               _buildNavItem(3, Icons.support_agent, 'Support'),
               _buildNavItem(4, Icons.person_outline, 'Profile'),
             ],
@@ -52,7 +52,6 @@ class DashboardBottomNav extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Indicator line for selected item
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             height: 3,

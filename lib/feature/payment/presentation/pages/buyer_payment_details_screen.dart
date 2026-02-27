@@ -180,7 +180,7 @@ class _BuyerPaymentDetailsScreenState
                   _buildPaymentMethodOption(
                     index: 1,
                     title: 'Pay Online',
-                    subtitle: 'Pay with Paystack',
+                    subtitle: 'Pay with Flutterwave',
                     icon: Icons.language,
                   ),
 

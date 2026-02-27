@@ -134,11 +134,77 @@ class MapMarkerGenerator {
     return BitmapDescriptor.bytes(bytes!.buffer.asUint8List());
   }
 
+  /// Creates a circular marker with an icon inside
+  /// Used for pickup/dropoff location markers
+  static Future<BitmapDescriptor> createLocationMarker({
+    required Color color,
+    required IconData icon,
+    double size = 50,
+  }) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Draw outer shadow/glow effect
+    final shadowPaint = Paint()
+      ..color = color.withAlpha(40)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 4, shadowPaint);
+
+    // Draw white border circle
+    final borderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 8, borderPaint);
+
+    // Draw colored inner circle
+    final fillPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 14, fillPaint);
+
+    // Draw icon in center
+    final iconPainter = TextPainter(textDirection: TextDirection.ltr);
+    iconPainter.text = TextSpan(
+      text: String.fromCharCode(icon.codePoint),
+      style: TextStyle(
+        fontSize: size * 0.36,
+        fontFamily: icon.fontFamily,
+        package: icon.fontPackage,
+        color: Colors.white,
+      ),
+    );
+    iconPainter.layout();
+    iconPainter.paint(
+      canvas,
+      Offset((size - iconPainter.width) / 2, (size - iconPainter.height) / 2),
+    );
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(size.toInt(), size.toInt());
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    return BitmapDescriptor.bytes(bytes!.buffer.asUint8List());
+  }
+
+  /// Convenience method to create pickup marker
+  static Future<BitmapDescriptor> createPickupMarker() {
+    return createLocationMarker(
+      color: pickupColor,
+      icon: Icons.arrow_upward_rounded,
+    );
+  }
+
+  /// Convenience method to create dropoff marker
+  static Future<BitmapDescriptor> createDropoffMarker() {
+    return createLocationMarker(
+      color: const Color(0xFFEF4444),
+      icon: Icons.arrow_downward_rounded,
+    );
+  }
+
   /// Predefined marker colors
   static const Color pickupColor = Color(0xFF2196F3); // Blue
-  static const Color dropoffColor = Color(0xFF4CAF50); // Green
+  static const Color dropoffColor = Color(0xFFEF4444); // Red
   static const Color riderColor = Color(0xFF2196F3); // Blue
-  static const Color nearbyRiderColor = Color(
-    0xFF2196F3,
-  ); // Blue (lighter opacity)
+  static const Color nearbyRiderColor = Color(0xFF2196F3);
 }

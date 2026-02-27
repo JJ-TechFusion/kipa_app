@@ -66,13 +66,15 @@ class ErrandListItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       BodySmall(
-                        errand.packageDescription,
+                        errand.packageDescription ?? 'Package delivery',
                         fontWeight: FontWeight.w500,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      verticalSpace(4),
-                      Caption(errand.packageSize.displayName),
+                      if (errand.packageSize != null) ...[
+                        verticalSpace(4),
+                        Caption(errand.packageSize!.displayName),
+                      ],
                     ],
                   ),
                 ),

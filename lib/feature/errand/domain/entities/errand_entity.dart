@@ -7,21 +7,21 @@ class ErrandEntity {
   final String pickupAddress;
   final double? pickupLatitude;
   final double? pickupLongitude;
-  final String pickupContactName;
-  final String pickupContactPhone;
+  final String? pickupContactName;
+  final String? pickupContactPhone;
   final String dropoffAddress;
   final double? dropoffLatitude;
   final double? dropoffLongitude;
-  final String dropoffContactName;
-  final String dropoffContactPhone;
-  final String packageDescription;
-  final PackageSize packageSize;
+  final String? dropoffContactName;
+  final String? dropoffContactPhone;
+  final String? packageDescription;
+  final PackageSize? packageSize;
   final String? notes;
   final double? estimatedPrice;
   final double? estimatedDistanceKm;
   final int? estimatedDurationMins;
   final ErrandDeliveryJobEntity? deliveryJob;
-  final String? dropoffCode; // Stored at errand level from API
+  final String? dropoffCode;
   final ErrandTimelineEntity? timeline;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -32,15 +32,15 @@ class ErrandEntity {
     required this.pickupAddress,
     this.pickupLatitude,
     this.pickupLongitude,
-    required this.pickupContactName,
-    required this.pickupContactPhone,
+    this.pickupContactName,
+    this.pickupContactPhone,
     required this.dropoffAddress,
     this.dropoffLatitude,
     this.dropoffLongitude,
-    required this.dropoffContactName,
-    required this.dropoffContactPhone,
-    required this.packageDescription,
-    required this.packageSize,
+    this.dropoffContactName,
+    this.dropoffContactPhone,
+    this.packageDescription,
+    this.packageSize,
     this.notes,
     this.estimatedPrice,
     this.estimatedDistanceKm,
@@ -95,7 +95,8 @@ class ErrandEntity {
       notes: notes ?? this.notes,
       estimatedPrice: estimatedPrice ?? this.estimatedPrice,
       estimatedDistanceKm: estimatedDistanceKm ?? this.estimatedDistanceKm,
-      estimatedDurationMins: estimatedDurationMins ?? this.estimatedDurationMins,
+      estimatedDurationMins:
+          estimatedDurationMins ?? this.estimatedDurationMins,
       deliveryJob: deliveryJob ?? this.deliveryJob,
       dropoffCode: dropoffCode ?? this.dropoffCode,
       timeline: timeline ?? this.timeline,
@@ -109,10 +110,7 @@ class ErrandTimelineEntity {
   final List<ErrandTimelineStepEntity> steps;
   final String? currentStep;
 
-  const ErrandTimelineEntity({
-    required this.steps,
-    this.currentStep,
-  });
+  const ErrandTimelineEntity({required this.steps, this.currentStep});
 }
 
 class ErrandTimelineStepEntity {
@@ -223,30 +221,30 @@ class CreateErrandParams {
   final String pickupAddress;
   final double pickupLatitude;
   final double pickupLongitude;
-  final String pickupContactName;
-  final String pickupContactPhone;
+  final String? pickupContactName;
+  final String? pickupContactPhone;
   final String dropoffAddress;
   final double dropoffLatitude;
   final double dropoffLongitude;
-  final String dropoffContactName;
-  final String dropoffContactPhone;
-  final String packageDescription;
-  final PackageSize packageSize;
+  final String? dropoffContactName;
+  final String? dropoffContactPhone;
+  final String? packageDescription;
+  final String vehicleType;
   final String? notes;
 
   const CreateErrandParams({
     required this.pickupAddress,
     required this.pickupLatitude,
     required this.pickupLongitude,
-    required this.pickupContactName,
-    required this.pickupContactPhone,
+    this.pickupContactName,
+    this.pickupContactPhone,
     required this.dropoffAddress,
     required this.dropoffLatitude,
     required this.dropoffLongitude,
-    required this.dropoffContactName,
-    required this.dropoffContactPhone,
-    required this.packageDescription,
-    required this.packageSize,
+    this.dropoffContactName,
+    this.dropoffContactPhone,
+    this.packageDescription,
+    required this.vehicleType,
     this.notes,
   });
 
@@ -255,16 +253,18 @@ class CreateErrandParams {
       'pickup_address': pickupAddress,
       'pickup_lat': pickupLatitude,
       'pickup_lng': pickupLongitude,
-      'pickup_contact_name': pickupContactName,
-      'pickup_contact_phone': pickupContactPhone,
+      if (pickupContactName != null) 'pickup_contact_name': pickupContactName,
+      if (pickupContactPhone != null)
+        'pickup_contact_phone': pickupContactPhone,
       'dropoff_address': dropoffAddress,
       'dropoff_lat': dropoffLatitude,
       'dropoff_lng': dropoffLongitude,
-      'dropoff_contact_name': dropoffContactName,
-      'dropoff_contact_phone': dropoffContactPhone,
-      'package_description': packageDescription,
-      'package_size': packageSize.value,
-      'vehicle_type': packageSize == PackageSize.large ? 'car' : 'motorcycle',
+      if (dropoffContactName != null)
+        'dropoff_contact_name': dropoffContactName,
+      if (dropoffContactPhone != null)
+        'dropoff_contact_phone': dropoffContactPhone,
+      if (packageDescription != null) 'package_description': packageDescription,
+      'vehicle_type': vehicleType,
       if (notes != null) 'notes': notes,
     };
   }

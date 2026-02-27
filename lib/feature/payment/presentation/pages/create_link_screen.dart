@@ -36,6 +36,8 @@ class _CreateLinkActionScreenState
   String? _processingTime;
   String _linkExpiry = 'reusable';
   File? _selectedImage;
+  Future<String?>? _imageUploadFuture;
+  String? _uploadedImageUrl;
 
   @override
   void initState() {
@@ -71,6 +73,28 @@ class _CreateLinkActionScreenState
 
     final isReusable = data['isReusable'] as bool? ?? true;
     _linkExpiry = isReusable ? 'reusable' : 'one_time';
+  }
+
+  void _onImageSelected(File? file) {
+    if (file == null) return;
+    setState(() {
+      _selectedImage = file;
+      _uploadedImageUrl = null;
+    });
+    // Start uploading immediately in the background
+    _imageUploadFuture = _uploadImage(file);
+  }
+
+  Future<String?> _uploadImage(File file) async {
+    final bytes = await file.readAsBytes();
+    final fileName = file.path.split('/').last;
+    final url = await ref
+        .read(paymentNotifierProvider.notifier)
+        .uploadItemImage(fileName: fileName, fileBytes: bytes);
+    if (mounted) {
+      setState(() => _uploadedImageUrl = url);
+    }
+    return url;
   }
 
   @override
@@ -110,13 +134,34 @@ class _CreateLinkActionScreenState
                 if (!widget.isEdit) ...[_buildInfoBox(), verticalSpace(24)],
 
                 Center(
-                  child: ImagePickerWidget(
-                    size: 80,
-                    onImageSelected: (file) {
-                      setState(() {
-                        _selectedImage = file;
-                      });
-                    },
+                  child: Stack(
+                    children: [
+                      ImagePickerWidget(
+                        size: 80,
+                        onImageSelected: _onImageSelected,
+                      ),
+                      if (paymentState.isUploadingItemImage)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(100),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 verticalSpace(8),
@@ -213,7 +258,8 @@ class _CreateLinkActionScreenState
             ),
           ),
 
-          if (paymentState.isCreatingPaymentRequest)
+          if (paymentState.isCreatingPaymentRequest ||
+              paymentState.isUploadingItemImage)
             Container(
               color: Colors.black.withValues(alpha: 0.5),
               child: const Center(
@@ -285,7 +331,7 @@ class _CreateLinkActionScreenState
     );
   }
 
-  void _handleGenerateLink() {
+  Future<void> _handleGenerateLink() async {
     if (_nameController.text.isEmpty) {
       _showError('Please enter item name');
       return;
@@ -303,12 +349,31 @@ class _CreateLinkActionScreenState
       return;
     }
 
+    // If image was selected, wait for its background upload to finish
+    List<String> itemImageUrls = [];
+    if (_selectedImage != null) {
+      // Await the in-flight upload if it hasn't completed yet
+      final url = _uploadedImageUrl ?? await _imageUploadFuture;
+      if (url != null) {
+        itemImageUrls = [url];
+      } else if (mounted) {
+        final errorMessage =
+            ref.read(paymentNotifierProvider).errorMessage ??
+            'Failed to upload image';
+        _showError(errorMessage);
+        return;
+      }
+    }
+
+    if (!mounted) return;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => VerifyTransactionModal(
-        onGenerate: (selectedExpiry) => _createPaymentRequest(selectedExpiry),
+        onGenerate: (selectedExpiry) =>
+            _createPaymentRequest(selectedExpiry, itemImageUrls),
         itemName: _nameController.text,
         itemDescription: _descController.text,
         itemPrice: double.tryParse(_priceController.text) ?? 0.0,
@@ -317,32 +382,18 @@ class _CreateLinkActionScreenState
     );
   }
 
-  Future<void> _createPaymentRequest(String linkExpiry) async {
+  Future<void> _createPaymentRequest(
+    String linkExpiry,
+    List<String> itemImageUrls,
+  ) async {
     Navigator.pop(context);
 
     int processingHours = _processingTimeMap[_processingTime!] ?? 24;
 
-    // Upload image first if one was selected
-    List<String> itemImageUrls = [];
-    if (_selectedImage != null) {
-      final bytes = await _selectedImage!.readAsBytes();
-      final fileName = _selectedImage!.path.split('/').last;
-      final url = await ref.read(paymentNotifierProvider.notifier).uploadItemImage(
-            fileName: fileName,
-            fileBytes: bytes,
-          );
-      if (url != null) {
-        itemImageUrls = [url];
-      } else if (mounted) {
-        // Upload failed — show error and abort
-        final errorMessage = ref.read(paymentNotifierProvider).errorMessage ?? 'Failed to upload image';
-        _showError(errorMessage);
-        return;
-      }
-    }
-
     if (widget.isEdit && widget.paymentRequest != null) {
-      await ref.read(paymentNotifierProvider.notifier).updatePaymentRequest(
+      await ref
+          .read(paymentNotifierProvider.notifier)
+          .updatePaymentRequest(
             id: widget.paymentRequest!['id'] as String,
             itemName: _nameController.text,
             itemDescription: _descController.text,
@@ -353,7 +404,9 @@ class _CreateLinkActionScreenState
             maxUses: linkExpiry == 'reusable' ? 5 : null,
           );
     } else {
-      await ref.read(paymentNotifierProvider.notifier).createPaymentRequest(
+      await ref
+          .read(paymentNotifierProvider.notifier)
+          .createPaymentRequest(
             itemName: _nameController.text,
             itemDescription: _descController.text,
             itemPrice: double.tryParse(_priceController.text) ?? 0.0,

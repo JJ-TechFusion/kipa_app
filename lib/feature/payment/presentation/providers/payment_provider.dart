@@ -20,10 +20,13 @@ import '../../domain/usecases/get_transaction_status_usecase.dart';
 import '../../domain/usecases/upload_item_image_usecase.dart';
 import '../../domain/usecases/ship_logistics_delivery_usecase.dart';
 import '../../domain/usecases/upload_shipment_receipt_usecase.dart';
+import '../../domain/usecases/get_transactions_usecase.dart';
 import '../state/payment_notifier.dart';
 import '../state/payment_state.dart';
 import '../state/transaction_status_notifier.dart';
 import '../state/transaction_status_state.dart';
+import '../state/transactions_list_notifier.dart';
+import '../state/transactions_list_state.dart';
 
 // Data Sources
 final paymentRemoteDataSourceProvider = Provider<PaymentRemoteDataSource>((
@@ -107,8 +110,8 @@ final cancelRiderSearchUseCaseProvider = Provider<CancelRiderSearchUseCase>((
 
 final getTransactionStatusUseCaseProvider =
     Provider<GetTransactionStatusUseCase>((ref) {
-  return GetTransactionStatusUseCase(ref.read(paymentRepositoryProvider));
-});
+      return GetTransactionStatusUseCase(ref.read(paymentRepositoryProvider));
+    });
 
 final uploadItemImageUseCaseProvider = Provider<UploadItemImageUseCase>((ref) {
   return UploadItemImageUseCase(ref.read(paymentRepositoryProvider));
@@ -116,13 +119,13 @@ final uploadItemImageUseCaseProvider = Provider<UploadItemImageUseCase>((ref) {
 
 final shipLogisticsDeliveryUseCaseProvider =
     Provider<ShipLogisticsDeliveryUseCase>((ref) {
-  return ShipLogisticsDeliveryUseCase(ref.read(paymentRepositoryProvider));
-});
+      return ShipLogisticsDeliveryUseCase(ref.read(paymentRepositoryProvider));
+    });
 
 final uploadShipmentReceiptUseCaseProvider =
     Provider<UploadShipmentReceiptUseCase>((ref) {
-  return UploadShipmentReceiptUseCase(ref.read(paymentRepositoryProvider));
-});
+      return UploadShipmentReceiptUseCase(ref.read(paymentRepositoryProvider));
+    });
 
 final paymentNotifierProvider = NotifierProvider<PaymentNotifier, PaymentState>(
   PaymentNotifier.new,
@@ -130,5 +133,14 @@ final paymentNotifierProvider = NotifierProvider<PaymentNotifier, PaymentState>(
 
 final transactionStatusNotifierProvider =
     NotifierProvider<TransactionStatusNotifier, TransactionStatusState>(
-  TransactionStatusNotifier.new,
-);
+      TransactionStatusNotifier.new,
+    );
+
+final getTransactionsUseCaseProvider = Provider<GetTransactionsUseCase>((ref) {
+  return GetTransactionsUseCase(ref.read(paymentRepositoryProvider));
+});
+
+final transactionsListNotifierProvider =
+    NotifierProvider<TransactionsListNotifier, TransactionsListState>(
+      TransactionsListNotifier.new,
+    );

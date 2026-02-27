@@ -98,7 +98,7 @@ class PaymentLinkCard extends ConsumerWidget {
             if (status.canMarkReady && !_isInterState)
               _buildReadyForPickupButton(context, ref)
             else if (status == PaymentRequestStatus.searchingRider)
-              _buildSearchingIndicator()
+              _buildSearchingIndicator(context, ref)
             else if (status.shouldShowTracking && !_isInterState)
               _buildTrackDeliveryButton(context, status)
             else if (!_isInterState)
@@ -135,33 +135,111 @@ class PaymentLinkCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildSearchingIndicator() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColor.primary.withAlpha(20),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: AppColor.primary.withAlpha(60)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColor.primary),
+  Widget _buildSearchingIndicator(BuildContext context, WidgetRef ref) {
+    final paymentRequestId = data['id'] as String;
+
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              RouteNames.riderSearchRoute,
+              arguments: {'paymentRequestId': paymentRequestId},
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColor.primary.withAlpha(20),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: AppColor.primary.withAlpha(60)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.primary),
+                  ),
+                ),
+                horizontalSpace(8),
+                const BodySmall(
+                  'Searching for rider...',
+                  fontWeight: FontWeight.w600,
+                  color: AppColor.primary,
+                ),
+                horizontalSpace(4),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 12,
+                  color: AppColor.primary,
+                ),
+              ],
             ),
           ),
-          horizontalSpace(8),
-          const BodySmall(
-            'Searching for rider...',
-            fontWeight: FontWeight.w600,
-            color: AppColor.primary,
+        ),
+        verticalSpace(8),
+        GestureDetector(
+          onTap: () async {
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog.adaptive(
+                title: const BodySmall(
+                  'Cancel Search?',
+                  color: AppColor.primary,
+                  lineHeight: 2,
+                ),
+                content: const BodySmall(
+                  'Are you sure you want to cancel the rider search?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const BodyText('No'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const BodyText(
+                      'Yes, Cancel',
+                      color: AppColor.errorColor,
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirmed == true) {
+              ref
+                  .read(paymentNotifierProvider.notifier)
+                  .cancelRiderSearch(paymentRequestId: paymentRequestId);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.red.withAlpha(15),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.red.withAlpha(40)),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.close, size: 16, color: Colors.red),
+                SizedBox(width: 6),
+                BodySmall(
+                  'Cancel Search',
+                  fontWeight: FontWeight.w500,
+                  color: Colors.red,
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

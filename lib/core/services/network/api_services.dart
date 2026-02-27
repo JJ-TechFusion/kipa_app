@@ -10,6 +10,20 @@ class ApiService {
   final Dio _dio;
   final AuthTokenService _authTokenService;
 
+  static const _excludedFrom401Logout = [
+    '/wallet/pin/verify',
+    '/wallet/pin',
+    '/wallet/pin/status',
+    '/wallet/pin/reset/confirm',
+  ];
+
+  bool _shouldHandleTokenExpiration(String? endpoint) {
+    if (endpoint == null) return true;
+    return !_excludedFrom401Logout.any(
+      (excluded) => endpoint.contains(excluded),
+    );
+  }
+
   ApiService(Dio instance, {AuthTokenService? authTokenService})
     : _dio = instance,
       _authTokenService = authTokenService ?? getIt<AuthTokenService>();
@@ -34,7 +48,7 @@ class ApiService {
 
       final networkResponse = NetworkResponse.fromMap(response.data);
 
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -54,7 +68,7 @@ class ApiService {
           statusCode: 503,
         );
       } else if (e is DioException) {
-        return await _handleDioException(e);
+        return await _handleDioException(e, endpoint);
       }
       return NetworkResponse(
         success: false,
@@ -77,15 +91,14 @@ class ApiService {
         queryParameters: query,
         data: requestBody,
         options: Options(
-          headers:
-              isProtected
-                  ? await _fetchHeaders()
-                  : {'Content-Type': 'application/json'},
+          headers: isProtected
+              ? await _fetchHeaders()
+              : {'Content-Type': 'application/json'},
         ),
       );
 
       // Check for authentication errors (401 Unauthorized)
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -105,7 +118,7 @@ class ApiService {
           statusCode: 503,
         );
       } else if (e is DioException) {
-        return await _handleDioException(e);
+        return await _handleDioException(e, endpoint);
       }
       return NetworkResponse(
         success: false,
@@ -130,7 +143,7 @@ class ApiService {
         options: Options(headers: isProtected ? await _fetchHeaders() : null),
       );
 
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -150,7 +163,7 @@ class ApiService {
           statusCode: 503,
         );
       } else if (e is DioException) {
-        return await _handleDioException(e);
+        return await _handleDioException(e, endpoint);
       }
       return NetworkResponse(
         success: false,
@@ -175,7 +188,7 @@ class ApiService {
         options: Options(headers: isProtected ? await _fetchHeaders() : null),
       );
 
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -195,7 +208,7 @@ class ApiService {
           statusCode: 503,
         );
       } else if (e is DioException) {
-        return await _handleDioException(e);
+        return await _handleDioException(e, endpoint);
       }
       return NetworkResponse(
         success: false,
@@ -220,7 +233,7 @@ class ApiService {
         options: Options(headers: isProtected ? await _fetchHeaders() : null),
       );
 
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -240,7 +253,7 @@ class ApiService {
           statusCode: 503,
         );
       } else if (e is DioException) {
-        return await _handleDioException(e);
+        return await _handleDioException(e, endpoint);
       }
       return NetworkResponse(
         success: false,
@@ -290,7 +303,7 @@ class ApiService {
         options: Options(headers: multipartHeaders),
       );
 
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -310,7 +323,7 @@ class ApiService {
           statusCode: 503,
         );
       } else if (e is DioException) {
-        return await _handleDioException(e);
+        return await _handleDioException(e, endpoint);
       }
       return NetworkResponse(
         success: false,
@@ -350,7 +363,7 @@ class ApiService {
         'KYC form submission response: ${response.statusCode}, data: ${response.data}',
       );
 
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -375,7 +388,7 @@ class ApiService {
           'ApiService',
           'DioException: ${e.message}, Response: ${e.response?.data}',
         );
-        if (e.response?.statusCode == 401) {
+        if (e.response?.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
           await _authTokenService.handleTokenExpiration();
           return NetworkResponse(
             success: false,
@@ -418,8 +431,8 @@ class ApiService {
     return headers;
   }
 
-  Future<NetworkResponse> _handleDioException(DioException e) async {
-    if (e.response?.statusCode == 401) {
+  Future<NetworkResponse> _handleDioException(DioException e, [String? endpoint]) async {
+    if (e.response?.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
       await _authTokenService.handleTokenExpiration();
       return NetworkResponse(
         success: false,

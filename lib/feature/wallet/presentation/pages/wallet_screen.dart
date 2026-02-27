@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kipa/core/shared/widgets/app_webview_page.dart';
@@ -64,42 +65,48 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                     .read(walletNotifierProvider.notifier)
                     .getPendingFunds();
               },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    verticalSpace(20),
-                    _WalletBalanceCard(
-                      balance: wallet != null
-                          ? formatCurrency(
-                              wallet.availableBalance.toStringAsFixed(2),
-                            )
-                          : '₦0.00',
-                      pendingBalance: wallet != null
-                          ? formatCurrency(
-                              wallet.lockedBalance.toStringAsFixed(2),
-                            )
-                          : '₦0.00',
-                    ),
-                    verticalSpace(24),
-                    _WalletActionButtons(
-                      onTopUp: _showTopUpSheet,
-                      onWithdraw: () {},
-                    ),
-                    verticalSpace(30),
-                    const BodyText(
-                      "Pending Funds",
-                      fontWeight: FontWeight.bold,
-                    ),
-                    verticalSpace(16),
-                    const _PendingFundsList(),
-                    verticalSpace(30),
-                    const BodyText("Transactions", fontWeight: FontWeight.bold),
-                    verticalSpace(16),
-                    const _TransactionHistoryList(),
-                    verticalSpace(80),
-                  ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      verticalSpace(20),
+                      _WalletBalanceCard(
+                        balance: wallet != null
+                            ? formatCurrency(
+                                wallet.availableBalance.toStringAsFixed(2),
+                              )
+                            : '₦0.00',
+                        pendingBalance: wallet != null
+                            ? formatCurrency(
+                                wallet.lockedBalance.toStringAsFixed(2),
+                              )
+                            : '₦0.00',
+                      ),
+                      verticalSpace(24),
+                      _WalletActionButtons(
+                        onTopUp: _showTopUpSheet,
+                        onWithdraw: () {},
+                      ),
+                      verticalSpace(30),
+                      const BodyText(
+                        "Pending Funds",
+                        fontWeight: FontWeight.bold,
+                      ),
+                      verticalSpace(16),
+                      const _PendingFundsList(),
+                      verticalSpace(30),
+                      const BodyText(
+                        "Transactions",
+                        fontWeight: FontWeight.bold,
+                      ),
+                      verticalSpace(16),
+                      const _TransactionHistoryList(),
+                      verticalSpace(80),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -173,11 +180,9 @@ class _TopUpAmountSheetState extends ConsumerState<_TopUpAmountSheet> {
         context,
         MaterialPageRoute(
           builder: (context) => AppWebviewPage(
-            pageUrl: topUpResponse.authorizationUrl,
+            pageUrl: topUpResponse.link,
             onPaymentComplete: () async {
-              await notifier.verifyTopUp(
-                reference: topUpResponse.paymentReference,
-              );
+              await notifier.verifyTopUp(reference: topUpResponse.txRef);
 
               if (mounted && context.mounted) {
                 final verifyState = ref.read(walletNotifierProvider);
@@ -291,7 +296,7 @@ class _TopUpAmountSheetState extends ConsumerState<_TopUpAmountSheet> {
   }
 }
 
-class _WalletBalanceCard extends StatelessWidget {
+class _WalletBalanceCard extends StatefulWidget {
   final String balance;
   final String pendingBalance;
 
@@ -299,6 +304,19 @@ class _WalletBalanceCard extends StatelessWidget {
     required this.balance,
     required this.pendingBalance,
   });
+
+  @override
+  State<_WalletBalanceCard> createState() => _WalletBalanceCardState();
+}
+
+class _WalletBalanceCardState extends State<_WalletBalanceCard> {
+  bool _obscureBalance = false;
+
+  void _toggleBalanceVisibility() {
+    setState(() {
+      _obscureBalance = !_obscureBalance;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -316,12 +334,21 @@ class _WalletBalanceCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              H1(balance, color: Colors.white, fontSize: 32),
+              H1(
+                _obscureBalance ? "••••••" : widget.balance,
+                color: Colors.white,
+                fontSize: 32,
+              ),
               horizontalSpace(10),
-              const Icon(
-                Icons.visibility_outlined,
-                color: Colors.white70,
-                size: 20,
+              GestureDetector(
+                onTap: _toggleBalanceVisibility,
+                child: Icon(
+                  _obscureBalance
+                      ? CupertinoIcons.eye_slash
+                      : CupertinoIcons.eye,
+                  color: Colors.white70,
+                  size: 20,
+                ),
               ),
             ],
           ),
@@ -333,7 +360,7 @@ class _WalletBalanceCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Caption(
-              "Pending Balance: $pendingBalance",
+              "Pending Balance: ${_obscureBalance ? "••••••" : widget.pendingBalance}",
               color: AppColor.lightText,
               fontWeight: FontWeight.w500,
             ),

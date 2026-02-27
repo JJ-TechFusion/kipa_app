@@ -1,15 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:kipa/core/shared/widgets/buttons/animated_button.dart';
-import 'package:kipa/core/shared/widgets/buttons/roundedbutton.dart';
 import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 
-class BuyerPaymentSuccessScreen extends StatelessWidget {
+class BuyerPaymentSuccessScreen extends StatefulWidget {
   final String? paymentRequestId;
 
   const BuyerPaymentSuccessScreen({super.key, this.paymentRequestId});
+
+  @override
+  State<BuyerPaymentSuccessScreen> createState() =>
+      _BuyerPaymentSuccessScreenState();
+}
+
+class _BuyerPaymentSuccessScreenState extends State<BuyerPaymentSuccessScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RouteNames.homeRoute,
+          (route) => false,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,36 +78,13 @@ class BuyerPaymentSuccessScreen extends StatelessWidget {
                 ),
               ),
               const Spacer(flex: 3),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
-                child: AnimatedButton(
-                  onTap: () {
-                    debugPrint('Payment Request ID: $paymentRequestId');
-                    if (paymentRequestId != null && paymentRequestId!.isNotEmpty) {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        RouteNames.transactionStatusRoute,
-                        (route) => route.isFirst,
-                        arguments: {
-                          'paymentRequestId': paymentRequestId,
-                        },
-                      );
-                    } else {
-                      // Navigate to dashboard if no paymentRequestId
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        RouteNames.dashboardRoute,
-                        (route) => false,
-                      );
-                    }
-                  },
-                  child: CustomButton(
-                    title: 'View Transaction Details',
-                    borderRadius: 30,
-                  ),
-                ),
+              const CircularProgressIndicator.adaptive(),
+              verticalSpace(12),
+              const BodySmall(
+                'Redirecting to home...',
+                color: AppColor.lightText,
               ),
-              verticalSpace(20),
+              verticalSpace(32),
             ],
           ),
         ),

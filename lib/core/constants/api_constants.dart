@@ -11,6 +11,7 @@ class ApiEndpoints {
   static const String deleteAccountUrl = '/auth/account';
   static const String createPaymentRequestUrl = '/payment-requests';
   static const String paymentRequestHistoryUrl = '/payment-requests/history';
+  static const String transactionsListUrl = '/transactions';
 
   static String fulfillmentUrl(String paymentRequestId) =>
       '/payment-requests/$paymentRequestId/fulfillment';
@@ -28,8 +29,8 @@ class ApiEndpoints {
 
   // Wallet endpoints
   static const String walletUrl = '/wallet';
-  static const String walletTopUpUrl = '/wallet/top-up';
-  static const String walletTopUpVerifyUrl = '/wallet/top-up/verify';
+  static const String walletTopUpUrl = '/wallet/flutterwave/topup/initialize';
+  static const String walletTopUpVerifyUrl = '/wallet/flutterwave/topup/verify';
   static const String walletTransactionsUrl = '/wallet/transactions';
   static const String walletPendingUrl = '/wallet/pending';
 

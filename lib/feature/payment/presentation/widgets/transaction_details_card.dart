@@ -13,6 +13,7 @@ class TransactionDetailsCard extends StatelessWidget {
   final bool isReceived;
   final String? totalLabel;
   final String? deliveryFee;
+  final String? feeLabel;
 
   const TransactionDetailsCard({
     super.key,
@@ -25,6 +26,7 @@ class TransactionDetailsCard extends StatelessWidget {
     this.youReceive,
     this.totalLabel,
     this.deliveryFee,
+    this.feeLabel,
   });
 
   @override
@@ -69,7 +71,7 @@ class TransactionDetailsCard extends StatelessWidget {
           verticalSpace(16),
           _buildDetailRow('Item Price', itemPrice),
           verticalSpace(8),
-          _buildDetailRow('+1% Buyer Fee', buyerFee),
+          _buildDetailRow(feeLabel ?? '+1% Buyer Fee', buyerFee),
           verticalSpace(8),
           _buildDetailRow(
             totalLabel ?? 'Buyer Pays Total',

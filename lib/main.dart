@@ -20,6 +20,9 @@ void main() async {
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await initDependencies();
+
+  await getIt<NotificationService>().initialize();
+
   runApp(const ProviderScope(child: KipaApp()));
 }
 

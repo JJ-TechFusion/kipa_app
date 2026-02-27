@@ -139,36 +139,42 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Caption('Description'),
-                      Flexible(
-                        child: BodySmall(
-                          errand.packageDescription,
-                          fontWeight: FontWeight.w500,
-                          textAlign: TextAlign.end,
-                        ),
-                      ),
-                    ],
-                  ),
-                  verticalSpace(12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Caption('Package Size'),
-                      BodySmall(
-                        errand.packageSize.displayName,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ],
-                  ),
-                  if (errand.notes != null && errand.notes!.isNotEmpty) ...[
-                    verticalSpace(12),
+                  if (errand.packageDescription != null && errand.packageDescription!.isNotEmpty) ...[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Caption('Notes'),
+                        const Caption('Description'),
+                        Flexible(
+                          child: BodySmall(
+                            errand.packageDescription!,
+                            fontWeight: FontWeight.w500,
+                            textAlign: TextAlign.end,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (errand.packageSize != null || (errand.notes != null && errand.notes!.isNotEmpty))
+                      verticalSpace(12),
+                  ],
+                  if (errand.packageSize != null) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Caption('Package Size'),
+                        BodySmall(
+                          errand.packageSize!.displayName,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ],
+                    ),
+                    if (errand.notes != null && errand.notes!.isNotEmpty)
+                      verticalSpace(12),
+                  ],
+                  if (errand.notes != null && errand.notes!.isNotEmpty)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Caption('Pickup Instructions'),
                         Expanded(
                           child: BodySmall(
                             errand.notes!,
@@ -178,7 +184,10 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
                         ),
                       ],
                     ),
-                  ],
+                  if (errand.packageSize == null &&
+                      (errand.packageDescription == null || errand.packageDescription!.isEmpty) &&
+                      (errand.notes == null || errand.notes!.isEmpty))
+                    const BodySmall('No package details provided', color: AppColor.lightText),
                 ],
               ),
             ),
@@ -254,31 +263,44 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
             verticalSpace(20),
 
             // Contact info
-            _buildSectionTitle('Contacts'),
-            verticalSpace(12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+            if ((errand.pickupContactName != null && errand.pickupContactName!.isNotEmpty) ||
+                (errand.pickupContactPhone != null && errand.pickupContactPhone!.isNotEmpty) ||
+                (errand.dropoffContactName != null && errand.dropoffContactName!.isNotEmpty) ||
+                (errand.dropoffContactPhone != null && errand.dropoffContactPhone!.isNotEmpty)) ...[
+              _buildSectionTitle('Contacts'),
+              verticalSpace(12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    if ((errand.pickupContactName != null && errand.pickupContactName!.isNotEmpty) ||
+                        (errand.pickupContactPhone != null && errand.pickupContactPhone!.isNotEmpty))
+                      _buildContactRow(
+                        'Pickup Contact',
+                        errand.pickupContactName ?? 'Not provided',
+                        errand.pickupContactPhone ?? 'Not provided',
+                      ),
+                    if ((errand.pickupContactName != null && errand.pickupContactName!.isNotEmpty) ||
+                        (errand.pickupContactPhone != null && errand.pickupContactPhone!.isNotEmpty))
+                      if ((errand.dropoffContactName != null && errand.dropoffContactName!.isNotEmpty) ||
+                          (errand.dropoffContactPhone != null && errand.dropoffContactPhone!.isNotEmpty))
+                        verticalSpace(16),
+                    if ((errand.dropoffContactName != null && errand.dropoffContactName!.isNotEmpty) ||
+                        (errand.dropoffContactPhone != null && errand.dropoffContactPhone!.isNotEmpty))
+                      _buildContactRow(
+                        'Dropoff Contact',
+                        errand.dropoffContactName ?? 'Not provided',
+                        errand.dropoffContactPhone ?? 'Not provided',
+                      ),
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  _buildContactRow(
-                    'Pickup Contact',
-                    errand.pickupContactName,
-                    errand.pickupContactPhone,
-                  ),
-                  verticalSpace(16),
-                  _buildContactRow(
-                    'Dropoff Contact',
-                    errand.dropoffContactName,
-                    errand.dropoffContactPhone,
-                  ),
-                ],
-              ),
-            ),
+            ],
 
             // Rider info (if available)
             if (errand.deliveryJob?.rider != null) ...[
