@@ -25,12 +25,11 @@ class DashboardHeader extends StatelessWidget {
           onTap: onProfileTap,
           child: ClipOval(
             child: SmartImage(
-              imageUrl: profileImageUrl ?? 'assets/images/user.png',
+              imageUrl: profileImageUrl ?? '',
+              name: userName,
               width: 48,
               height: 48,
               fit: BoxFit.cover,
-              fallbackIcon: Icons.person,
-              fallbackIconSize: 24,
             ),
           ),
         ),

@@ -24,7 +24,7 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       setState(() {});
     });
@@ -74,8 +74,10 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
             child: Row(
               children: [
                 _buildTabItem(0, "Active Links"),
-                horizontalSpace(20),
-                _buildTabItem(1, "Link History"),
+                horizontalSpace(12),
+                _buildTabItem(1, "Drafts"),
+                horizontalSpace(12),
+                _buildTabItem(2, "History"),
               ],
             ),
           ),
@@ -83,7 +85,11 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [_buildActiveLinks(), _buildLinkHistory()],
+              children: [
+                _buildActiveLinks(),
+                _buildDrafts(),
+                _buildLinkHistory(),
+              ],
             ),
           ),
           Padding(
@@ -146,7 +152,10 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
       );
     }
 
-    final links = state.paymentRequests ?? [];
+    // Filter out drafts from active links
+    final links = (state.paymentRequests ?? [])
+        .where((link) => link.status.toLowerCase() != 'draft')
+        .toList();
 
     if (links.isEmpty) {
       return Center(
@@ -197,6 +206,84 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
               },
             );
           },
+          onEdit: () {
+            Navigator.pushNamed(
+              context,
+              RouteNames.createLinkActionRoute,
+              arguments: {
+                'isEdit': true,
+                'paymentRequest': {
+                  'id': link.id,
+                  'itemName': link.itemName,
+                  'itemDescription': link.itemDescription,
+                  'amount': link.itemPrice,
+                  'processingTimeHours': 24,
+                  'isReusable': link.isReusable,
+                },
+              },
+            ).then((_) {
+              ref.read(paymentNotifierProvider.notifier).fetchPaymentRequests();
+            });
+          },
+          onDelete: () => _confirmDelete(context, link.id),
+        );
+      },
+    );
+  }
+
+  Widget _buildDrafts() {
+    final state = ref.watch(paymentNotifierProvider);
+
+    if (state.isFetchingPaymentRequests || state.paymentRequests == null) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColor.primary),
+      );
+    }
+
+    // Filter only draft status
+    final drafts = (state.paymentRequests ?? [])
+        .where((link) => link.status.toLowerCase() == 'draft')
+        .toList();
+
+    if (drafts.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.drafts, size: 48, color: AppColor.kipaGrey),
+            verticalSpace(16),
+            const BodyText('No draft payment links', color: AppColor.kipaGrey),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      itemCount: drafts.length,
+      separatorBuilder: (context, index) => verticalSpace(16),
+      itemBuilder: (context, index) {
+        final link = drafts[index];
+
+        return PaymentLinkCard(
+          data: {
+            'id': link.id,
+            'status': link.status,
+            'date': 'Created ${_formatDate(link.createdAt)}',
+            'itemName': link.itemName,
+            'specs': link.itemDescription,
+            'amount': link.itemPrice.toStringAsFixed(2),
+            'isReusable': link.isReusable,
+            'pickupAddress': link.pickupAddress,
+            'dropoffAddress': link.dropoffAddress,
+            'delivery_job_id': link.deliveryJobId,
+            'delivery_type': link.deliveryType,
+            'pickup_lat': link.pickupLat,
+            'pickup_lng': link.pickupLng,
+            'dropoff_lat': link.dropoffLat,
+            'dropoff_lng': link.dropoffLng,
+          },
+          onReuse: () {},
           onEdit: () {
             Navigator.pushNamed(
               context,

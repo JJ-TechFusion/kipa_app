@@ -68,44 +68,49 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColor.scaffoldBackground,
-      appBar: AppBar(
-        title: const BodyText(
-          'Deliveries',
-          fontWeight: FontWeight.w600,
-          fontSize: 18,
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: AppColor.scaffoldBackground,
+        appBar: AppBar(
+          title: const BodyText(
+            'Deliveries',
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          automaticallyImplyLeading: false,
         ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-      ),
-      body: Column(
-        children: [
-          Row(
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
             children: [
-              _buildTabItem(0, "Intra-state"),
-              horizontalSpace(12),
-              _buildTabItem(1, "Inter-state"),
-              horizontalSpace(12),
-              _buildTabItem(2, "Errands"),
+              Row(
+                children: [
+                  _buildTabItem(0, "Intra-state"),
+                  horizontalSpace(12),
+                  _buildTabItem(1, "Inter-state"),
+                  horizontalSpace(12),
+                  _buildTabItem(2, "Errands"),
+                ],
+              ),
+              verticalSpace(16),
+              _buildStatusFilters(),
+              verticalSpace(16),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildIntraStateList(),
+                    _buildInterStateList(),
+                    _buildErrandsList(),
+                  ],
+                ),
+              ),
             ],
           ),
-          verticalSpace(16),
-          _buildStatusFilters(),
-          verticalSpace(16),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildIntraStateList(),
-                _buildInterStateList(),
-                _buildErrandsList(),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -268,11 +273,27 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
     final purchasesState = ref.watch(purchasesNotifierProvider);
     final salesState = ref.watch(salesNotifierProvider);
 
+    // Only show deliveries where rider has accepted
     final allPurchases = (purchasesState.purchases ?? [])
         .where((p) => p.deliveryType != 'inter_state')
+        .where((p) => p.delivery?.riderAssigned == true)
         .toList();
+
+    const riderAcceptedStatuses = [
+      'rider_assigned',
+      'in_delivery',
+      'delivered',
+      'confirmation_window',
+      'completed',
+      'return_in_progress',
+      'return_delivered',
+      'return_confirmed',
+    ];
     final allSales = (salesState.sales ?? [])
         .where((s) => s.deliveryType != 'inter_state')
+        .where(
+          (s) => riderAcceptedStatuses.contains(s.orderStatus.toLowerCase()),
+        )
         .toList();
 
     final purchases = _selectedStatus == 'all'
@@ -317,36 +338,43 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
             final riderAssigned = item.delivery?.riderAssigned ?? false;
             return DeliveryListItem(
               purchase: item,
-              onTap: riderAssigned ? () {
-                Navigator.pushNamed(
-                  context,
-                  RouteNames.deliveryDetailsRoute,
-                  arguments: {
-                    'deliveryJobId': item.delivery?.jobId ?? '',
-                    'purchaseId': item.id,
-                    'isBuyer': true,
-                  },
-                );
-              } : null,
+              onTap: riderAssigned
+                  ? () {
+                      Navigator.pushNamed(
+                        context,
+                        RouteNames.deliveryDetailsRoute,
+                        arguments: {
+                          'deliveryJobId': item.delivery?.jobId ?? '',
+                          'purchaseId': item.id,
+                          'isBuyer': true,
+                        },
+                      );
+                    }
+                  : null,
             );
           } else {
             final saleIndex = index - purchases.length;
             final item = sales[saleIndex];
             final orderStatus = item.orderStatus.toLowerCase();
-            final riderAssigned = orderStatus == 'in_delivery' || orderStatus == 'completed' || orderStatus == 'delivered';
+            final riderAssigned =
+                orderStatus == 'in_delivery' ||
+                orderStatus == 'completed' ||
+                orderStatus == 'delivered';
             return DeliveryListItem(
               sale: item,
-              onTap: riderAssigned ? () {
-                Navigator.pushNamed(
-                  context,
-                  RouteNames.deliveryDetailsRoute,
-                  arguments: {
-                    'deliveryJobId': item.deliveryJobId ?? '',
-                    'saleId': item.id,
-                    'isBuyer': false,
-                  },
-                );
-              } : null,
+              onTap: riderAssigned
+                  ? () {
+                      Navigator.pushNamed(
+                        context,
+                        RouteNames.deliveryDetailsRoute,
+                        arguments: {
+                          'deliveryJobId': item.deliveryJobId ?? '',
+                          'saleId': item.id,
+                          'isBuyer': false,
+                        },
+                      );
+                    }
+                  : null,
             );
           }
         },

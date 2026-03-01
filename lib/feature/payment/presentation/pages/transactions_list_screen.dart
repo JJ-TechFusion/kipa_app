@@ -35,54 +35,62 @@ class _TransactionsListScreenState
     return Scaffold(
       backgroundColor: AppColor.scaffoldBackground,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            verticalSpace(16),
-            const H4('Transactions'),
-            verticalSpace(16),
-            Row(
-              children: [
-                _buildFilterChip('All', 'all', state.selectedFilter, notifier),
-                horizontalSpace(8),
-                _buildFilterChip(
-                  'Active',
-                  'active',
-                  state.selectedFilter,
-                  notifier,
-                ),
-                horizontalSpace(8),
-                _buildFilterChip(
-                  'Completed',
-                  'completed',
-                  state.selectedFilter,
-                  notifier,
-                ),
-              ],
-            ),
-            verticalSpace(16),
-            Expanded(
-              child: state.isFetching
-                  ? const Center(child: CircularProgressIndicator())
-                  : state.errorMessage != null
-                  ? _buildErrorState(state.errorMessage!, notifier)
-                  : state.transactions == null || state.transactions!.isEmpty
-                  ? _buildEmptyState()
-                  : RefreshIndicator(
-                      onRefresh: () => notifier.fetchTransactions(),
-                      child: ListView.separated(
-                        itemCount: state.transactions!.length,
-                        separatorBuilder: (_, _) => verticalSpace(12),
-                        itemBuilder: (context, index) {
-                          return _buildTransactionCard(
-                            context,
-                            state.transactions![index],
-                          );
-                        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              verticalSpace(16),
+              Center(child: const H4('Transactions')),
+              verticalSpace(16),
+              Row(
+                children: [
+                  _buildFilterChip(
+                    'All',
+                    'all',
+                    state.selectedFilter,
+                    notifier,
+                  ),
+                  horizontalSpace(8),
+                  _buildFilterChip(
+                    'Active',
+                    'active',
+                    state.selectedFilter,
+                    notifier,
+                  ),
+                  horizontalSpace(8),
+                  _buildFilterChip(
+                    'Completed',
+                    'completed',
+                    state.selectedFilter,
+                    notifier,
+                  ),
+                ],
+              ),
+              verticalSpace(16),
+              Expanded(
+                child: state.isFetching
+                    ? const Center(child: CircularProgressIndicator())
+                    : state.errorMessage != null
+                    ? _buildErrorState(state.errorMessage!, notifier)
+                    : state.transactions == null || state.transactions!.isEmpty
+                    ? _buildEmptyState()
+                    : RefreshIndicator(
+                        onRefresh: () => notifier.fetchTransactions(),
+                        child: ListView.separated(
+                          itemCount: state.transactions!.length,
+                          separatorBuilder: (_, _) => verticalSpace(12),
+                          itemBuilder: (context, index) {
+                            return _buildTransactionCard(
+                              context,
+                              state.transactions![index],
+                            );
+                          },
+                        ),
                       ),
-                    ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

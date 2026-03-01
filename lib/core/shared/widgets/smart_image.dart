@@ -13,6 +13,8 @@ class SmartImage extends StatelessWidget {
   final IconData? fallbackIcon;
   final double? fallbackIconSize;
   final Color? backgroundColor;
+  final String? name;
+  final bool showInitials;
 
   const SmartImage({
     super.key,
@@ -27,10 +29,31 @@ class SmartImage extends StatelessWidget {
     this.fallbackIcon = Icons.home,
     this.fallbackIconSize = 60,
     this.backgroundColor,
+    this.name,
+    this.showInitials = true,
   });
+
+  String _getInitials() {
+    if (name == null || name!.isEmpty) return '?';
+    final nameParts = name!
+        .trim()
+        .split(' ')
+        .where((w) => w.isNotEmpty)
+        .toList();
+    if (nameParts.isEmpty) return '?';
+    if (nameParts.length == 1) return nameParts[0][0].toUpperCase();
+    return '${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}'
+        .toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (imageUrl.isEmpty ||
+        imageUrl.contains('placeholder') ||
+        imageUrl.contains('user_placeholder.png')) {
+      return _buildErrorWidget();
+    }
+
     final isNetworkImage = imageUrl.startsWith('http');
 
     if (isNetworkImage) {
@@ -49,10 +72,9 @@ class SmartImage extends StatelessWidget {
         },
       );
     } else {
-      final assetPath =
-          imageUrl.contains('assets/')
-              ? imageUrl
-              : 'assets/images/$imageUrl${imageUrl.contains('.') ? '' : '.png'}';
+      final assetPath = imageUrl.contains('assets/')
+          ? imageUrl
+          : 'assets/images/$imageUrl${imageUrl.contains('.') ? '' : '.png'}';
 
       return Image.asset(
         assetPath,
@@ -73,11 +95,10 @@ class SmartImage extends StatelessWidget {
       color: backgroundColor ?? Colors.grey[100],
       child: Center(
         child: CircularProgressIndicator(
-          value:
-              loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+              : null,
           strokeWidth: progressStrokeWidth!,
           color: progressColor ?? AppColor.primary,
         ),
@@ -86,13 +107,28 @@ class SmartImage extends StatelessWidget {
   }
 
   Widget _buildErrorWidget() {
+    if (errorWidget != null) return errorWidget!;
+
+    if (showInitials && name != null && name!.isNotEmpty) {
+      final radius = width != null ? width! / 2 : 20.0;
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: AppColor.primary,
+        child: Text(
+          _getInitials(),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: radius * 0.8,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
     return Container(
       width: width,
       height: height,
-      color: backgroundColor ?? Colors.grey[100],
-      child: Center(
-        child: Icon(fallbackIcon!, size: fallbackIconSize, color: Colors.grey),
-      ),
+      color: backgroundColor ?? Colors.transparent,
     );
   }
 }

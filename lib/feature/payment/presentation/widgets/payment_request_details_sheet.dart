@@ -235,32 +235,9 @@ class _PaymentRequestDetailsSheetState
                         ),
                         verticalSpace(32),
 
-                        // Action button - only show if not completed or if reusable
-                        if (!(details.status == 'completed' &&
-                            details.isReusable == false))
-                          SizedBox(
-                            width: double.infinity,
-                            child: CustomButton(
-                              title: 'Generate Payment Link',
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigator.pushNamed(
-                                  context,
-                                  RouteNames.fulfillmentFormRoute,
-                                  arguments: {
-                                    'paymentRequestId': widget.paymentRequestId,
-                                  },
-                                );
-                              },
-                              borderRadius: 30,
-                            ),
-                          ),
-                        if (!(details.status == 'completed' &&
-                            details.isReusable == false))
-                          verticalSpace(24),
-                        if (details.status == 'completed' &&
-                            details.isReusable == false)
-                          verticalSpace(12),
+                        // Action button
+                        _buildActionButton(details),
+                        verticalSpace(24),
                       ],
                     ),
                   ),
@@ -268,6 +245,50 @@ class _PaymentRequestDetailsSheetState
               ),
             ),
     );
+  }
+
+  Widget _buildActionButton(dynamic details) {
+    final status = PaymentRequestStatus.fromString(details.status);
+
+    // If payment is paid, show "View Transaction" button
+    if (status.isPaid) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: CustomButton(
+          title: 'View Transaction',
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(
+              context,
+              RouteNames.transactionStatusRoute,
+              arguments: {'paymentRequestId': widget.paymentRequestId},
+            );
+          },
+          borderRadius: 30,
+        ),
+      );
+    }
+
+    // Otherwise, show "Generate Payment Link" button if applicable
+    if (!(details.status == 'completed' && details.isReusable == false)) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: CustomButton(
+          title: 'Generate Payment Link',
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(
+              context,
+              RouteNames.fulfillmentFormRoute,
+              arguments: {'paymentRequestId': widget.paymentRequestId},
+            );
+          },
+          borderRadius: 30,
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   Widget _buildSectionHeader(String title) {

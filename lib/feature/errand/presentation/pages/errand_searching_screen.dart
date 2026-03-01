@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -263,7 +264,7 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: _pickupLocation ?? _defaultLocation,
-              zoom: 14,
+              zoom: Platform.isAndroid ? 18 : 14,
             ),
             onMapCreated: (controller) {
               _mapController = controller;

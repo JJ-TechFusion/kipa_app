@@ -631,24 +631,14 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          radius: 30,
-          backgroundColor: AppColor.primary.withAlpha(30),
-          child: rider.photoUrl != null
-              ? ClipOval(
-                  child: SmartImage(
-                    imageUrl: rider.photoUrl!,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    placeholder: Icon(
-                      Icons.person,
-                      color: AppColor.primary,
-                      size: 30,
-                    ),
-                  ),
-                )
-              : Icon(Icons.person, color: AppColor.primary, size: 30),
+        ClipOval(
+          child: SmartImage(
+            imageUrl: rider.photoUrl ?? '',
+            name: rider.name,
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+          ),
         ),
         horizontalSpace(16),
         Expanded(

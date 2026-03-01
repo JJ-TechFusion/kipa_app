@@ -132,14 +132,21 @@ class _TransactionStatusScreenState
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 22),
-        child: Column(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref
+              .read(transactionStatusNotifierProvider.notifier)
+              .fetchTransactionStatus(widget.paymentRequestId);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 22),
+          child: Column(
           children: [
             isPaid ? _buildReceivedHeader(transaction) : _buildPendingHeader(),
             verticalSpace(24),
 
-            if (isPaid && transaction.isSeller) ...[
+            if (isPaid && transaction.isSeller && _shouldShowProcessingBanner(transaction)) ...[
               _buildProcessingBanner(transaction),
               verticalSpace(24),
             ],
@@ -208,6 +215,7 @@ class _TransactionStatusScreenState
             ],
           ],
         ),
+        ),
       ),
     );
   }
@@ -267,6 +275,25 @@ class _TransactionStatusScreenState
         ),
       ],
     );
+  }
+
+  bool _shouldShowProcessingBanner(TransactionStatusEntity transaction) {
+    // For inter-state deliveries, hide processing banner once order is fulfilled
+    if (transaction.deliveryType.toLowerCase() == 'inter_state') {
+      // Check if current step has passed order fulfillment
+      final currentStep = transaction.timeline.currentStep.toLowerCase();
+
+      // Hide banner if current step is at or past shipment/fulfillment stages
+      if (currentStep.contains('shipped') ||
+          currentStep.contains('fulfilled') ||
+          currentStep.contains('in_transit') ||
+          currentStep.contains('delivered') ||
+          currentStep.contains('completed')) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   Widget _buildProcessingBanner(TransactionStatusEntity transaction) {

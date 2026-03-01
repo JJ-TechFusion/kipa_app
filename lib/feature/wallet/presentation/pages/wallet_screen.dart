@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/core/shared/widgets/app_webview_page.dart';
 import 'package:kipa/core/shared/widgets/custom_snackbar.dart';
 import 'package:kipa/core/shared/widgets/smart_image.dart';
@@ -96,9 +97,13 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () async {
-                final walletNotifier = ref.read(walletNotifierProvider.notifier);
+                final walletNotifier = ref.read(
+                  walletNotifierProvider.notifier,
+                );
                 final syncResponse = await walletNotifier.syncWallet();
-                if (mounted && syncResponse != null && syncResponse.amountSynced > 0) {
+                if (context.mounted &&
+                    syncResponse != null &&
+                    syncResponse.amountSynced > 0) {
                   CustomSnackBar.show(
                     context,
                     message:
@@ -611,10 +616,7 @@ class _AccountDetailRow extends StatelessWidget {
         Row(
           children: [
             BodySmall(value, fontWeight: FontWeight.w600),
-            if (trailing != null) ...[
-              horizontalSpace(8),
-              trailing!,
-            ],
+            if (trailing != null) ...[horizontalSpace(8), trailing!],
           ],
         ),
       ],
@@ -674,12 +676,18 @@ class _PendingFundsList extends ConsumerWidget {
               description: fund.itemDescription,
               amount: formatCurrency(fund.itemAmount.toStringAsFixed(2)),
               status: fund.formattedStatus,
-              imageUrl: fund.counterParty.photoUrl.isNotEmpty
-                  ? fund.counterParty.photoUrl
-                  : "/assets/images/user_placeholder.png",
+              imageUrl: fund.counterParty.photoUrl,
               expectedRelease: fund.createdAt.add(
                 Duration(hours: fund.processingTimeHours),
               ),
+              paymentRequestId: fund.paymentRequestId,
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  RouteNames.transactionStatusRoute,
+                  arguments: {'paymentRequestId': fund.paymentRequestId},
+                );
+              },
             ),
           );
         }).toList(),
@@ -697,6 +705,8 @@ class _PendingFundCard extends StatelessWidget {
   final String status;
   final String imageUrl;
   final DateTime expectedRelease;
+  final String paymentRequestId;
+  final VoidCallback? onTap;
 
   const _PendingFundCard({
     required this.name,
@@ -707,109 +717,121 @@ class _PendingFundCard extends StatelessWidget {
     required this.status,
     required this.imageUrl,
     required this.expectedRelease,
+    required this.paymentRequestId,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 320,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0E7FF),
-                  borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 320,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E7FF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Overline(
+                    status,
+                    color: AppColor.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                child: Overline(
-                  status,
-                  color: AppColor.primary,
-                  fontWeight: FontWeight.w600,
+                horizontalSpace(8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0F2F1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.verified_user_outlined,
+                        size: 10,
+                        color: AppColor.green,
+                      ),
+                      horizontalSpace(4),
+                      const Overline(
+                        "Kipa Protected",
+                        color: AppColor.green,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              horizontalSpace(8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0F2F1),
-                  borderRadius: BorderRadius.circular(12),
+              ],
+            ),
+            verticalSpace(12),
+            Row(
+              children: [
+                ClipOval(
+                  child: SmartImage(
+                    imageUrl: imageUrl,
+                    name: name,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-                child: Row(
+                horizontalSpace(12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.verified_user_outlined,
-                      size: 10,
-                      color: AppColor.green,
-                    ),
-                    horizontalSpace(4),
-                    const Overline(
-                      "Kipa Protected",
-                      color: AppColor.green,
-                      fontWeight: FontWeight.w600,
+                    BodyText(name, fontWeight: FontWeight.bold),
+                    Caption(role),
+                  ],
+                ),
+              ],
+            ),
+            verticalSpace(12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BodySmall(item, fontWeight: FontWeight.w600),
+                    verticalSpace(8),
+                    Caption(description, fontSize: 10),
+                    verticalSpace(4),
+                    Caption(
+                      "Expected Release: ${expectedRelease.toIso8601String()}",
+                      fontSize: 10,
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          verticalSpace(12),
-          Row(
-            children: [
-              ClipOval(
-                child: SmartImage(
-                  imageUrl: imageUrl,
-                  width: 40,
-                  height: 40,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              horizontalSpace(12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  BodyText(name, fontWeight: FontWeight.bold),
-                  Caption(role),
-                ],
-              ),
-            ],
-          ),
-          verticalSpace(12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  BodySmall(item, fontWeight: FontWeight.w600),
-                  verticalSpace(8),
-                  Caption(description, fontSize: 10),
-                  verticalSpace(4),
-                  Caption(
-                    "Expected Release: ${expectedRelease.toIso8601String()}",
-                    fontSize: 10,
-                  ),
-                ],
-              ),
-              BodySmall(amount, fontWeight: FontWeight.bold),
-            ],
-          ),
-        ],
+                BodySmall(amount, fontWeight: FontWeight.bold),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1026,7 +1048,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
       } else {
         final errorMessage =
             ref.read(walletNotifierProvider).errorMessage ??
-                'Failed to initiate withdrawal';
+            'Failed to initiate withdrawal';
         CustomSnackBar.show(
           context,
           message: errorMessage,
@@ -1041,8 +1063,9 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
     final bankAccountsState = ref.watch(bankAccountsNotifierProvider);
     final walletState = ref.watch(walletNotifierProvider);
     final bankAccounts = bankAccountsState.bankAccounts;
-    final defaultAccount =
-        bankAccounts.where((account) => account.isDefault).firstOrNull;
+    final defaultAccount = bankAccounts
+        .where((account) => account.isDefault)
+        .firstOrNull;
 
     if (_selectedBankAccountId == null && defaultAccount != null) {
       _selectedBankAccountId = defaultAccount.id;

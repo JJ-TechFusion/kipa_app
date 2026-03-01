@@ -81,6 +81,8 @@ class _LogisticsDeliveryDetailsScreenState
                 children: [
                   _buildDeliveryStatusCard(details),
                   verticalSpace(16),
+                  _buildEscrowStatusBadgeCentered(details),
+                  verticalSpace(16),
                   if (details.delivery.status == 'in_transit')
                     _buildDeliveryBannerCard(details),
 
@@ -88,22 +90,15 @@ class _LogisticsDeliveryDetailsScreenState
                   _buildItemCard(details),
                   verticalSpace(16),
                   _buildRouteCard(details),
-                  verticalSpace(16),
                   if (details.delivery.carrier.isNotEmpty) ...[
                     verticalSpace(16),
                     _buildShippingCard(context, details),
                   ],
                   verticalSpace(16),
-                  _buildEscrowCard(details),
-                  verticalSpace(16),
                   _buildPartiesCard(details),
                   if (details.timeline != null) ...[
                     verticalSpace(16),
                     _buildTimelineCard(details.timeline!),
-                  ],
-                  if (details.events.isNotEmpty) ...[
-                    verticalSpace(16),
-                    _buildEventsCard(details.events),
                   ],
                   if (details.dispute != null) ...[
                     verticalSpace(16),
@@ -121,6 +116,51 @@ class _LogisticsDeliveryDetailsScreenState
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildEscrowStatusBadgeCentered(
+    LogisticsDeliveryDetailsEntity details,
+  ) {
+    final escrowStatus = details.escrow?.status ?? '';
+    if (escrowStatus.isEmpty) return const SizedBox.shrink();
+
+    Color bgColor;
+    Color textColor;
+
+    switch (escrowStatus) {
+      case 'locked':
+      case 'funded':
+      case 'delivery_in_progress':
+        bgColor = const Color(0xFFFFF3E0);
+        textColor = Colors.orange;
+        break;
+      case 'released':
+        bgColor = const Color(0xFFE0F2F1);
+        textColor = const Color(0xFF00695C);
+        break;
+      case 'refunded':
+        bgColor = const Color(0xFFEDE7F6);
+        textColor = Colors.purple;
+        break;
+      default:
+        bgColor = AppColor.kipaGrey.withValues(alpha: 0.15);
+        textColor = AppColor.kipaGrey;
+    }
+
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: BodySmall(
+          _capitalize(escrowStatus),
+          color: textColor,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
@@ -585,53 +625,6 @@ class _LogisticsDeliveryDetailsScreenState
     );
   }
 
-  Widget _buildEscrowCard(LogisticsDeliveryDetailsEntity details) {
-    final escrow = details.escrow;
-    final pr = details.paymentRequest;
-
-    final itemAmount = escrow?.itemAmount ?? pr.itemPrice;
-    final buyerFee = escrow?.buyerFee ?? pr.buyerServiceFee;
-    final totalLocked = escrow?.totalLocked ?? pr.estimatedTotal;
-    final escrowStatus = escrow?.status ?? '';
-
-    return _card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const BodySmall('Escrow', fontWeight: FontWeight.w600),
-              const Spacer(),
-              if (escrowStatus.isNotEmpty) _escrowStatusBadge(escrowStatus),
-            ],
-          ),
-          verticalSpace(12),
-          _amountRow('Item Amount', itemAmount),
-          verticalSpace(6),
-          _amountRow('Buyer Fee', buyerFee),
-          verticalSpace(8),
-          const Divider(height: 1),
-          verticalSpace(8),
-          _amountRow('Total Locked', totalLocked, bold: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _amountRow(String label, double amount, {bool bold = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Caption(label, color: AppColor.kipaGrey2),
-        BodySmall(
-          'N${amount.toStringAsFixed(2)}',
-          fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
-          color: bold ? AppColor.primary : null,
-        ),
-      ],
-    );
-  }
-
   Widget _buildTimelineCard(LogisticsTimeline timeline) {
     final allSteps = [...timeline.steps, ...timeline.disputeSteps];
 
@@ -647,63 +640,6 @@ class _LogisticsDeliveryDetailsScreenState
     }).toList();
 
     return _card(child: TransactionTimeline(steps: timelineSteps));
-  }
-
-  Widget _buildEventsCard(List<LogisticsEventEntity> events) {
-    return _card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const BodySmall('Activity Log', fontWeight: FontWeight.w600),
-          verticalSpace(12),
-          ...events.map((event) => _buildEventItem(event)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEventItem(LogisticsEventEntity event) {
-    final label = event.fromStatus != null
-        ? '${_formatStatus(event.fromStatus!)} → ${_formatStatus(event.toStatus)}'
-        : _formatStatus(event.toStatus);
-
-    final actorLabel = _capitalize(event.actorType);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsets.only(top: 4),
-            decoration: const BoxDecoration(
-              color: AppColor.primary,
-              shape: BoxShape.circle,
-            ),
-          ),
-          horizontalSpace(10),
-          Expanded(
-            child: Column(
-              spacing: 4,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BodySmall(label, fontWeight: FontWeight.w500),
-                Caption(
-                  '$actorLabel · ${_formatDateTime(event.createdAt)}',
-                  color: AppColor.kipaGrey,
-                ),
-                if (event.reason != null && event.reason!.isNotEmpty) ...[
-                  verticalSpace(2),
-                  Caption(event.reason!, color: AppColor.kipaGrey2),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildDisputeCard(LogisticsDisputeEntity dispute) {
@@ -1032,26 +968,6 @@ class _LogisticsDeliveryDetailsScreenState
     );
   }
 
-  Widget _escrowStatusBadge(String status) {
-    Color color;
-    switch (status) {
-      case 'locked':
-      case 'funded':
-      case 'delivery_in_progress':
-        color = Colors.orange;
-        break;
-      case 'released':
-        color = Colors.green;
-        break;
-      case 'refunded':
-        color = Colors.purple;
-        break;
-      default:
-        color = AppColor.kipaGrey;
-    }
-    return _tag(_capitalize(status), color);
-  }
-
   Widget _tag(String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1091,8 +1007,6 @@ class _LogisticsDeliveryDetailsScreenState
         })
         .join(' ');
   }
-
-  String _formatStatus(String status) => _capitalize(status);
 
   String _formatDate(DateTime dt) {
     final months = [

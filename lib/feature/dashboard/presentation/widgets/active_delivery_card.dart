@@ -55,13 +55,10 @@ class ActiveDeliveryCard extends StatelessWidget {
               children: [
                 ClipOval(
                   child: SmartImage(
-                    imageUrl:
-                        deliveryData['buyerImage'] ??
-                        'assets/images/user_placeholder.png',
+                    imageUrl: deliveryData['buyerImage'] ?? '',
+                    name: deliveryData['buyerName'] ?? 'Buyer',
                     width: 40,
                     height: 40,
-                    fallbackIcon: Icons.person,
-                    fallbackIconSize: 20,
                   ),
                 ),
                 horizontalSpace(12),

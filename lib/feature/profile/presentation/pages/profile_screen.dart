@@ -108,13 +108,16 @@ class ProfileScreen extends ConsumerWidget {
     if (isDeletingAccount) {
       return const Scaffold(
         body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Deleting account...'),
-            ],
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator.adaptive(),
+                SizedBox(height: 16),
+                Text('Deleting account...'),
+              ],
+            ),
           ),
         ),
       );
@@ -126,125 +129,131 @@ class ProfileScreen extends ConsumerWidget {
         elevation: 0,
         toolbarHeight: 0,
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await ref.read(authNotifierProvider.notifier).fetchCurrentUser();
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              verticalSpace(20),
-              Center(
-                child: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColor.primary.withValues(alpha: 0.1),
-                          width: 2,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await ref.read(authNotifierProvider.notifier).fetchCurrentUser();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                verticalSpace(20),
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColor.primary.withValues(alpha: 0.1),
+                            width: 2,
+                          ),
+                        ),
+                        child: ClipOval(
+                          child: SmartImage(
+                            imageUrl: user.profileImageUrl ?? '',
+                            name: user.fullName,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                      child: ClipOval(
-                        child: SmartImage(
-                          imageUrl:
-                              (user.profileImageUrl == null ||
-                                  user.profileImageUrl!.isEmpty)
-                              ? 'assets/images/user.png'
-                              : user.profileImageUrl!,
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    verticalSpace(12),
-                    H4(user.fullName),
-                    verticalSpace(4),
-                    BodySmall(user.email, color: AppColor.lightText),
-                  ],
+                      verticalSpace(12),
+                      H4(user.fullName),
+                      verticalSpace(4),
+                      BodySmall(user.email, color: AppColor.lightText),
+                    ],
+                  ),
                 ),
-              ),
-              verticalSpace(32),
+                verticalSpace(32),
 
-              const BodyText("Account", fontWeight: FontWeight.bold),
-              verticalSpace(16),
-              _buildMenuItem(
-                context,
-                icon: Icons.person_outline,
-                title: "Personal Details",
-                onTap: () {
-                  Navigator.pushNamed(context, RouteNames.personalDetailsRoute);
-                },
-              ),
-              _buildMenuItem(
-                context,
-                icon: Icons.shield_outlined,
-                title: "Security & Privacy",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SecurityScreen(),
-                    ),
-                  );
-                },
-              ),
-              _buildMenuItem(
-                context,
-                icon: Icons.account_balance_wallet_outlined,
-                title: "Wallet",
-                onTap: () {
-                  Navigator.pushNamed(context, RouteNames.walletRoute);
-                },
-              ),
-              _buildMenuItem(
-                context,
-                icon: Icons.account_balance,
-                title: "Bank Accounts",
-                onTap: () {
-                  Navigator.pushNamed(context, RouteNames.bankAccountsRoute);
-                },
-              ),
-              _buildMenuItem(
-                context,
-                icon: Icons.link,
-                title: "Payment Links",
-                onTap: () {
-                  Navigator.pushNamed(context, RouteNames.paymentLinkListRoute);
-                },
-              ),
-              verticalSpace(24),
+                const BodyText("Account", fontWeight: FontWeight.bold),
+                verticalSpace(16),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.person_outline,
+                  title: "Personal Details",
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      RouteNames.personalDetailsRoute,
+                    );
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.shield_outlined,
+                  title: "Security & Privacy",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SecurityScreen(),
+                      ),
+                    );
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.account_balance_wallet_outlined,
+                  title: "Wallet",
+                  onTap: () {
+                    Navigator.pushNamed(context, RouteNames.walletRoute);
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.account_balance,
+                  title: "Bank Accounts",
+                  onTap: () {
+                    Navigator.pushNamed(context, RouteNames.bankAccountsRoute);
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.link,
+                  title: "Payment Links",
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      RouteNames.paymentLinkListRoute,
+                    );
+                  },
+                ),
+                verticalSpace(24),
 
-              // const BodyText("Support", fontWeight: FontWeight.bold),
-              // verticalSpace(16),
-              // _buildMenuItem(
-              //   context,
-              //   icon: Icons.info_outline,
-              //   title: "Help Centre",
-              //   onTap: () {},
-              // ),
-              // verticalSpace(24),
-              const BodyText("Actions", fontWeight: FontWeight.bold),
-              verticalSpace(16),
-              _buildMenuItem(
-                context,
-                icon: Icons.logout,
-                title: "Sign Out",
-                onTap: () => _handleLogout(context, ref),
-                isLast: false,
-              ),
-              _buildMenuItem(
-                context,
-                icon: Icons.delete_outline,
-                title: "Delete Account",
-                onTap: () => _handleDeleteAccount(context, ref),
-                isLast: true,
-              ),
-              verticalSpace(40),
-            ],
+                // const BodyText("Support", fontWeight: FontWeight.bold),
+                // verticalSpace(16),
+                // _buildMenuItem(
+                //   context,
+                //   icon: Icons.info_outline,
+                //   title: "Help Centre",
+                //   onTap: () {},
+                // ),
+                // verticalSpace(24),
+                const BodyText("Actions", fontWeight: FontWeight.bold),
+                verticalSpace(16),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.logout,
+                  title: "Sign Out",
+                  onTap: () => _handleLogout(context, ref),
+                  isLast: false,
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.delete_outline,
+                  title: "Delete Account",
+                  onTap: () => _handleDeleteAccount(context, ref),
+                  isLast: true,
+                ),
+                verticalSpace(40),
+              ],
+            ),
           ),
         ),
       ),
