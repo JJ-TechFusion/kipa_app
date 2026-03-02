@@ -130,71 +130,74 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            verticalSpace(24),
-            const Center(child: StepIndicator(currentStep: 4, totalSteps: 4)),
-            verticalSpace(32),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              verticalSpace(24),
+              const Center(child: StepIndicator(currentStep: 4, totalSteps: 4)),
+              verticalSpace(32),
 
-            const H3(
-              'Tell us some basic information to proceed',
-              color: AppColor.primaryText,
-            ),
-            verticalSpace(32),
-
-            Center(
-              child: ImagePickerWidget(
-                size: 100,
-                onImageSelected: _onImageSelected,
+              const H3(
+                'Tell us some basic information to proceed',
+                color: AppColor.primaryText,
               ),
-            ),
-            verticalSpace(24),
+              verticalSpace(32),
 
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    TextInputField(
-                      label: 'First Name',
-                      hintText: 'Enter your first name',
-                      controller: _firstNameController,
-                      inputType: TextInputType.name,
-                    ),
-                    verticalSpace(16),
-
-                    TextInputField(
-                      label: 'Last Name',
-                      hintText: 'Enter your last name',
-                      controller: _lastNameController,
-                      inputType: TextInputType.name,
-                    ),
-                    verticalSpace(16),
-
-                    TextInputField(
-                      label: 'Email',
-                      hintText: 'Enter your email',
-                      controller: _emailController,
-                      inputType: TextInputType.emailAddress,
-                    ),
-                  ],
+              Center(
+                child: ImagePickerWidget(
+                  size: 100,
+                  onImageSelected: _onImageSelected,
                 ),
               ),
-            ),
+              verticalSpace(24),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: AnimatedButton(
-                onTap: isLoading ? () {} : _onContinue,
-                child: CustomButton(
-                  title: isLoading ? 'Saving...' : 'Complete',
-                  color: AppColor.onboardingPrimary,
-                  borderRadius: 28,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      TextInputField(
+                        label: 'First Name',
+                        hintText: 'Enter your first name',
+                        controller: _firstNameController,
+                        inputType: TextInputType.name,
+                      ),
+                      verticalSpace(16),
+
+                      TextInputField(
+                        label: 'Last Name',
+                        hintText: 'Enter your last name',
+                        controller: _lastNameController,
+                        inputType: TextInputType.name,
+                      ),
+                      verticalSpace(16),
+
+                      TextInputField(
+                        label: 'Email',
+                        hintText: 'Enter your email',
+                        controller: _emailController,
+                        inputType: TextInputType.emailAddress,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            verticalSpace(16),
-          ],
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                child: AnimatedButton(
+                  onTap: isLoading ? () {} : _onContinue,
+                  child: CustomButton(
+                    title: isLoading ? 'Saving...' : 'Complete',
+                    color: AppColor.onboardingPrimary,
+                    borderRadius: 28,
+                  ),
+                ),
+              ),
+              verticalSpace(16),
+            ],
+          ),
         ),
       ),
     );

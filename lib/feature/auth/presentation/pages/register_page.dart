@@ -70,63 +70,66 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            verticalSpace(24),
-            const Center(child: StepIndicator(currentStep: 1, totalSteps: 4)),
-            verticalSpace(32),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              verticalSpace(24),
+              const Center(child: StepIndicator(currentStep: 1, totalSteps: 4)),
+              verticalSpace(32),
 
-            const H3('Enter your phone number', color: AppColor.primaryText),
-            verticalSpace(32),
+              const H3('Enter your phone number', color: AppColor.primaryText),
+              verticalSpace(32),
 
-            TextInputField(
-              label: 'Phone Number',
-              hintText: '8012345678',
-              controller: _phoneController,
-              inputType: TextInputType.phone,
-              prefixIcon: GestureDetector(
-                onTap: _showCountryPicker,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _selectedCountryFlag,
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _selectedCountryCode,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+              TextInputField(
+                label: 'Phone Number',
+                hintText: '8012345678',
+                controller: _phoneController,
+                inputType: TextInputType.phone,
+                prefixIcon: GestureDetector(
+                  onTap: _showCountryPicker,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _selectedCountryFlag,
+                          style: const TextStyle(fontSize: 20),
                         ),
-                      ),
-                      const Icon(Icons.arrow_drop_down, size: 20),
-                    ],
+                        const SizedBox(width: 8),
+                        Text(
+                          _selectedCountryCode,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Icon(Icons.arrow_drop_down, size: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            const Spacer(),
+              const Spacer(),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: AnimatedButton(
-                onTap: _onNextPressed,
-                child: const CustomButton(
-                  title: 'Next',
-                  color: AppColor.onboardingPrimary,
-                  borderRadius: 28,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                child: AnimatedButton(
+                  onTap: _onNextPressed,
+                  child: const CustomButton(
+                    title: 'Next',
+                    color: AppColor.onboardingPrimary,
+                    borderRadius: 28,
+                  ),
                 ),
               ),
-            ),
 
-            verticalSpace(24),
-          ],
+              verticalSpace(24),
+            ],
+          ),
         ),
       ),
     );

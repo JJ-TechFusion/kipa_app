@@ -11,10 +11,12 @@ import '../../domain/usecases/verify_pin_usecase.dart';
 import '../../domain/usecases/change_pin_usecase.dart';
 import '../../domain/usecases/request_pin_reset_usecase.dart';
 import '../../domain/usecases/confirm_pin_reset_usecase.dart';
-import '../../domain/usecases/get_subaccount_usecase.dart';
-import '../../domain/usecases/create_subaccount_usecase.dart';
 import '../../domain/usecases/withdraw_usecase.dart';
 import '../../domain/usecases/sync_wallet_usecase.dart';
+import '../../domain/usecases/get_virtual_account_status_usecase.dart';
+import '../../domain/usecases/create_virtual_account_usecase.dart';
+import '../../domain/usecases/get_virtual_account_usecase.dart';
+import '../../domain/usecases/decline_virtual_account_usecase.dart';
 import '../providers/wallet_provider.dart';
 import 'wallet_state.dart';
 
@@ -30,10 +32,12 @@ class WalletNotifier extends Notifier<WalletState> {
   late final ChangePinUseCase _changePinUseCase;
   late final RequestPinResetUseCase _requestPinResetUseCase;
   late final ConfirmPinResetUseCase _confirmPinResetUseCase;
-  late final GetSubaccountUseCase _getSubaccountUseCase;
-  late final CreateSubaccountUseCase _createSubaccountUseCase;
   late final WithdrawUseCase _withdrawUseCase;
   late final SyncWalletUseCase _syncWalletUseCase;
+  late final GetVirtualAccountStatusUseCase _getVirtualAccountStatusUseCase;
+  late final CreateVirtualAccountUseCase _createVirtualAccountUseCase;
+  late final GetVirtualAccountUseCase _getVirtualAccountUseCase;
+  late final DeclineVirtualAccountUseCase _declineVirtualAccountUseCase;
 
   @override
   WalletState build() {
@@ -50,10 +54,12 @@ class WalletNotifier extends Notifier<WalletState> {
     _changePinUseCase = ref.read(changePinUseCaseProvider);
     _requestPinResetUseCase = ref.read(requestPinResetUseCaseProvider);
     _confirmPinResetUseCase = ref.read(confirmPinResetUseCaseProvider);
-    _getSubaccountUseCase = ref.read(getSubaccountUseCaseProvider);
-    _createSubaccountUseCase = ref.read(createSubaccountUseCaseProvider);
     _withdrawUseCase = ref.read(withdrawUseCaseProvider);
     _syncWalletUseCase = ref.read(syncWalletUseCaseProvider);
+    _getVirtualAccountStatusUseCase = ref.read(getVirtualAccountStatusUseCaseProvider);
+    _createVirtualAccountUseCase = ref.read(createVirtualAccountUseCaseProvider);
+    _getVirtualAccountUseCase = ref.read(getVirtualAccountUseCaseProvider);
+    _declineVirtualAccountUseCase = ref.read(declineVirtualAccountUseCaseProvider);
     return const WalletState();
   }
 
@@ -362,66 +368,6 @@ class WalletNotifier extends Notifier<WalletState> {
     }
   }
 
-  Future<void> getSubaccount() async {
-    state = state.copyWith(isFetchingSubaccount: true, errorMessage: null);
-
-    try {
-      final response = await _getSubaccountUseCase();
-
-      if (response.success && response.data != null) {
-        state = state.copyWith(
-          isFetchingSubaccount: false,
-          subaccount: response.data as SubaccountEntity?,
-        );
-      } else {
-        state = state.copyWith(
-          isFetchingSubaccount: false,
-          subaccount: null,
-        );
-      }
-    } catch (e) {
-      state = state.copyWith(
-        isFetchingSubaccount: false,
-        subaccount: null,
-      );
-    }
-  }
-
-  Future<bool> createSubaccount(String email) async {
-    state = state.copyWith(isCreatingSubaccount: true, errorMessage: null);
-
-    try {
-      final response = await _createSubaccountUseCase(email);
-
-      if (response.success && response.data != null) {
-        state = state.copyWith(
-          isCreatingSubaccount: false,
-          subaccount: response.data as SubaccountEntity?,
-        );
-        return true;
-      } else {
-        state = state.copyWith(
-          isCreatingSubaccount: false,
-          errorMessage: response.message,
-        );
-        return false;
-      }
-    } catch (e) {
-      state = state.copyWith(
-        isCreatingSubaccount: false,
-        errorMessage: e.toString(),
-      );
-      return false;
-    }
-  }
-
-  Future<void> ensureSubaccount(String email) async {
-    await getSubaccount();
-    if (state.subaccount == null) {
-      await createSubaccount(email);
-    }
-  }
-
   Future<bool> withdraw(String bankAccountId, double amount) async {
     state = state.copyWith(isWithdrawing: true, errorMessage: null);
 
@@ -472,5 +418,124 @@ class WalletNotifier extends Notifier<WalletState> {
       );
       return null;
     }
+  }
+
+  // Virtual Account Methods
+  Future<void> getVirtualAccountStatus() async {
+    state = state.copyWith(
+      isFetchingVirtualAccountStatus: true,
+      virtualAccountErrorMessage: null,
+    );
+
+    try {
+      final response = await _getVirtualAccountStatusUseCase();
+
+      if (response.success && response.data != null) {
+        final statusEntity = response.data as VirtualAccountStatusEntity;
+        state = state.copyWith(
+          isFetchingVirtualAccountStatus: false,
+          virtualAccountStatus: statusEntity,
+          virtualAccount: statusEntity.account,
+        );
+      } else {
+        state = state.copyWith(
+          isFetchingVirtualAccountStatus: false,
+          virtualAccountErrorMessage: response.message,
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isFetchingVirtualAccountStatus: false,
+        virtualAccountErrorMessage: e.toString(),
+      );
+    }
+  }
+
+  Future<bool> createVirtualAccount(String bvn) async {
+    state = state.copyWith(
+      isCreatingVirtualAccount: true,
+      virtualAccountErrorMessage: null,
+    );
+
+    try {
+      final response = await _createVirtualAccountUseCase(bvn);
+
+      if (response.success && response.data != null) {
+        state = state.copyWith(
+          isCreatingVirtualAccount: false,
+          virtualAccount: response.data as VirtualAccountEntity?,
+        );
+        // Refresh the status
+        await getVirtualAccountStatus();
+        return true;
+      } else {
+        state = state.copyWith(
+          isCreatingVirtualAccount: false,
+          virtualAccountErrorMessage: response.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isCreatingVirtualAccount: false,
+        virtualAccountErrorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  Future<void> getVirtualAccount() async {
+    try {
+      final response = await _getVirtualAccountUseCase();
+
+      if (response.success && response.data != null) {
+        state = state.copyWith(
+          virtualAccount: response.data as VirtualAccountEntity?,
+        );
+      }
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  Future<bool> declineVirtualAccount() async {
+    state = state.copyWith(
+      isDecliningVirtualAccount: true,
+      virtualAccountErrorMessage: null,
+    );
+
+    try {
+      final response = await _declineVirtualAccountUseCase();
+
+      if (response.success) {
+        // Optimistically update the local state to hide the prompt immediately
+        final updatedStatus = VirtualAccountStatusEntity(
+          hasAccount: state.virtualAccountStatus?.hasAccount ?? false,
+          declined: true,
+          account: state.virtualAccountStatus?.account,
+        );
+        state = state.copyWith(
+          isDecliningVirtualAccount: false,
+          virtualAccountStatus: updatedStatus,
+        );
+        return true;
+      } else {
+        state = state.copyWith(
+          isDecliningVirtualAccount: false,
+          virtualAccountErrorMessage: response.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isDecliningVirtualAccount: false,
+        virtualAccountErrorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  void clearVirtualAccountError() {
+    state = state.copyWith(virtualAccountErrorMessage: null);
   }
 }

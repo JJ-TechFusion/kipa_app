@@ -15,9 +15,6 @@ abstract class WalletRepository {
   Future<NetworkResponse> requestPinReset();
   Future<NetworkResponse> confirmPinReset(String otpCode, String newPin);
 
-  // Subaccount operations
-  Future<NetworkResponse> getSubaccount();
-  Future<NetworkResponse> createSubaccount(String email);
   Future<NetworkResponse> syncWallet();
 
   // Bank account operations
@@ -30,4 +27,10 @@ abstract class WalletRepository {
 
   // Withdrawal operations
   Future<NetworkResponse> withdraw(String bankAccountId, double amount);
+
+  // Virtual Account operations
+  Future<NetworkResponse> getVirtualAccountStatus();
+  Future<NetworkResponse> createVirtualAccount(String bvn);
+  Future<NetworkResponse> getVirtualAccount();
+  Future<NetworkResponse> declineVirtualAccount();
 }

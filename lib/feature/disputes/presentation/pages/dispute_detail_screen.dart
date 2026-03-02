@@ -62,291 +62,301 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
     return Scaffold(
       backgroundColor: AppColor.scaffoldBackground,
       appBar: _buildAppBar(context, 'Dispute Details'),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Status card
-            _buildCard(
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: _statusColor(
-                        dispute.status,
-                      ).withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Status card
+              _buildCard(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _statusColor(
+                          dispute.status,
+                        ).withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.history_toggle_off,
+                        color: _statusColor(dispute.status),
+                        size: 20,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.history_toggle_off,
-                      color: _statusColor(dispute.status),
-                      size: 20,
+                    horizontalSpace(12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BodyText(
+                            _statusLabel(dispute.status),
+                            fontWeight: FontWeight.w600,
+                          ),
+                          Caption(dateFormatter.format(dispute.createdAt)),
+                        ],
+                      ),
                     ),
-                  ),
-                  horizontalSpace(12),
-                  Expanded(
-                    child: Column(
+                    _buildOutcomeBadge(dispute.outcome),
+                  ],
+                ),
+              ),
+              verticalSpace(16),
+
+              // Counterparty info
+              _buildCard(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: AppColor.primary,
+                      radius: 24,
+                      child: Text(
+                        initials,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    horizontalSpace(12),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        BodyText(
-                          _statusLabel(dispute.status),
+                        Caption(
+                          dispute.counterPartyName,
                           fontWeight: FontWeight.w600,
+                          color: AppColor.primaryText,
                         ),
-                        Caption(dateFormatter.format(dispute.createdAt)),
+                        Overline(counterpartyRole),
                       ],
                     ),
-                  ),
-                  _buildOutcomeBadge(dispute.outcome),
-                ],
-              ),
-            ),
-            verticalSpace(16),
-
-            // Counterparty info
-            _buildCard(
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: AppColor.primary,
-                    radius: 24,
-                    child: Text(
-                      initials,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  horizontalSpace(12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Caption(
-                        dispute.counterPartyName,
-                        fontWeight: FontWeight.w600,
-                        color: AppColor.primaryText,
-                      ),
-                      Overline(counterpartyRole),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            verticalSpace(16),
-
-            // Item & transaction info
-            _buildCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Caption(
-                    'Transaction',
-                    fontWeight: FontWeight.w600,
-                    color: AppColor.kipaGrey,
-                  ),
-                  verticalSpace(12),
-                  _buildRow('Item', dispute.paymentRequest.itemName),
-                  if (dispute.paymentRequest.itemDescription != null) ...[
-                    verticalSpace(8),
-                    _buildRow(
-                      'Description',
-                      dispute.paymentRequest.itemDescription!,
-                    ),
-                  ],
-                  verticalSpace(8),
-                  _buildRow(
-                    'Item Price',
-                    currencyFormatter.format(dispute.paymentRequest.itemPrice),
-                    valueWeight: FontWeight.w600,
-                  ),
-                  verticalSpace(8),
-                  _buildRow(
-                    'Delivery Fee',
-                    currencyFormatter.format(
-                      dispute.paymentRequest.estimatedDeliveryFee,
-                    ),
-                  ),
-                  verticalSpace(8),
-                  _buildRow(
-                    'Total',
-                    currencyFormatter.format(
-                      dispute.paymentRequest.estimatedTotal,
-                    ),
-                    valueWeight: FontWeight.w600,
-                  ),
-                  verticalSpace(8),
-                  _buildRow('Payment Code', dispute.paymentRequest.paymentCode),
-                ],
-              ),
-            ),
-            verticalSpace(16),
-
-            // Dispute reason
-            _buildCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Caption(
-                    'Dispute Reason',
-                    fontWeight: FontWeight.w600,
-                    color: AppColor.kipaGrey,
-                  ),
-                  verticalSpace(10),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColor.scaffoldBackground,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: BodySmall(
-                      dispute.reason,
-                      color: AppColor.primaryText,
-                      lineHeight: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            verticalSpace(16),
-
-            // Evidence
-            if (dispute.evidence.isNotEmpty) ...[
-              _buildCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Caption(
-                      'Evidence',
-                      fontWeight: FontWeight.w600,
-                      color: AppColor.kipaGrey,
-                    ),
-                    verticalSpace(12),
-                    SizedBox(
-                      height: 100,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: dispute.evidence.length,
-                        separatorBuilder: (context, index) =>
-                            horizontalSpace(8),
-                        itemBuilder: (context, index) {
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              dispute.evidence[index],
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stack) =>
-                                  Container(
-                                    width: 100,
-                                    height: 100,
-                                    color: AppColor.scaffoldBackground,
-                                    child: const Icon(
-                                      Icons.broken_image_outlined,
-                                      color: AppColor.kipaGrey,
-                                    ),
-                                  ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
                   ],
                 ),
               ),
               verticalSpace(16),
-            ],
 
-            // Resolution info (if resolved/closed)
-            if (dispute.outcome != 'pending') ...[
+              // Item & transaction info
               _buildCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Caption(
-                      'Resolution',
+                      'Transaction',
                       fontWeight: FontWeight.w600,
                       color: AppColor.kipaGrey,
                     ),
                     verticalSpace(12),
-                    _buildRow('Outcome', _outcomeLabel(dispute.outcome)),
-                    if (dispute.resolvedAt != null) ...[
+                    _buildRow('Item', dispute.paymentRequest.itemName),
+                    if (dispute.paymentRequest.itemDescription != null) ...[
                       verticalSpace(8),
                       _buildRow(
-                        'Resolved At',
-                        dateFormatter.format(dispute.resolvedAt!),
+                        'Description',
+                        dispute.paymentRequest.itemDescription!,
                       ),
                     ],
-                    if (dispute.resolutionNotes != null &&
-                        dispute.resolutionNotes!.isNotEmpty) ...[
-                      verticalSpace(10),
-                      const Caption(
-                        'Notes',
-                        fontWeight: FontWeight.w500,
-                        color: AppColor.kipaGrey,
+                    verticalSpace(8),
+                    _buildRow(
+                      'Item Price',
+                      currencyFormatter.format(
+                        dispute.paymentRequest.itemPrice,
                       ),
-                      verticalSpace(6),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColor.scaffoldBackground,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: BodySmall(
-                          dispute.resolutionNotes!,
-                          color: AppColor.primaryText,
-                          lineHeight: 1.5,
-                        ),
+                      valueWeight: FontWeight.w600,
+                    ),
+                    verticalSpace(8),
+                    _buildRow(
+                      'Delivery Fee',
+                      currencyFormatter.format(
+                        dispute.paymentRequest.estimatedDeliveryFee,
                       ),
-                    ],
+                    ),
+                    verticalSpace(8),
+                    _buildRow(
+                      'Total',
+                      currencyFormatter.format(
+                        dispute.paymentRequest.estimatedTotal,
+                      ),
+                      valueWeight: FontWeight.w600,
+                    ),
+                    verticalSpace(8),
+                    _buildRow(
+                      'Payment Code',
+                      dispute.paymentRequest.paymentCode,
+                    ),
                   ],
                 ),
               ),
               verticalSpace(16),
-            ],
 
-            // Escrow breakdown
-            _buildCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Caption(
-                    'Escrow Breakdown',
-                    fontWeight: FontWeight.w600,
-                    color: AppColor.kipaGrey,
-                  ),
-                  verticalSpace(12),
-                  _buildRow(
-                    'Item Amount',
-                    currencyFormatter.format(dispute.escrow.itemAmount),
-                  ),
-                  verticalSpace(8),
-                  _buildRow(
-                    'Delivery Fee',
-                    currencyFormatter.format(dispute.escrow.actualDeliveryFee),
-                  ),
-                  verticalSpace(8),
-                  _buildRow(
-                    'Buyer Fee',
-                    currencyFormatter.format(dispute.escrow.buyerFee),
-                  ),
-                  const Divider(height: 20),
-                  _buildRow(
-                    'Total Locked',
-                    currencyFormatter.format(dispute.escrow.totalLocked),
-                    valueWeight: FontWeight.w700,
-                  ),
-                  verticalSpace(8),
-                  _buildRow(
-                    'Seller Payout',
-                    currencyFormatter.format(dispute.escrow.sellerPayout),
-                    valueWeight: FontWeight.w600,
-                  ),
-                ],
+              // Dispute reason
+              _buildCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Caption(
+                      'Dispute Reason',
+                      fontWeight: FontWeight.w600,
+                      color: AppColor.kipaGrey,
+                    ),
+                    verticalSpace(10),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColor.scaffoldBackground,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: BodySmall(
+                        dispute.reason,
+                        color: AppColor.primaryText,
+                        lineHeight: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            verticalSpace(30),
-          ],
+              verticalSpace(16),
+
+              // Evidence
+              if (dispute.evidence.isNotEmpty) ...[
+                _buildCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Caption(
+                        'Evidence',
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.kipaGrey,
+                      ),
+                      verticalSpace(12),
+                      SizedBox(
+                        height: 100,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: dispute.evidence.length,
+                          separatorBuilder: (context, index) =>
+                              horizontalSpace(8),
+                          itemBuilder: (context, index) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                dispute.evidence[index],
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stack) =>
+                                    Container(
+                                      width: 100,
+                                      height: 100,
+                                      color: AppColor.scaffoldBackground,
+                                      child: const Icon(
+                                        Icons.broken_image_outlined,
+                                        color: AppColor.kipaGrey,
+                                      ),
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                verticalSpace(16),
+              ],
+
+              // Resolution info (if resolved/closed)
+              if (dispute.outcome != 'pending') ...[
+                _buildCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Caption(
+                        'Resolution',
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.kipaGrey,
+                      ),
+                      verticalSpace(12),
+                      _buildRow('Outcome', _outcomeLabel(dispute.outcome)),
+                      if (dispute.resolvedAt != null) ...[
+                        verticalSpace(8),
+                        _buildRow(
+                          'Resolved At',
+                          dateFormatter.format(dispute.resolvedAt!),
+                        ),
+                      ],
+                      if (dispute.resolutionNotes != null &&
+                          dispute.resolutionNotes!.isNotEmpty) ...[
+                        verticalSpace(10),
+                        const Caption(
+                          'Notes',
+                          fontWeight: FontWeight.w500,
+                          color: AppColor.kipaGrey,
+                        ),
+                        verticalSpace(6),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColor.scaffoldBackground,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: BodySmall(
+                            dispute.resolutionNotes!,
+                            color: AppColor.primaryText,
+                            lineHeight: 1.5,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                verticalSpace(16),
+              ],
+
+              // Escrow breakdown
+              _buildCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Caption(
+                      'Escrow Breakdown',
+                      fontWeight: FontWeight.w600,
+                      color: AppColor.kipaGrey,
+                    ),
+                    verticalSpace(12),
+                    _buildRow(
+                      'Item Amount',
+                      currencyFormatter.format(dispute.escrow.itemAmount),
+                    ),
+                    verticalSpace(8),
+                    _buildRow(
+                      'Delivery Fee',
+                      currencyFormatter.format(
+                        dispute.escrow.actualDeliveryFee,
+                      ),
+                    ),
+                    verticalSpace(8),
+                    _buildRow(
+                      'Buyer Fee',
+                      currencyFormatter.format(dispute.escrow.buyerFee),
+                    ),
+                    const Divider(height: 20),
+                    _buildRow(
+                      'Total Locked',
+                      currencyFormatter.format(dispute.escrow.totalLocked),
+                      valueWeight: FontWeight.w700,
+                    ),
+                    verticalSpace(8),
+                    _buildRow(
+                      'Seller Payout',
+                      currencyFormatter.format(dispute.escrow.sellerPayout),
+                      valueWeight: FontWeight.w600,
+                    ),
+                  ],
+                ),
+              ),
+              verticalSpace(30),
+            ],
+          ),
         ),
       ),
     );
@@ -354,17 +364,7 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
 
   AppBar _buildAppBar(BuildContext context, String title) {
     return AppBar(
-      leading: IconButton(
-        onPressed: () => Navigator.pop(context),
-        icon: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(
-            color: AppColor.primary,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-        ),
-      ),
+      automaticallyImplyLeading: false,
       title: BodyText(title, fontWeight: FontWeight.w600, fontSize: 18),
       centerTitle: true,
       elevation: 0,

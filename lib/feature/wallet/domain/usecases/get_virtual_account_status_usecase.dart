@@ -1,12 +1,12 @@
 import '../../../../core/services/network/network_response.dart';
 import '../repositories/wallet_repository.dart';
 
-class GetSubaccountUseCase {
+class GetVirtualAccountStatusUseCase {
   final WalletRepository repository;
 
-  GetSubaccountUseCase(this.repository);
+  GetVirtualAccountStatusUseCase(this.repository);
 
   Future<NetworkResponse> call() async {
-    return await repository.getSubaccount();
+    return await repository.getVirtualAccountStatus();
   }
 }

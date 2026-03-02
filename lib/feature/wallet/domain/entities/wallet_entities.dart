@@ -265,32 +265,6 @@ class PinResetConfirmRequestEntity {
   PinResetConfirmRequestEntity({required this.otpCode, required this.newPin});
 }
 
-class SubaccountEntity {
-  final String id;
-  final String accountBank;
-  final String accountNumber;
-  final String accountReference;
-  final String barterId;
-  final String businessName;
-  final bool isActive;
-
-  SubaccountEntity({
-    required this.id,
-    required this.accountBank,
-    required this.accountNumber,
-    required this.accountReference,
-    required this.barterId,
-    required this.businessName,
-    required this.isActive,
-  });
-}
-
-class CreateSubaccountRequestEntity {
-  final String email;
-
-  CreateSubaccountRequestEntity({required this.email});
-}
-
 class WalletSyncResponseEntity {
   final double previousBalance;
   final double flutterwaveBalance;
@@ -339,4 +313,39 @@ class WithdrawalEntity {
     required this.paymentProvider,
     required this.createdAt,
   });
+}
+
+// Virtual Account Entities
+class VirtualAccountEntity {
+  final String accountNumber;
+  final String bankName;
+  final DateTime createdAt;
+  final String email;
+  final bool isActive;
+
+  VirtualAccountEntity({
+    required this.accountNumber,
+    required this.bankName,
+    required this.createdAt,
+    required this.email,
+    required this.isActive,
+  });
+}
+
+class VirtualAccountStatusEntity {
+  final bool hasAccount;
+  final bool declined;
+  final VirtualAccountEntity? account;
+
+  VirtualAccountStatusEntity({
+    required this.hasAccount,
+    required this.declined,
+    this.account,
+  });
+}
+
+class CreateVirtualAccountRequestEntity {
+  final String bvn;
+
+  CreateVirtualAccountRequestEntity({required this.bvn});
 }

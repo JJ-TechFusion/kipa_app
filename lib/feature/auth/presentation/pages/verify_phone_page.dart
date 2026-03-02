@@ -73,74 +73,77 @@ class _VerifyPhonePageState extends ConsumerState<VerifyPhonePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            verticalSpace(24),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                const Center(
-                  child: StepIndicator(currentStep: 2, totalSteps: 4),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColor.onboardingPrimary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 20,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              verticalSpace(24),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Center(
+                    child: StepIndicator(currentStep: 2, totalSteps: 4),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColor.onboardingPrimary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
+              ),
+              verticalSpace(32),
+
+              const H3(
+                'We\'ll send a verification code to your phone number',
+                color: AppColor.primaryText,
+              ),
+              verticalSpace(32),
+
+              VerificationMethodCard(
+                icon: Icons.message,
+                iconColor: AppColor.onboardingPrimary,
+                title: 'SMS Code',
+                description: 'Receive a 6-digit code via text',
+                isSelected: _selectedMethod == 'sms',
+                onTap: authState.isLoading
+                    ? () {}
+                    : () => _onMethodSelected('sms'),
+              ),
+              verticalSpace(16),
+
+              VerificationMethodCard(
+                icon: Icons.phone,
+                iconColor: AppColor.onboardingPrimary,
+                title: 'Voice Call',
+                description: 'Receive the code via an automated call',
+                isSelected: _selectedMethod == 'voice',
+                onTap: authState.isLoading
+                    ? () {}
+                    : () => _onMethodSelected('voice'),
+              ),
+
+              if (authState.isLoading) ...[
+                verticalSpace(24),
+                const Center(child: CircularProgressIndicator.adaptive()),
               ],
-            ),
-            verticalSpace(32),
 
-            const H3(
-              'We\'ll send a verification code to your phone number',
-              color: AppColor.primaryText,
-            ),
-            verticalSpace(32),
-
-            VerificationMethodCard(
-              icon: Icons.message,
-              iconColor: AppColor.onboardingPrimary,
-              title: 'SMS Code',
-              description: 'Receive a 6-digit code via text',
-              isSelected: _selectedMethod == 'sms',
-              onTap: authState.isLoading
-                  ? () {}
-                  : () => _onMethodSelected('sms'),
-            ),
-            verticalSpace(16),
-
-            VerificationMethodCard(
-              icon: Icons.phone,
-              iconColor: AppColor.onboardingPrimary,
-              title: 'Voice Call',
-              description: 'Receive the code via an automated call',
-              isSelected: _selectedMethod == 'voice',
-              onTap: authState.isLoading
-                  ? () {}
-                  : () => _onMethodSelected('voice'),
-            ),
-
-            if (authState.isLoading) ...[
-              verticalSpace(24),
-              const Center(child: CircularProgressIndicator.adaptive()),
+              const Spacer(),
             ],
-
-            const Spacer(),
-          ],
+          ),
         ),
       ),
     );

@@ -262,38 +262,6 @@ class PinResetConfirmRequestModel extends PinResetConfirmRequestEntity {
   }
 }
 
-class SubaccountModel extends SubaccountEntity {
-  SubaccountModel({
-    required super.id,
-    required super.accountBank,
-    required super.accountNumber,
-    required super.accountReference,
-    required super.barterId,
-    required super.businessName,
-    required super.isActive,
-  });
-
-  factory SubaccountModel.fromJson(Map<String, dynamic> json) {
-    return SubaccountModel(
-      id: json['id'] ?? '',
-      accountBank: json['account_bank'] ?? '',
-      accountNumber: json['account_number'] ?? '',
-      accountReference: json['account_reference'] ?? '',
-      barterId: json['barter_id'] ?? '',
-      businessName: json['business_name'] ?? '',
-      isActive: json['is_active'] ?? false,
-    );
-  }
-}
-
-class CreateSubaccountRequestModel extends CreateSubaccountRequestEntity {
-  CreateSubaccountRequestModel({required super.email});
-
-  Map<String, dynamic> toJson() {
-    return {'email': email};
-  }
-}
-
 class WalletSyncResponseModel extends WalletSyncResponseEntity {
   WalletSyncResponseModel({
     required super.previousBalance,
@@ -353,5 +321,52 @@ class WithdrawalModel extends WithdrawalEntity {
       paymentProvider: json['payment_provider'] ?? '',
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
     );
+  }
+}
+
+// Virtual Account Models
+class VirtualAccountModel extends VirtualAccountEntity {
+  VirtualAccountModel({
+    required super.accountNumber,
+    required super.bankName,
+    required super.createdAt,
+    required super.email,
+    required super.isActive,
+  });
+
+  factory VirtualAccountModel.fromJson(Map<String, dynamic> json) {
+    return VirtualAccountModel(
+      accountNumber: json['account_number'] ?? '',
+      bankName: json['bank_name'] ?? '',
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      email: json['email'] ?? '',
+      isActive: json['is_active'] ?? false,
+    );
+  }
+}
+
+class VirtualAccountStatusModel extends VirtualAccountStatusEntity {
+  VirtualAccountStatusModel({
+    required super.hasAccount,
+    required super.declined,
+    super.account,
+  });
+
+  factory VirtualAccountStatusModel.fromJson(Map<String, dynamic> json) {
+    return VirtualAccountStatusModel(
+      hasAccount: json['has_account'] ?? false,
+      declined: json['declined'] ?? false,
+      account: json['account'] != null
+          ? VirtualAccountModel.fromJson(json['account'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+}
+
+class CreateVirtualAccountRequestModel extends CreateVirtualAccountRequestEntity {
+  CreateVirtualAccountRequestModel({required super.bvn});
+
+  Map<String, dynamic> toJson() {
+    return {'bvn': bvn};
   }
 }

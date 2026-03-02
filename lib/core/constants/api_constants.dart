@@ -34,9 +34,12 @@ class ApiEndpoints {
   static const String walletTransactionsUrl = '/wallet/transactions';
   static const String walletPendingUrl = '/wallet/pending';
 
-  // Wallet subaccount endpoint
-  static const String walletSubaccountUrl = '/wallet/flutterwave/subaccount';
   static const String walletSyncUrl = '/wallet/flutterwave/sync';
+
+  // Virtual Account endpoints
+  static const String virtualAccountUrl = '/wallet/flutterwave/virtual-account';
+  static const String virtualAccountStatusUrl = '/wallet/flutterwave/virtual-account/status';
+  static const String virtualAccountDeclineUrl = '/wallet/flutterwave/virtual-account/decline';
 
   // Wallet PIN endpoints
   static const String walletPinStatusUrl = '/wallet/pin/status';

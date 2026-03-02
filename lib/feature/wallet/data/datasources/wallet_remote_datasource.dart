@@ -198,45 +198,6 @@ class WalletRemoteDataSource {
     return response;
   }
 
-  Future<NetworkResponse> getSubaccount() async {
-    final response = await apiService.getRequest(
-      endpoint: ApiEndpoints.walletSubaccountUrl,
-    );
-
-    if (response.success && response.data != null) {
-      final dataMap = response.data as Map<String, dynamic>;
-      final subaccountData = dataMap['subaccount'] as Map<String, dynamic>?;
-      if (subaccountData != null) {
-        return NetworkResponse(
-          success: true,
-          data: SubaccountModel.fromJson(subaccountData),
-          message: response.message,
-        );
-      }
-    }
-    return response;
-  }
-
-  Future<NetworkResponse> createSubaccount(String email) async {
-    final response = await apiService.postRequest(
-      endpoint: ApiEndpoints.walletSubaccountUrl,
-      requestBody: CreateSubaccountRequestModel(email: email).toJson(),
-    );
-
-    if (response.success && response.data != null) {
-      final dataMap = response.data as Map<String, dynamic>;
-      final subaccountData = dataMap['subaccount'] as Map<String, dynamic>?;
-      if (subaccountData != null) {
-        return NetworkResponse(
-          success: true,
-          data: SubaccountModel.fromJson(subaccountData),
-          message: response.message,
-        );
-      }
-    }
-    return response;
-  }
-
   Future<NetworkResponse> syncWallet() async {
     final response = await apiService.postRequest(
       endpoint: ApiEndpoints.walletSyncUrl,
@@ -380,6 +341,70 @@ class WalletRemoteDataSource {
         );
       }
     }
+    return response;
+  }
+
+  // Virtual Account operations
+  Future<NetworkResponse> getVirtualAccountStatus() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.virtualAccountStatusUrl,
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      return NetworkResponse(
+        success: true,
+        data: VirtualAccountStatusModel.fromJson(dataMap),
+        message: response.message,
+      );
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> createVirtualAccount(String bvn) async {
+    final response = await apiService.postRequest(
+      endpoint: ApiEndpoints.virtualAccountUrl,
+      requestBody: CreateVirtualAccountRequestModel(bvn: bvn).toJson(),
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      final virtualAccountData = dataMap['virtual_account'] as Map<String, dynamic>?;
+      if (virtualAccountData != null) {
+        return NetworkResponse(
+          success: true,
+          data: VirtualAccountModel.fromJson(virtualAccountData),
+          message: dataMap['message'] ?? response.message,
+        );
+      }
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> getVirtualAccount() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.virtualAccountUrl,
+    );
+
+    if (response.success && response.data != null) {
+      final dataMap = response.data as Map<String, dynamic>;
+      final virtualAccountData = dataMap['virtual_account'] as Map<String, dynamic>?;
+      if (virtualAccountData != null) {
+        return NetworkResponse(
+          success: true,
+          data: VirtualAccountModel.fromJson(virtualAccountData),
+          message: dataMap['message'] ?? response.message,
+        );
+      }
+    }
+    return response;
+  }
+
+  Future<NetworkResponse> declineVirtualAccount() async {
+    final response = await apiService.getRequest(
+      endpoint: ApiEndpoints.virtualAccountDeclineUrl,
+    );
+
     return response;
   }
 }

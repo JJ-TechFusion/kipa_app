@@ -63,16 +63,6 @@ class WalletRepositoryImpl implements WalletRepository {
   }
 
   @override
-  Future<NetworkResponse> getSubaccount() async {
-    return await remoteDataSource.getSubaccount();
-  }
-
-  @override
-  Future<NetworkResponse> createSubaccount(String email) async {
-    return await remoteDataSource.createSubaccount(email);
-  }
-
-  @override
   Future<NetworkResponse> getBanks() async {
     return await remoteDataSource.getBanks();
   }
@@ -116,5 +106,25 @@ class WalletRepositoryImpl implements WalletRepository {
   @override
   Future<NetworkResponse> syncWallet() async {
     return await remoteDataSource.syncWallet();
+  }
+
+  @override
+  Future<NetworkResponse> getVirtualAccountStatus() async {
+    return await remoteDataSource.getVirtualAccountStatus();
+  }
+
+  @override
+  Future<NetworkResponse> createVirtualAccount(String bvn) async {
+    return await remoteDataSource.createVirtualAccount(bvn);
+  }
+
+  @override
+  Future<NetworkResponse> getVirtualAccount() async {
+    return await remoteDataSource.getVirtualAccount();
+  }
+
+  @override
+  Future<NetworkResponse> declineVirtualAccount() async {
+    return await remoteDataSource.declineVirtualAccount();
   }
 }

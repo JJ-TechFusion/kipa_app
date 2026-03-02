@@ -16,7 +16,7 @@ class TransactionStatusNotifier extends Notifier<TransactionStatusState> {
   }
 
   Future<void> fetchTransactionStatus(String paymentRequestId) async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
+    state = const TransactionStatusState(isLoading: true);
 
     try {
       final response = await _getTransactionStatusUseCase(paymentRequestId);

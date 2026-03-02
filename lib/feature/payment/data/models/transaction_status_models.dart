@@ -15,6 +15,14 @@ class TransactionStatusModel {
   final UserInfoModel seller;
   final UserInfoModel buyer;
   final TransactionTimelineModel timeline;
+  // Delivery fields
+  final String? deliveryJobId;
+  final String? pickupAddress;
+  final String? dropoffAddress;
+  final double? pickupLat;
+  final double? pickupLng;
+  final double? dropoffLat;
+  final double? dropoffLng;
 
   const TransactionStatusModel({
     required this.id,
@@ -31,6 +39,13 @@ class TransactionStatusModel {
     required this.seller,
     required this.buyer,
     required this.timeline,
+    this.deliveryJobId,
+    this.pickupAddress,
+    this.dropoffAddress,
+    this.pickupLat,
+    this.pickupLng,
+    this.dropoffLat,
+    this.dropoffLng,
   });
 
   factory TransactionStatusModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +56,17 @@ class TransactionStatusModel {
       if (value is String) return double.tryParse(value) ?? 0.0;
       return 0.0;
     }
+
+    double? parseNullableDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value.toDouble();
+      if (value is double) return value;
+      if (value is String) return double.tryParse(value);
+      return null;
+    }
+
+    // Parse delivery object if present
+    final delivery = json['delivery'] as Map<String, dynamic>?;
 
     return TransactionStatusModel(
       id: json['id']?.toString() ?? '',
@@ -69,6 +95,14 @@ class TransactionStatusModel {
       timeline: TransactionTimelineModel.fromJson(
         json['timeline'] as Map<String, dynamic>? ?? {},
       ),
+      // Try delivery_job_id at root first, then from delivery object
+      deliveryJobId: json['delivery_job_id']?.toString() ?? delivery?['job_id']?.toString(),
+      pickupAddress: delivery?['pickup_address']?.toString(),
+      dropoffAddress: delivery?['dropoff_address']?.toString(),
+      pickupLat: parseNullableDouble(delivery?['pickup_lat']),
+      pickupLng: parseNullableDouble(delivery?['pickup_lng']),
+      dropoffLat: parseNullableDouble(delivery?['dropoff_lat']),
+      dropoffLng: parseNullableDouble(delivery?['dropoff_lng']),
     );
   }
 
@@ -88,6 +122,13 @@ class TransactionStatusModel {
       seller: seller.toEntity(),
       buyer: buyer.toEntity(),
       timeline: timeline.toEntity(),
+      deliveryJobId: deliveryJobId,
+      pickupAddress: pickupAddress,
+      dropoffAddress: dropoffAddress,
+      pickupLat: pickupLat,
+      pickupLng: pickupLng,
+      dropoffLat: dropoffLat,
+      dropoffLng: dropoffLng,
     );
   }
 }

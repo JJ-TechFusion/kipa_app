@@ -13,6 +13,14 @@ class TransactionStatusEntity {
   final UserInfoEntity seller;
   final UserInfoEntity buyer;
   final TransactionTimelineEntity timeline;
+  // Delivery fields
+  final String? deliveryJobId;
+  final String? pickupAddress;
+  final String? dropoffAddress;
+  final double? pickupLat;
+  final double? pickupLng;
+  final double? dropoffLat;
+  final double? dropoffLng;
 
   const TransactionStatusEntity({
     required this.id,
@@ -29,6 +37,13 @@ class TransactionStatusEntity {
     required this.seller,
     required this.buyer,
     required this.timeline,
+    this.deliveryJobId,
+    this.pickupAddress,
+    this.dropoffAddress,
+    this.pickupLat,
+    this.pickupLng,
+    this.dropoffLat,
+    this.dropoffLng,
   });
 
   bool get isBuyer => viewerRole == 'buyer';

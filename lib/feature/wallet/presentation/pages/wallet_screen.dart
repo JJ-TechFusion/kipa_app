@@ -2,15 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/core/shared/widgets/app_webview_page.dart';
 import 'package:kipa/core/shared/widgets/custom_snackbar.dart';
 import 'package:kipa/core/shared/widgets/smart_image.dart';
+import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/feature/payment/presentation/widgets/fund_wallet_sheet.dart';
 import 'package:kipa/core/shared/widgets/number_pad.dart';
 import 'package:kipa/core/shared/widgets/widgets.dart';
 import 'package:kipa/core/shared/widgets/buttons/animated_button.dart';
-import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/feature/wallet/presentation/providers/bank_accounts_provider.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
@@ -35,14 +36,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
 
   Future<void> _initializeWallet() async {
     final walletNotifier = ref.read(walletNotifierProvider.notifier);
-    final currentUser = ref.read(authNotifierProvider).currentUser;
 
-    // Check/create subaccount if user has email
-    if (currentUser?.email != null && currentUser!.email.isNotEmpty) {
-      await walletNotifier.ensureSubaccount(currentUser.email);
-    }
-
-    // Sync wallet balance from Flutterwave
     final syncResponse = await walletNotifier.syncWallet();
     if (mounted && syncResponse != null && syncResponse.amountSynced > 0) {
       CustomSnackBar.show(
@@ -53,10 +47,11 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       );
     }
 
-    // Fetch wallet data
     walletNotifier.getWallet();
     walletNotifier.getTransactions();
     walletNotifier.getPendingFunds();
+
+    walletNotifier.getVirtualAccountStatus();
   }
 
   void _showTopUpSheet() {
@@ -80,10 +75,34 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     );
   }
 
+  void _showCreateVirtualAccountSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const _CreateVirtualAccountSheet(),
+    );
+  }
+
+  Future<void> _declineVirtualAccount() async {
+    final walletNotifier = ref.read(walletNotifierProvider.notifier);
+    await walletNotifier.declineVirtualAccount();
+  }
+
   @override
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletNotifierProvider);
     final wallet = walletState.wallet;
+    final virtualAccountStatus = walletState.virtualAccountStatus;
+    final virtualAccount = walletState.virtualAccount;
+
+    final showVirtualAccountPrompt =
+        virtualAccountStatus != null &&
+        !virtualAccountStatus.hasAccount &&
+        !virtualAccountStatus.declined;
 
     return Scaffold(
       appBar: AppBar(
@@ -114,6 +133,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 await walletNotifier.getWallet();
                 await walletNotifier.getTransactions();
                 await walletNotifier.getPendingFunds();
+                await walletNotifier.getVirtualAccountStatus();
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -131,7 +151,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                             : '₦0.00',
                         pendingBalance: wallet != null
                             ? formatCurrency(
-                                wallet.lockedBalance.toStringAsFixed(2),
+                                wallet.totalPendingEscrow.toStringAsFixed(2),
                               )
                             : '₦0.00',
                       ),
@@ -140,14 +160,13 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                         onTopUp: _showTopUpSheet,
                         onWithdraw: _showWithdrawSheet,
                       ),
-                      verticalSpace(24),
-                      if (walletState.subaccount != null)
-                        _BankAccountCard(
-                          bankName: walletState.subaccount!.accountBank,
-                          accountNumber: walletState.subaccount!.accountNumber,
-                          accountName: walletState.subaccount!.businessName,
-                          barterId: walletState.subaccount!.barterId,
+                      if (virtualAccount != null) ...[
+                        verticalSpace(24),
+                        _VirtualAccountCard(
+                          accountNumber: virtualAccount.accountNumber,
+                          bankName: virtualAccount.bankName,
                         ),
+                      ],
                       verticalSpace(30),
                       const BodyText(
                         "Pending Funds",
@@ -168,6 +187,14 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 ),
               ),
             ),
+      // Virtual Account Prompt Bottom Bar
+      bottomNavigationBar: showVirtualAccountPrompt
+          ? _VirtualAccountPromptBar(
+              onAccept: _showCreateVirtualAccountSheet,
+              onDecline: _declineVirtualAccount,
+              isLoading: walletState.isDecliningVirtualAccount,
+            )
+          : null,
     );
   }
 }
@@ -491,139 +518,6 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-class _BankAccountCard extends StatelessWidget {
-  final String bankName;
-  final String accountNumber;
-  final String accountName;
-  final String barterId;
-
-  const _BankAccountCard({
-    required this.bankName,
-    required this.accountNumber,
-    required this.accountName,
-    required this.barterId,
-  });
-
-  void _copyAccountNumber(BuildContext context) {
-    // Copy to clipboard
-    final data = ClipboardData(text: accountNumber);
-    Clipboard.setData(data);
-    CustomSnackBar.show(
-      context,
-      message: 'Account number copied',
-      type: SnackBarType.success,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.account_balance,
-                  color: AppColor.green,
-                  size: 20,
-                ),
-              ),
-              horizontalSpace(12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    BodySmall(
-                      'Fund via Bank Transfer',
-                      fontWeight: FontWeight.w600,
-                    ),
-                    Caption(
-                      'Transfer to this account to fund your wallet',
-                      color: AppColor.lightText,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          verticalSpace(16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                _AccountDetailRow(label: 'Bank', value: bankName),
-                verticalSpace(8),
-                _AccountDetailRow(
-                  label: 'Account Number',
-                  value: accountNumber,
-                  trailing: GestureDetector(
-                    onTap: () => _copyAccountNumber(context),
-                    child: const Icon(
-                      Icons.copy,
-                      size: 18,
-                      color: AppColor.primary,
-                    ),
-                  ),
-                ),
-                verticalSpace(8),
-                _AccountDetailRow(label: 'Account Name', value: accountName),
-                verticalSpace(8),
-                _AccountDetailRow(label: 'Barter ID', value: barterId),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AccountDetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final Widget? trailing;
-
-  const _AccountDetailRow({
-    required this.label,
-    required this.value,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Caption(label, color: AppColor.lightText),
-        Row(
-          children: [
-            BodySmall(value, fontWeight: FontWeight.w600),
-            if (trailing != null) ...[horizontalSpace(8), trailing!],
-          ],
-        ),
-      ],
-    );
-  }
-}
-
 class _PendingFundsList extends ConsumerWidget {
   const _PendingFundsList();
 
@@ -822,7 +716,7 @@ class _PendingFundCard extends StatelessWidget {
                     Caption(description, fontSize: 10),
                     verticalSpace(4),
                     Caption(
-                      "Expected Release: ${expectedRelease.toIso8601String()}",
+                      "Expected Release: ${DateFormat('MMM d, yyyy').format(expectedRelease)}",
                       fontSize: 10,
                     ),
                   ],
@@ -1193,6 +1087,436 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
                 ],
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VirtualAccountCard extends StatelessWidget {
+  final String accountNumber;
+  final String bankName;
+
+  const _VirtualAccountCard({
+    required this.accountNumber,
+    required this.bankName,
+  });
+
+  void _copyAccountNumber(BuildContext context) {
+    Clipboard.setData(ClipboardData(text: accountNumber));
+    CustomSnackBar.show(
+      context,
+      message: 'Account number copied',
+      type: SnackBarType.success,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.account_balance,
+                  color: AppColor.green,
+                  size: 20,
+                ),
+              ),
+              horizontalSpace(12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BodySmall(
+                      'Fund via Bank Transfer',
+                      fontWeight: FontWeight.w600,
+                    ),
+                    Caption(
+                      'Transfer to this account to fund your wallet',
+                      color: AppColor.lightText,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          verticalSpace(16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Caption('Bank', color: AppColor.lightText),
+                    BodySmall(bankName, fontWeight: FontWeight.w600),
+                  ],
+                ),
+                verticalSpace(8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Caption('Account Number', color: AppColor.lightText),
+                    Row(
+                      children: [
+                        BodySmall(accountNumber, fontWeight: FontWeight.w600),
+                        horizontalSpace(8),
+                        GestureDetector(
+                          onTap: () => _copyAccountNumber(context),
+                          child: const Icon(
+                            Icons.copy,
+                            size: 18,
+                            color: AppColor.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VirtualAccountPromptBar extends StatelessWidget {
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
+  final bool isLoading;
+
+  const _VirtualAccountPromptBar({
+    required this.onAccept,
+    required this.onDecline,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E7FF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.account_balance_outlined,
+                    color: AppColor.primary,
+                    size: 24,
+                  ),
+                ),
+                horizontalSpace(12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BodySmall(
+                        'Create a Virtual Account',
+                        fontWeight: FontWeight.w600,
+                      ),
+                      Caption(
+                        'Fund your wallet easily via bank transfer',
+                        color: AppColor.lightText,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            verticalSpace(16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: isLoading ? null : onDecline,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(color: Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const BodySmall('Not Now'),
+                  ),
+                ),
+                horizontalSpace(12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : onAccept,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const BodySmall(
+                      'Create Account',
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CreateVirtualAccountSheet extends ConsumerStatefulWidget {
+  const _CreateVirtualAccountSheet();
+
+  @override
+  ConsumerState<_CreateVirtualAccountSheet> createState() =>
+      _CreateVirtualAccountSheetState();
+}
+
+class _CreateVirtualAccountSheetState
+    extends ConsumerState<_CreateVirtualAccountSheet> {
+  final _bvnController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _bvnController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleCreateAccount() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final walletNotifier = ref.read(walletNotifierProvider.notifier);
+    final success = await walletNotifier.createVirtualAccount(
+      _bvnController.text.trim(),
+    );
+
+    if (mounted) {
+      if (success) {
+        Navigator.pop(context);
+        CustomSnackBar.show(
+          context,
+          message: 'Virtual account created successfully!',
+          type: SnackBarType.success,
+        );
+      } else {
+        final errorMessage =
+            ref.read(walletNotifierProvider).virtualAccountErrorMessage ??
+            'Failed to create virtual account';
+        CustomSnackBar.show(
+          context,
+          message: errorMessage,
+          type: SnackBarType.error,
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final walletState = ref.watch(walletNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
+    final user = authState.currentUser;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  verticalSpace(20),
+                  const Center(
+                    child: BodyText(
+                      'Create Virtual Account',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  verticalSpace(8),
+                  const Center(
+                    child: Caption(
+                      'Enter your BVN to create a virtual account',
+                      color: AppColor.lightText,
+                    ),
+                  ),
+                  verticalSpace(24),
+                  // User info display
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Caption(
+                              'First Name',
+                              color: AppColor.lightText,
+                            ),
+                            BodySmall(
+                              user?.firstName ?? '-',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ],
+                        ),
+                        verticalSpace(8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Caption(
+                              'Last Name',
+                              color: AppColor.lightText,
+                            ),
+                            BodySmall(
+                              user?.lastName ?? '-',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ],
+                        ),
+                        verticalSpace(8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Caption('Email', color: AppColor.lightText),
+                            Flexible(
+                              child: BodySmall(
+                                user?.email ?? '-',
+                                fontWeight: FontWeight.w600,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  verticalSpace(20),
+                  const BodySmall('BVN', fontWeight: FontWeight.w500),
+                  verticalSpace(8),
+                  TextInputField(
+                    controller: _bvnController,
+
+                    customInputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your BVN';
+                      }
+                      if (value.length != 11) {
+                        return 'BVN must be 11 digits';
+                      }
+                      return null;
+                    },
+                    hintText: 'Enter your 11-digit BVN',
+                  ),
+                  verticalSpace(8),
+                  const Caption(
+                    'Your BVN is required for identity verification and account creation.',
+                    color: AppColor.lightText,
+                  ),
+                  verticalSpace(24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: walletState.isCreatingVirtualAccount
+                          ? null
+                          : _handleCreateAccount,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColor.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: walletState.isCreatingVirtualAccount
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const BodySmall(
+                              'Create Account',
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                    ),
+                  ),
+                  verticalSpace(16),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

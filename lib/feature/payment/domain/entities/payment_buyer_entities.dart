@@ -15,6 +15,12 @@ class InitializePaymentResponseEntity {
   final String? escrowId;
   final String? message;
   final String? status;
+  // Delivery info
+  final String? deliveryType;
+  final String? pickupAddress;
+  final String? dropoffAddress;
+  final String? logisticsDeliveryId;
+  final String? deliveryJobId;
 
   InitializePaymentResponseEntity({
     this.accessCode = '',
@@ -26,7 +32,16 @@ class InitializePaymentResponseEntity {
     this.escrowId,
     this.message,
     this.status,
+    this.deliveryType,
+    this.pickupAddress,
+    this.dropoffAddress,
+    this.logisticsDeliveryId,
+    this.deliveryJobId,
   });
+
+  bool get isWalletPayment => paymentMethod == 'wallet';
+  bool get isInterState => deliveryType == 'inter_state';
+  bool get isIntraState => deliveryType == 'intra_state';
 }
 
 class VerifyPaymentResponseEntity {
@@ -36,6 +51,12 @@ class VerifyPaymentResponseEntity {
   final String paymentRequestId;
   final String paymentStatus;
   final String status;
+  // Delivery info
+  final String? deliveryType;
+  final String? pickupAddress;
+  final String? dropoffAddress;
+  final String? logisticsDeliveryId;
+  final String? deliveryJobId;
 
   VerifyPaymentResponseEntity({
     required this.escrowId,
@@ -44,7 +65,15 @@ class VerifyPaymentResponseEntity {
     required this.paymentRequestId,
     required this.paymentStatus,
     required this.status,
+    this.deliveryType,
+    this.pickupAddress,
+    this.dropoffAddress,
+    this.logisticsDeliveryId,
+    this.deliveryJobId,
   });
+
+  bool get isInterState => deliveryType == 'inter_state';
+  bool get isIntraState => deliveryType == 'intra_state';
 }
 
 class PaymentDetailsEntity {

@@ -19,6 +19,11 @@ class InitializePaymentResponseModel extends InitializePaymentResponseEntity {
     super.escrowId,
     super.message,
     super.status,
+    super.deliveryType,
+    super.pickupAddress,
+    super.dropoffAddress,
+    super.logisticsDeliveryId,
+    super.deliveryJobId,
   });
 
   factory InitializePaymentResponseModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +37,11 @@ class InitializePaymentResponseModel extends InitializePaymentResponseEntity {
       escrowId: json['escrow_id'],
       message: json['message'],
       status: json['status'],
+      deliveryType: json['delivery_type'],
+      pickupAddress: json['pickup_address'],
+      dropoffAddress: json['dropoff_address'],
+      logisticsDeliveryId: json['logistics_delivery_id'],
+      deliveryJobId: json['delivery_job_id'],
     );
   }
 }
@@ -44,6 +54,11 @@ class VerifyPaymentResponseModel extends VerifyPaymentResponseEntity {
     required super.paymentRequestId,
     required super.paymentStatus,
     required super.status,
+    super.deliveryType,
+    super.pickupAddress,
+    super.dropoffAddress,
+    super.logisticsDeliveryId,
+    super.deliveryJobId,
   });
 
   factory VerifyPaymentResponseModel.fromJson(Map<String, dynamic> json) {
@@ -54,6 +69,11 @@ class VerifyPaymentResponseModel extends VerifyPaymentResponseEntity {
       paymentRequestId: json['payment_request_id'] ?? '',
       paymentStatus: json['payment_status'] ?? '',
       status: json['status'] ?? '',
+      deliveryType: json['delivery_type'],
+      pickupAddress: json['pickup_address'],
+      dropoffAddress: json['dropoff_address'],
+      logisticsDeliveryId: json['logistics_delivery_id'],
+      deliveryJobId: json['delivery_job_id'],
     );
   }
 }

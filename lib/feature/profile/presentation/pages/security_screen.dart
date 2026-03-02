@@ -19,24 +19,27 @@ class SecurityScreen extends StatelessWidget {
         title: const BodyLarge("Security", fontWeight: FontWeight.bold),
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            verticalSpace(16),
-            _SecurityOptionCard(
-              title: "Change Wallet PIN",
-              onTap: () {
-                _showChangePinBottomSheet(context);
-              },
-            ),
-            verticalSpace(16),
-            _SecurityOptionCard(
-              title: "Reset Wallet PIN",
-              onTap: () {
-                _showResetPinBottomSheet(context);
-              },
-            ),
-          ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: SafeArea(
+          child: Column(
+            children: [
+              verticalSpace(16),
+              _SecurityOptionCard(
+                title: "Change Wallet PIN",
+                onTap: () {
+                  _showChangePinBottomSheet(context);
+                },
+              ),
+              verticalSpace(16),
+              _SecurityOptionCard(
+                title: "Reset Wallet PIN",
+                onTap: () {
+                  _showResetPinBottomSheet(context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

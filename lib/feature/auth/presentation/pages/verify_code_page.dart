@@ -135,84 +135,87 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            verticalSpace(24),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                const Center(
-                  child: StepIndicator(currentStep: 3, totalSteps: 4),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColor.onboardingPrimary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 20,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              verticalSpace(24),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Center(
+                    child: StepIndicator(currentStep: 3, totalSteps: 4),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColor.onboardingPrimary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            verticalSpace(32),
-
-            const H3(
-              'Enter the 6-Digit Code sent to\nyour phone number',
-              color: AppColor.primaryText,
-            ),
-            verticalSpace(45),
-
-            Center(
-              child: Pinput(
-                controller: _pinController,
-                length: 6,
-                defaultPinTheme: defaultPinTheme,
-                focusedPinTheme: focusedPinTheme,
-                submittedPinTheme: submittedPinTheme,
-                showCursor: true,
-                onCompleted: (pin) => _onVerify(),
+                ],
               ),
-            ),
-            verticalSpace(24),
+              verticalSpace(32),
 
-            Center(
-              child: TextButton(
-                onPressed: authState.isResending ? null : _onResendCode,
-                child: BodyText(
-                  authState.isResending
-                      ? 'Resending...'
-                      : 'Resend OTP (${authState.retryAfterSeconds}s)',
-                  color: AppColor.upholdGrey,
+              const H3(
+                'Enter the 6-Digit Code sent to\nyour phone number',
+                color: AppColor.primaryText,
+              ),
+              verticalSpace(45),
+
+              Center(
+                child: Pinput(
+                  controller: _pinController,
+                  length: 6,
+                  defaultPinTheme: defaultPinTheme,
+                  focusedPinTheme: focusedPinTheme,
+                  submittedPinTheme: submittedPinTheme,
+                  showCursor: true,
+                  onCompleted: (pin) => _onVerify(),
                 ),
               ),
-            ),
+              verticalSpace(24),
 
-            const Spacer(),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: AnimatedButton(
-                onTap: authState.isLoading ? () {} : _onVerify,
-                child: CustomButton(
-                  title: authState.isLoading ? 'Verifying...' : 'Verify',
-                  color: AppColor.onboardingPrimary,
-                  borderRadius: 28,
+              Center(
+                child: TextButton(
+                  onPressed: authState.isResending ? null : _onResendCode,
+                  child: BodyText(
+                    authState.isResending
+                        ? 'Resending...'
+                        : 'Resend OTP (${authState.retryAfterSeconds}s)',
+                    color: AppColor.upholdGrey,
+                  ),
                 ),
               ),
-            ),
-            verticalSpace(16),
-          ],
+
+              const Spacer(),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: AnimatedButton(
+                  onTap: authState.isLoading ? () {} : _onVerify,
+                  child: CustomButton(
+                    title: authState.isLoading ? 'Verifying...' : 'Verify',
+                    color: AppColor.onboardingPrimary,
+                    borderRadius: 28,
+                  ),
+                ),
+              ),
+              verticalSpace(16),
+            ],
+          ),
         ),
       ),
     );

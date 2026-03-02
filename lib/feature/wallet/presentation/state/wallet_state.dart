@@ -12,8 +12,6 @@ class WalletState {
   final bool isChangingPin;
   final bool isRequestingPinReset;
   final bool isConfirmingPinReset;
-  final bool isFetchingSubaccount;
-  final bool isCreatingSubaccount;
   final bool isWithdrawing;
   final bool isSyncing;
   final String? errorMessage;
@@ -26,7 +24,14 @@ class WalletState {
   final List<PendingFundEntity> pendingFunds;
   final PinStatusEntity? pinStatus;
   final bool isPinVerified;
-  final SubaccountEntity? subaccount;
+
+  // Virtual Account
+  final bool isFetchingVirtualAccountStatus;
+  final bool isCreatingVirtualAccount;
+  final bool isDecliningVirtualAccount;
+  final VirtualAccountStatusEntity? virtualAccountStatus;
+  final VirtualAccountEntity? virtualAccount;
+  final String? virtualAccountErrorMessage;
 
   const WalletState({
     this.isFetchingWallet = false,
@@ -40,8 +45,6 @@ class WalletState {
     this.isChangingPin = false,
     this.isRequestingPinReset = false,
     this.isConfirmingPinReset = false,
-    this.isFetchingSubaccount = false,
-    this.isCreatingSubaccount = false,
     this.isWithdrawing = false,
     this.isSyncing = false,
     this.errorMessage,
@@ -54,7 +57,12 @@ class WalletState {
     this.pendingFunds = const [],
     this.pinStatus,
     this.isPinVerified = false,
-    this.subaccount,
+    this.isFetchingVirtualAccountStatus = false,
+    this.isCreatingVirtualAccount = false,
+    this.isDecliningVirtualAccount = false,
+    this.virtualAccountStatus,
+    this.virtualAccount,
+    this.virtualAccountErrorMessage,
   });
 
   WalletState copyWith({
@@ -69,8 +77,6 @@ class WalletState {
     bool? isChangingPin,
     bool? isRequestingPinReset,
     bool? isConfirmingPinReset,
-    bool? isFetchingSubaccount,
-    bool? isCreatingSubaccount,
     bool? isWithdrawing,
     bool? isSyncing,
     String? errorMessage,
@@ -83,7 +89,12 @@ class WalletState {
     List<PendingFundEntity>? pendingFunds,
     PinStatusEntity? pinStatus,
     bool? isPinVerified,
-    SubaccountEntity? subaccount,
+    bool? isFetchingVirtualAccountStatus,
+    bool? isCreatingVirtualAccount,
+    bool? isDecliningVirtualAccount,
+    VirtualAccountStatusEntity? virtualAccountStatus,
+    VirtualAccountEntity? virtualAccount,
+    String? virtualAccountErrorMessage,
   }) {
     return WalletState(
       isFetchingWallet: isFetchingWallet ?? this.isFetchingWallet,
@@ -99,8 +110,6 @@ class WalletState {
       isChangingPin: isChangingPin ?? this.isChangingPin,
       isRequestingPinReset: isRequestingPinReset ?? this.isRequestingPinReset,
       isConfirmingPinReset: isConfirmingPinReset ?? this.isConfirmingPinReset,
-      isFetchingSubaccount: isFetchingSubaccount ?? this.isFetchingSubaccount,
-      isCreatingSubaccount: isCreatingSubaccount ?? this.isCreatingSubaccount,
       isWithdrawing: isWithdrawing ?? this.isWithdrawing,
       isSyncing: isSyncing ?? this.isSyncing,
       errorMessage: errorMessage,
@@ -113,7 +122,15 @@ class WalletState {
       pendingFunds: pendingFunds ?? this.pendingFunds,
       pinStatus: pinStatus ?? this.pinStatus,
       isPinVerified: isPinVerified ?? this.isPinVerified,
-      subaccount: subaccount ?? this.subaccount,
+      isFetchingVirtualAccountStatus:
+          isFetchingVirtualAccountStatus ?? this.isFetchingVirtualAccountStatus,
+      isCreatingVirtualAccount:
+          isCreatingVirtualAccount ?? this.isCreatingVirtualAccount,
+      isDecliningVirtualAccount:
+          isDecliningVirtualAccount ?? this.isDecliningVirtualAccount,
+      virtualAccountStatus: virtualAccountStatus ?? this.virtualAccountStatus,
+      virtualAccount: virtualAccount ?? this.virtualAccount,
+      virtualAccountErrorMessage: virtualAccountErrorMessage,
     );
   }
 }

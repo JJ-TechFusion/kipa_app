@@ -15,10 +15,12 @@ import '../../domain/usecases/verify_pin_usecase.dart';
 import '../../domain/usecases/change_pin_usecase.dart';
 import '../../domain/usecases/request_pin_reset_usecase.dart';
 import '../../domain/usecases/confirm_pin_reset_usecase.dart';
-import '../../domain/usecases/get_subaccount_usecase.dart';
-import '../../domain/usecases/create_subaccount_usecase.dart';
 import '../../domain/usecases/withdraw_usecase.dart';
 import '../../domain/usecases/sync_wallet_usecase.dart';
+import '../../domain/usecases/get_virtual_account_status_usecase.dart';
+import '../../domain/usecases/create_virtual_account_usecase.dart';
+import '../../domain/usecases/get_virtual_account_usecase.dart';
+import '../../domain/usecases/decline_virtual_account_usecase.dart';
 import '../state/wallet_notifier.dart';
 import '../state/wallet_state.dart';
 
@@ -79,21 +81,33 @@ final confirmPinResetUseCaseProvider = Provider<ConfirmPinResetUseCase>((ref) {
   return ConfirmPinResetUseCase(ref.read(walletRepositoryProvider));
 });
 
-// Subaccount Use Cases
-final getSubaccountUseCaseProvider = Provider<GetSubaccountUseCase>((ref) {
-  return GetSubaccountUseCase(ref.read(walletRepositoryProvider));
-});
-
-final createSubaccountUseCaseProvider = Provider<CreateSubaccountUseCase>((ref) {
-  return CreateSubaccountUseCase(ref.read(walletRepositoryProvider));
-});
-
 final withdrawUseCaseProvider = Provider<WithdrawUseCase>((ref) {
   return WithdrawUseCase(ref.read(walletRepositoryProvider));
 });
 
 final syncWalletUseCaseProvider = Provider<SyncWalletUseCase>((ref) {
   return SyncWalletUseCase(ref.read(walletRepositoryProvider));
+});
+
+// Virtual Account Use Cases
+final getVirtualAccountStatusUseCaseProvider =
+    Provider<GetVirtualAccountStatusUseCase>((ref) {
+  return GetVirtualAccountStatusUseCase(ref.read(walletRepositoryProvider));
+});
+
+final createVirtualAccountUseCaseProvider =
+    Provider<CreateVirtualAccountUseCase>((ref) {
+  return CreateVirtualAccountUseCase(ref.read(walletRepositoryProvider));
+});
+
+final getVirtualAccountUseCaseProvider =
+    Provider<GetVirtualAccountUseCase>((ref) {
+  return GetVirtualAccountUseCase(ref.read(walletRepositoryProvider));
+});
+
+final declineVirtualAccountUseCaseProvider =
+    Provider<DeclineVirtualAccountUseCase>((ref) {
+  return DeclineVirtualAccountUseCase(ref.read(walletRepositoryProvider));
 });
 
 // Notifier

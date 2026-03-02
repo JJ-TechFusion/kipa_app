@@ -145,8 +145,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             DashboardHeader(
-                              userName:
-                                  authState.currentUser?.firstName ?? 'User',
+                              userName: authState.currentUser?.firstName ?? '',
                               profileImageUrl:
                                   authState.currentUser?.profileImageUrl,
                               onNotificationTap: () {},
@@ -157,7 +156,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               balance:
                                   walletState.wallet?.availableBalance ?? 0,
                               pendingBalance:
-                                  walletState.wallet?.lockedBalance ?? 0,
+                                  walletState.wallet?.totalPendingEscrow ?? 0,
                               isVisible: state.isBalanceVisible,
                               onVisibilityToggle:
                                   controller.toggleBalanceVisibility,

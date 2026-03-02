@@ -145,6 +145,12 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => RiderSearchScreen(
             paymentRequestId: args?['paymentRequestId'] ?? '',
+            pickupAddress: args?['pickupAddress'],
+            dropoffAddress: args?['dropoffAddress'],
+            pickupLat: args?['pickupLat'],
+            pickupLng: args?['pickupLng'],
+            dropoffLat: args?['dropoffLat'],
+            dropoffLng: args?['dropoffLng'],
           ),
         );
 

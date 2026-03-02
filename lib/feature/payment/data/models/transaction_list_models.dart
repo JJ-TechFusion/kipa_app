@@ -13,6 +13,15 @@ class TransactionListItemModel {
   final String counterpartyRole;
   final DateTime createdAt;
   final DateTime? paidAt;
+  // Delivery fields
+  final String? deliveryJobId;
+  final String? logisticsDeliveryId;
+  final String? pickupAddress;
+  final String? dropoffAddress;
+  final double? pickupLat;
+  final double? pickupLng;
+  final double? dropoffLat;
+  final double? dropoffLng;
 
   TransactionListItemModel({
     required this.paymentRequestId,
@@ -27,6 +36,14 @@ class TransactionListItemModel {
     required this.counterpartyRole,
     required this.createdAt,
     this.paidAt,
+    this.deliveryJobId,
+    this.logisticsDeliveryId,
+    this.pickupAddress,
+    this.dropoffAddress,
+    this.pickupLat,
+    this.pickupLng,
+    this.dropoffLat,
+    this.dropoffLng,
   });
 
   static double _parseDouble(dynamic value) {
@@ -34,6 +51,14 @@ class TransactionListItemModel {
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0;
     return 0;
+  }
+
+  static double? _parseNullableDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
   }
 
   factory TransactionListItemModel.fromJson(Map<String, dynamic> json) {
@@ -52,6 +77,14 @@ class TransactionListItemModel {
       paidAt: json['paid_at'] != null
           ? DateTime.tryParse(json['paid_at'])
           : null,
+      deliveryJobId: json['delivery_job_id']?.toString(),
+      logisticsDeliveryId: json['logistics_delivery_id']?.toString(),
+      pickupAddress: json['pickup_address']?.toString(),
+      dropoffAddress: json['dropoff_address']?.toString(),
+      pickupLat: _parseNullableDouble(json['pickup_lat']),
+      pickupLng: _parseNullableDouble(json['pickup_lng']),
+      dropoffLat: _parseNullableDouble(json['dropoff_lat']),
+      dropoffLng: _parseNullableDouble(json['dropoff_lng']),
     );
   }
 
@@ -69,6 +102,14 @@ class TransactionListItemModel {
       counterpartyRole: counterpartyRole,
       createdAt: createdAt,
       paidAt: paidAt,
+      deliveryJobId: deliveryJobId,
+      logisticsDeliveryId: logisticsDeliveryId,
+      pickupAddress: pickupAddress,
+      dropoffAddress: dropoffAddress,
+      pickupLat: pickupLat,
+      pickupLng: pickupLng,
+      dropoffLat: dropoffLat,
+      dropoffLng: dropoffLng,
     );
   }
 }

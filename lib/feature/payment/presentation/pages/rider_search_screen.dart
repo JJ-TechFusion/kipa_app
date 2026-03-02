@@ -18,8 +18,24 @@ const String _googleMapsApiKey = 'AIzaSyDGctg74O3Vwa0IP_o2Eh2xwKe5CSuz-k0';
 
 class RiderSearchScreen extends ConsumerStatefulWidget {
   final String paymentRequestId;
+  // Optional initial data - if provided, skip fetching from state
+  final String? pickupAddress;
+  final String? dropoffAddress;
+  final double? pickupLat;
+  final double? pickupLng;
+  final double? dropoffLat;
+  final double? dropoffLng;
 
-  const RiderSearchScreen({super.key, required this.paymentRequestId});
+  const RiderSearchScreen({
+    super.key,
+    required this.paymentRequestId,
+    this.pickupAddress,
+    this.dropoffAddress,
+    this.pickupLat,
+    this.pickupLng,
+    this.dropoffLat,
+    this.dropoffLng,
+  });
 
   @override
   ConsumerState<RiderSearchScreen> createState() => _RiderSearchScreenState();
@@ -80,6 +96,32 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
   }
 
   Future<void> _fetchPaymentDetails() async {
+    // First, check if data was passed directly via widget parameters
+    if (widget.pickupAddress != null && widget.dropoffAddress != null) {
+      _pickupAddress = widget.pickupAddress;
+      _dropoffAddress = widget.dropoffAddress;
+
+      if (widget.pickupLat != null && widget.pickupLng != null) {
+        _pickupLocation = LatLng(widget.pickupLat!, widget.pickupLng!);
+      }
+      if (widget.dropoffLat != null && widget.dropoffLng != null) {
+        _dropoffLocation = LatLng(widget.dropoffLat!, widget.dropoffLng!);
+      }
+
+      // If coordinates available, use them; otherwise geocode
+      if (_pickupLocation != null && _dropoffLocation != null) {
+        setState(() {
+          _isLoadingLocations = false;
+          _updateMarkers();
+        });
+        return;
+      } else {
+        await _geocodeAddresses();
+        return;
+      }
+    }
+
+    // Fallback: try to get data from paymentRequests state
     final state = ref.read(paymentNotifierProvider);
     final paymentRequests = state.paymentRequests ?? [];
 
