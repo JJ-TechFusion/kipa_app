@@ -14,19 +14,14 @@ import '../../domain/usecases/open_dispute_usecase.dart';
 import '../state/purchases_notifier.dart';
 import '../state/purchases_state.dart';
 
-// Data Sources
 final purchasesRemoteDataSourceProvider = Provider<PurchasesRemoteDataSource>((
   ref,
 ) {
   return PurchasesRemoteDataSource(getIt<ApiService>());
 });
-
-// Repository
 final purchasesRepositoryProvider = Provider<PurchasesRepository>((ref) {
   return PurchasesRepositoryImpl(ref.read(purchasesRemoteDataSourceProvider));
 });
-
-// Use Cases
 final getPurchasesUseCaseProvider = Provider<GetPurchasesUseCase>((ref) {
   return GetPurchasesUseCase(ref.read(purchasesRepositoryProvider));
 });
@@ -57,7 +52,5 @@ final uploadDisputeEvidenceUseCaseProvider =
 final openDisputeUseCaseProvider = Provider<OpenDisputeUseCase>((ref) {
   return OpenDisputeUseCase(ref.read(purchasesRepositoryProvider));
 });
-
-// Notifier
 final purchasesNotifierProvider =
     NotifierProvider<PurchasesNotifier, PurchasesState>(PurchasesNotifier.new);

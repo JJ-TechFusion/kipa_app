@@ -43,9 +43,8 @@ class RouteNames {
   static const String personalDetailsRoute = '/personal-details';
 
   static const String disputeDetailRoute = '/dispute-detail';
-  static const String logisticsDeliveryDetailsRoute = '/logistics-delivery-details';
-
-  // Errand routes
+  static const String logisticsDeliveryDetailsRoute =
+      '/logistics-delivery-details';
   static const String createErrandRoute = '/create-errand';
   static const String errandSummaryRoute = '/errand-summary';
   static const String errandSearchingRoute = '/errand-searching';

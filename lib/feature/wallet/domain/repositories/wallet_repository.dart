@@ -6,8 +6,6 @@ abstract class WalletRepository {
   Future<NetworkResponse> verifyTopUp(String reference);
   Future<NetworkResponse> getTransactions();
   Future<NetworkResponse> getPendingFunds();
-
-  // PIN operations
   Future<NetworkResponse> getPinStatus();
   Future<NetworkResponse> createPin(String pin);
   Future<NetworkResponse> verifyPin(String pin);
@@ -16,19 +14,13 @@ abstract class WalletRepository {
   Future<NetworkResponse> confirmPinReset(String otpCode, String newPin);
 
   Future<NetworkResponse> syncWallet();
-
-  // Bank account operations
   Future<NetworkResponse> getBanks();
   Future<NetworkResponse> getBankAccounts();
   Future<NetworkResponse> resolveAccount(String accountNumber, String bankCode);
   Future<NetworkResponse> addBankAccount(String bankCode, String accountNumber);
   Future<NetworkResponse> setDefaultBankAccount(String id);
   Future<NetworkResponse> deleteBankAccount(String id);
-
-  // Withdrawal operations
   Future<NetworkResponse> withdraw(String bankAccountId, double amount);
-
-  // Virtual Account operations
   Future<NetworkResponse> getVirtualAccountStatus();
   Future<NetworkResponse> createVirtualAccount(String bvn);
   Future<NetworkResponse> getVirtualAccount();

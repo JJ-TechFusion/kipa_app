@@ -1,5 +1,4 @@
 enum NotificationType {
-  // Order Lifecycle
   orderPaid('order_paid'),
   orderReadyPickup('order_ready_pickup'),
   riderAssigned('rider_assigned'),
@@ -7,8 +6,6 @@ enum NotificationType {
   orderDelivered('order_delivered'),
   escrowReleased('escrow_released'),
   orderCancelled('order_cancelled'),
-
-  // Unavailability Handling
   deliveryFailed('delivery_failed'),
   buyerUnavailable('buyer_unavailable'),
   itemReturning('item_returning'),
@@ -16,14 +13,10 @@ enum NotificationType {
   rebookReminder('rebook_reminder'),
   rebookExpired('rebook_expired'),
   deliveryResumed('delivery_resumed'),
-
-  // Errand Lifecycle
   errandAccepted('errand_accepted'),
   errandPickedUp('errand_picked_up'),
   errandDelivered('errand_delivered'),
   errandCompleted('errand_completed'),
-
-  // Logistics Delivery
   logisticsShipped('logistics_shipped'),
   logisticsDeliveryClaimed('logistics_delivery_claimed'),
   logisticsConfirmReminder('logistics_confirm_reminder'),
@@ -33,27 +26,19 @@ enum NotificationType {
   logisticsReturnRequired('logistics_return_required'),
   logisticsReturnShipped('logistics_return_shipped'),
   logisticsReleased('logistics_released'),
-
-  // Wallet Events
   topupSuccess('topup_success'),
   dvaTransfer('dva_transfer'),
   withdrawalInitiated('withdrawal_initiated'),
   withdrawalSuccess('withdrawal_success'),
   withdrawalFailed('withdrawal_failed'),
-
-  // Dispute & Admin
   disputeOpened('dispute_opened'),
   disputeResolved('dispute_resolved'),
   refundProcessed('refund_processed'),
   riderVerified('rider_verified'),
   riderSuspended('rider_suspended'),
   userSuspended('user_suspended'),
-
-  // Chat & General
   chatMessage('chat_message'),
   broadcast('broadcast'),
-
-  // Fallback
   unknown('unknown');
 
   final String value;
@@ -68,7 +53,6 @@ enum NotificationType {
   }
 }
 
-/// Parsed notification payload from FCM.
 class NotificationPayload {
   final String? title;
   final String? body;
@@ -112,11 +96,8 @@ class NotificationPayload {
       dropoffCode: data['dropoff_code'],
     );
   }
-
-  /// Determines which route to navigate to based on notification type.
   String? get targetRoute {
     switch (type) {
-      // Delivery tracking
       case NotificationType.riderAssigned:
       case NotificationType.orderPickedUp:
       case NotificationType.deliveryFailed:
@@ -124,13 +105,9 @@ class NotificationPayload {
       case NotificationType.itemReturning:
       case NotificationType.deliveryResumed:
         return '/delivery-tracking';
-
-      // Delivery details
       case NotificationType.orderDelivered:
       case NotificationType.itemReturned:
         return '/delivery-details';
-
-      // Order / payment details
       case NotificationType.orderPaid:
       case NotificationType.orderReadyPickup:
       case NotificationType.escrowReleased:
@@ -138,22 +115,16 @@ class NotificationPayload {
       case NotificationType.rebookReminder:
       case NotificationType.rebookExpired:
         return '/buyer-payment-details';
-
-      // Wallet (go to home/wallet tab)
       case NotificationType.topupSuccess:
       case NotificationType.dvaTransfer:
       case NotificationType.withdrawalInitiated:
       case NotificationType.withdrawalSuccess:
       case NotificationType.withdrawalFailed:
         return '/home';
-
-      // Dispute
       case NotificationType.disputeOpened:
       case NotificationType.disputeResolved:
       case NotificationType.refundProcessed:
         return '/dispute';
-
-      // Chat
       case NotificationType.chatMessage:
         return '/chat';
 
@@ -162,7 +133,6 @@ class NotificationPayload {
     }
   }
 
-  /// Arguments to pass when navigating.
   Map<String, dynamic>? get targetArguments {
     final args = <String, dynamic>{};
     if (jobId != null) {

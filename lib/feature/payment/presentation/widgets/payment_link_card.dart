@@ -93,8 +93,6 @@ class PaymentLinkCard extends ConsumerWidget {
               ],
             ),
             verticalSpace(16),
-
-            // Action buttons based on status
             if (status.canMarkReady && !_isInterState)
               _buildReadyForPickupButton(context, ref)
             else if (status == PaymentRequestStatus.searchingRider)

@@ -294,7 +294,6 @@ class _BuyerPaymentDetailsScreenState
                               );
                             }
                           } else {
-                            // Wallet payment success
                             if (!context.mounted) return;
                             Navigator.pushNamedAndRemoveUntil(
                               context,

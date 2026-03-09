@@ -68,7 +68,6 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Status card
               _buildCard(
                 child: Row(
                   children: [
@@ -104,8 +103,6 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
                 ),
               ),
               verticalSpace(16),
-
-              // Counterparty info
               _buildCard(
                 child: Row(
                   children: [
@@ -133,8 +130,6 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
                 ),
               ),
               verticalSpace(16),
-
-              // Item & transaction info
               _buildCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,8 +180,6 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
                 ),
               ),
               verticalSpace(16),
-
-              // Dispute reason
               _buildCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,8 +207,6 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
                 ),
               ),
               verticalSpace(16),
-
-              // Evidence
               if (dispute.evidence.isNotEmpty) ...[
                 _buildCard(
                   child: Column(
@@ -262,8 +253,6 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
                 ),
                 verticalSpace(16),
               ],
-
-              // Resolution info (if resolved/closed)
               if (dispute.outcome != 'pending') ...[
                 _buildCard(
                   child: Column(
@@ -311,8 +300,6 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
                 ),
                 verticalSpace(16),
               ],
-
-              // Escrow breakdown
               _buildCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

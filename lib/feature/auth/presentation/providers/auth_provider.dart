@@ -16,22 +16,15 @@ import '../../domain/usecases/delete_user_usecase.dart';
 import '../state/auth_notifier.dart';
 import '../state/auth_state.dart';
 
-// Device Info Service
 final deviceInfoServiceProvider = Provider<DeviceInfoService>((ref) {
   return DeviceInfoService();
 });
-
-// Data Sources
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   return AuthRemoteDataSource(getIt<ApiService>());
 });
-
-// Repository
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryImpl(ref.read(authRemoteDataSourceProvider));
 });
-
-// Use Cases
 final sendOtpUseCaseProvider = Provider<SendOtpUseCase>((ref) {
   return SendOtpUseCase(ref.read(authRepositoryProvider));
 });
@@ -64,8 +57,6 @@ final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
 final deleteUserUseCaseProvider = Provider<DeleteUserUseCase>((ref) {
   return DeleteUserUseCase(ref.read(authRepositoryProvider));
 });
-
-// State Notifier
 final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(() {
   return AuthNotifier();
 });

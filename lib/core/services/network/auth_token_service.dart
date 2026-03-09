@@ -26,7 +26,7 @@ class AuthTokenService {
         await _storageService.deleteData('access_token');
         _navigateToLogin();
       } catch (flagError) {
-        // Critical failure in token expiration handling
+        _navigateToLogin();
       }
     }
   }

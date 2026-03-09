@@ -94,15 +94,12 @@ class PaymentDetailsModel extends PaymentDetailsEntity {
   });
 
   factory PaymentDetailsModel.fromJson(Map<String, dynamic> json) {
-    // Extract seller info from flat response
     final seller = SellerInfoModel(
       id: json['seller_id'] ?? '',
       name: json['seller_name'] ?? '',
       email: json['seller_email'],
       phone: json['seller_phone'],
     );
-
-    // Build item from flat response
     final items = <PaymentItemModel>[];
     if (json['item_name'] != null) {
       items.add(
@@ -112,8 +109,6 @@ class PaymentDetailsModel extends PaymentDetailsEntity {
         ),
       );
     }
-
-    // Build fulfillment info from flat response
     FulfillmentInfoModel? fulfillment;
     if (json['delivery_type'] != null) {
       fulfillment = FulfillmentInfoModel(
@@ -121,8 +116,6 @@ class PaymentDetailsModel extends PaymentDetailsEntity {
         estimatedDeliveryFee: (json['estimated_delivery_fee'] ?? 0).toDouble(),
       );
     }
-
-    // Calculate actual total buyer pays in app (item price + service fee, NO delivery fee)
     final itemPrice = (json['item_price'] ?? 0).toDouble();
     final serviceFee = (json['buyer_service_fee'] ?? 0).toDouble();
     final totalToPay = itemPrice + serviceFee;

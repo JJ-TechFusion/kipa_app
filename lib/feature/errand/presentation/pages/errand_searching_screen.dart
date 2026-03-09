@@ -29,14 +29,8 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
     with TickerProviderStateMixin {
   GoogleMapController? _mapController;
   Timer? _pollingTimer;
-
-  // Animation controllers
   late AnimationController _pulseController;
-
-  // Default to Lagos, Nigeria
   static const LatLng _defaultLocation = LatLng(6.5244, 3.3792);
-
-  // Map elements
   Set<Marker> _markers = {};
   Set<Circle> _circles = {};
   Set<Polyline> _polylines = {};
@@ -47,23 +41,15 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
   @override
   void initState() {
     super.initState();
-
-    // Pulse animation for the search effect
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     )..repeat();
-
-    // Set locations from errand
     _setupLocations();
-
-    // Set the current errand in state
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(errandNotifierProvider.notifier).setCurrentErrand(widget.errand);
     });
-
-    // Start polling for rider assignment
     _startPolling();
   }
 
@@ -109,8 +95,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
         ),
       ),
     };
-
-    // Add pulsing circle around pickup
     _circles = {
       Circle(
         circleId: const CircleId('pickup_pulse'),
@@ -121,8 +105,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
         strokeWidth: 2,
       ),
     };
-
-    // Add polyline connecting pickup and dropoff
     _polylines = {
       Polyline(
         polylineId: const PolylineId('route'),
@@ -173,8 +155,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
       final currentErrand = state.currentErrand;
 
       if (currentErrand == null) return;
-
-      // Check if rider has been assigned
       if (currentErrand.status == ErrandStatus.accepted ||
           currentErrand.status == ErrandStatus.pickedUp ||
           currentErrand.status == ErrandStatus.inTransit) {
@@ -189,7 +169,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
         }
       }
     } catch (e) {
-      // Continue polling on error
       logMessage('ErrandSearchingScreen', 'Polling error: $e');
     }
   }
@@ -260,7 +239,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Google Map
           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: _pickupLocation ?? _defaultLocation,
@@ -278,8 +256,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
             mapToolbarEnabled: false,
             compassEnabled: false,
           ),
-
-          // Radar animation overlay
           if (_pickupLocation != null)
             Positioned.fill(
               child: IgnorePointer(
@@ -300,8 +276,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
                 ),
               ),
             ),
-
-          // Top bar
           Positioned(
             top: 0,
             left: 0,
@@ -354,8 +328,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
               ),
             ),
           ),
-
-          // Bottom sheet
           Positioned(
             bottom: 0,
             left: 0,
@@ -371,7 +343,7 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
     return GestureDetector(
       onTap: () {
         _pollingTimer?.cancel();
-        Navigator.pop(context);
+        Navigator.popUntil(context, (route) => route.isFirst);
       },
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -392,6 +364,9 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
   }
 
   Widget _buildBottomSheet(dynamic state) {
+    final currentErrand = state.currentErrand as ErrandEntity?;
+    final isAccepted = currentErrand?.status == ErrandStatus.accepted;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -417,47 +392,57 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
             ),
           ),
           verticalSpace(20),
-
-          // Animated search indicator
-          _buildSearchIndicator(),
+          if (isAccepted)
+            _buildRiderFoundIndicator()
+          else
+            _buildSearchIndicator(),
 
           verticalSpace(20),
-
-          // Status text
-          const BodyText(
-            'Finding a Rider',
+          BodyText(
+            isAccepted ? 'Rider Found!' : 'Finding a Rider',
             fontWeight: FontWeight.w600,
             fontSize: 20,
           ),
 
           verticalSpace(8),
 
-          const Caption(
-            'We\'re looking for nearby riders to pick up your package',
-            color: AppColor.lightText,
+          Caption(
+            isAccepted
+                ? 'A rider has accepted your errand. Redirecting...'
+                : 'We\'re looking for nearby riders to pick up your package',
+            color: isAccepted ? AppColor.primary : AppColor.lightText,
             textAlign: TextAlign.center,
           ),
 
           verticalSpace(24),
-
-          // Location info
           _buildLocationInfo(),
 
           verticalSpace(24),
-
-          // Cancel button
-          CustomButton(
-            title: state.isCancelling ? 'Cancelling...' : 'Cancel Search',
-            borderRadius: 30,
-            color: AppColor.kipaGrey.withAlpha(50),
-            textColor: AppColor.primaryText,
-            isLoading: state.isCancelling,
-            onTap: state.isCancelling ? null : _cancelErrand,
-          ),
+          if (!isAccepted)
+            CustomButton(
+              title: state.isCancelling ? 'Cancelling...' : 'Cancel Search',
+              borderRadius: 30,
+              color: AppColor.kipaGrey.withAlpha(50),
+              textColor: AppColor.primaryText,
+              isLoading: state.isCancelling,
+              onTap: state.isCancelling ? null : _cancelErrand,
+            ),
 
           verticalSpace(16),
         ],
       ),
+    );
+  }
+
+  Widget _buildRiderFoundIndicator() {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.green.withAlpha(30),
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(Icons.check_circle, color: Colors.green, size: 50),
     );
   }
 
@@ -468,7 +453,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Pulsing circles
           ...List.generate(3, (index) {
             return AnimatedBuilder(
               animation: _pulseController,
@@ -497,8 +481,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
               },
             );
           }),
-
-          // Center icon
           Container(
             width: 50,
             height: 50,
@@ -595,7 +577,6 @@ class _ErrandSearchingScreenState extends ConsumerState<ErrandSearchingScreen>
   }
 }
 
-// Custom painter for radar effect on map
 class _RadarPainter extends CustomPainter {
   final double progress;
   final Offset center;
@@ -609,7 +590,6 @@ class _RadarPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw 3 expanding circles
     for (int i = 0; i < 3; i++) {
       final delay = i * 0.33;
       final adjustedProgress = (progress + delay) % 1.0;

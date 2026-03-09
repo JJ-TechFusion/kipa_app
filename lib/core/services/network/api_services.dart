@@ -45,10 +45,20 @@ class ApiService {
         queryParameters: query,
         options: Options(headers: headers),
       );
+      final NetworkResponse networkResponse;
+      if (response.data is List) {
+        networkResponse = NetworkResponse(
+          success: true,
+          message: '',
+          data: response.data,
+          statusCode: response.statusCode,
+        );
+      } else {
+        networkResponse = NetworkResponse.fromMap(response.data);
+      }
 
-      final networkResponse = NetworkResponse.fromMap(response.data);
-
-      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
+      if (response.statusCode == 401 &&
+          _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -96,9 +106,8 @@ class ApiService {
               : {'Content-Type': 'application/json'},
         ),
       );
-
-      // Check for authentication errors (401 Unauthorized)
-      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
+      if (response.statusCode == 401 &&
+          _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -143,7 +152,8 @@ class ApiService {
         options: Options(headers: isProtected ? await _fetchHeaders() : null),
       );
 
-      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
+      if (response.statusCode == 401 &&
+          _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -188,7 +198,8 @@ class ApiService {
         options: Options(headers: isProtected ? await _fetchHeaders() : null),
       );
 
-      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
+      if (response.statusCode == 401 &&
+          _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -233,7 +244,8 @@ class ApiService {
         options: Options(headers: isProtected ? await _fetchHeaders() : null),
       );
 
-      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
+      if (response.statusCode == 401 &&
+          _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -303,7 +315,8 @@ class ApiService {
         options: Options(headers: multipartHeaders),
       );
 
-      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
+      if (response.statusCode == 401 &&
+          _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -363,7 +376,8 @@ class ApiService {
         'KYC form submission response: ${response.statusCode}, data: ${response.data}',
       );
 
-      if (response.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
+      if (response.statusCode == 401 &&
+          _shouldHandleTokenExpiration(endpoint)) {
         await _authTokenService.handleTokenExpiration();
         return NetworkResponse(
           success: false,
@@ -388,7 +402,8 @@ class ApiService {
           'ApiService',
           'DioException: ${e.message}, Response: ${e.response?.data}',
         );
-        if (e.response?.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
+        if (e.response?.statusCode == 401 &&
+            _shouldHandleTokenExpiration(endpoint)) {
           await _authTokenService.handleTokenExpiration();
           return NetworkResponse(
             success: false,
@@ -431,8 +446,12 @@ class ApiService {
     return headers;
   }
 
-  Future<NetworkResponse> _handleDioException(DioException e, [String? endpoint]) async {
-    if (e.response?.statusCode == 401 && _shouldHandleTokenExpiration(endpoint)) {
+  Future<NetworkResponse> _handleDioException(
+    DioException e, [
+    String? endpoint,
+  ]) async {
+    if (e.response?.statusCode == 401 &&
+        _shouldHandleTokenExpiration(endpoint)) {
       await _authTokenService.handleTokenExpiration();
       return NetworkResponse(
         success: false,

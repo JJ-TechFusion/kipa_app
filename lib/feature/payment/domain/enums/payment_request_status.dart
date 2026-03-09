@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Enum representing all possible payment request statuses
 enum PaymentRequestStatus {
   draft,
   linkActive,
@@ -26,7 +25,6 @@ enum PaymentRequestStatus {
   pendingRebook,
   unknown;
 
-  /// Parse status string from API to enum
   static PaymentRequestStatus fromString(String status) {
     switch (status.toLowerCase()) {
       case 'draft':
@@ -78,7 +76,6 @@ enum PaymentRequestStatus {
     }
   }
 
-  /// Convert enum to API string format
   String toApiString() {
     switch (this) {
       case PaymentRequestStatus.draft:
@@ -131,9 +128,7 @@ enum PaymentRequestStatus {
   }
 }
 
-/// Extension methods for PaymentRequestStatus
 extension PaymentRequestStatusExtension on PaymentRequestStatus {
-  /// Get display label for the status
   String get label {
     switch (this) {
       case PaymentRequestStatus.draft:
@@ -185,7 +180,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
     }
   }
 
-  /// Get short label for compact displays (e.g., on cards)
   String get shortLabel {
     switch (this) {
       case PaymentRequestStatus.draft:
@@ -237,7 +231,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
     }
   }
 
-  /// Get color for the status badge/chip
   Color get color {
     switch (this) {
       case PaymentRequestStatus.draft:
@@ -289,7 +282,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
     }
   }
 
-  /// Check if status is in an active/ongoing state
   bool get isActive {
     return this == PaymentRequestStatus.linkActive ||
         this == PaymentRequestStatus.paidAwaitingFulfillment ||
@@ -301,7 +293,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
         this == PaymentRequestStatus.confirmationWindow;
   }
 
-  /// Check if status indicates completion (success or failure)
   bool get isComplete {
     return this == PaymentRequestStatus.completed ||
         this == PaymentRequestStatus.cancelled ||
@@ -310,7 +301,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
         this == PaymentRequestStatus.returnConfirmed;
   }
 
-  /// Check if status indicates an error or problem
   bool get hasError {
     return this == PaymentRequestStatus.noRiderFound ||
         this == PaymentRequestStatus.cancelled ||
@@ -318,7 +308,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
         this == PaymentRequestStatus.returnDamageDisputed;
   }
 
-  /// Check if status is related to returns
   bool get isReturnFlow {
     return this == PaymentRequestStatus.returnRequired ||
         this == PaymentRequestStatus.returnSearchingRider ||
@@ -328,7 +317,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
         this == PaymentRequestStatus.returnDamageDisputed;
   }
 
-  /// Check if payment has been received
   bool get isPaid {
     return this == PaymentRequestStatus.paidAwaitingFulfillment ||
         this == PaymentRequestStatus.readyForPickup ||
@@ -340,19 +328,16 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
         this == PaymentRequestStatus.completed;
   }
 
-  /// Check if seller action is required
   bool get requiresSellerAction {
     return this == PaymentRequestStatus.paidAwaitingFulfillment ||
         this == PaymentRequestStatus.pendingRebook;
   }
 
-  /// Check if buyer action is required
   bool get requiresBuyerAction {
     return this == PaymentRequestStatus.linkActive ||
         this == PaymentRequestStatus.confirmationWindow;
   }
 
-  /// Check if delivery tracking should be shown
   bool get shouldShowTracking {
     return this == PaymentRequestStatus.searchingRider ||
         this == PaymentRequestStatus.riderAssigned ||
@@ -362,24 +347,20 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
         this == PaymentRequestStatus.returnInProgress;
   }
 
-  /// Check if "Mark Ready for Pickup" action is available
   bool get canMarkReady {
     return this == PaymentRequestStatus.paidAwaitingFulfillment;
   }
 
-  /// Check if payment link can be shared
   bool get canShareLink {
     return this == PaymentRequestStatus.linkActive;
   }
 
-  /// Check if request can be cancelled
   bool get canCancel {
     return this == PaymentRequestStatus.draft ||
         this == PaymentRequestStatus.linkActive ||
         this == PaymentRequestStatus.paidAwaitingFulfillment;
   }
 
-  /// Get icon for the status
   IconData get icon {
     switch (this) {
       case PaymentRequestStatus.draft:
@@ -428,7 +409,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
     }
   }
 
-  /// Get progression order for main flow statuses
   int get progressionOrder {
     const order = [
       PaymentRequestStatus.draft,
@@ -446,7 +426,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
     return index >= 0 ? index : -1;
   }
 
-  /// Check if this status comes after another status in progression
   bool isAfter(PaymentRequestStatus other) {
     final thisOrder = progressionOrder;
     final otherOrder = other.progressionOrder;
@@ -454,7 +433,6 @@ extension PaymentRequestStatusExtension on PaymentRequestStatus {
     return thisOrder > otherOrder;
   }
 
-  /// Check if this status is at or after another status in progression
   bool isAtOrAfter(PaymentRequestStatus other) {
     final thisOrder = progressionOrder;
     final otherOrder = other.progressionOrder;

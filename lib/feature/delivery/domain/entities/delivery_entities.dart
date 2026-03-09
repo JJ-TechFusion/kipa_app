@@ -1,4 +1,3 @@
-/// Entity representing a delivery job
 class DeliveryJobEntity {
   final String id;
   final String paymentRequestId;
@@ -79,7 +78,6 @@ class DeliveryJobEntity {
   }
 }
 
-/// Entity representing a rider
 class RiderEntity {
   final String id;
   final String name;
@@ -102,7 +100,6 @@ class RiderEntity {
   });
 }
 
-/// Entity representing rider's live location
 class RiderLocationEntity {
   final double latitude;
   final double longitude;
@@ -123,7 +120,6 @@ class RiderLocationEntity {
   });
 }
 
-/// Entity representing a chat message
 class ChatMessageEntity {
   final String id;
   final String senderId;
@@ -135,6 +131,8 @@ class ChatMessageEntity {
   final bool isFromRider;
   final bool isMe;
   final DateTime timestamp;
+  final String? senderName;
+  final String? senderType; // 'rider', 'buyer', 'seller'
 
   const ChatMessageEntity({
     required this.id,
@@ -147,12 +145,25 @@ class ChatMessageEntity {
     required this.isFromRider,
     this.isMe = false,
     required this.timestamp,
+    this.senderName,
+    this.senderType,
   });
 
   bool get isImage => mediaType == 'image' && mediaUrl != null;
+  String get displaySenderName {
+    if (senderName != null && senderName!.isNotEmpty) return senderName!;
+    if (senderType == 'buyer') return 'Buyer';
+    if (senderType == 'seller') return 'Seller';
+    if (senderType == 'customer') return 'Customer';
+    if (senderType == 'rider' || isFromRider) return 'Rider';
+    return 'Customer';
+  }
+
+  bool get isFromCustomer => senderType == 'customer';
+  bool get isFromBuyer => senderType == 'buyer';
+  bool get isFromSeller => senderType == 'seller';
 }
 
-/// Entity representing a nearby available rider
 class NearbyRiderEntity {
   final String riderId;
   final double latitude;
@@ -171,7 +182,6 @@ class NearbyRiderEntity {
   });
 }
 
-/// Entity representing a location point in history
 class LocationPointEntity {
   final double latitude;
   final double longitude;
@@ -188,7 +198,6 @@ class LocationPointEntity {
   });
 }
 
-/// Entity representing location history for a delivery job
 class LocationHistoryEntity {
   final String jobId;
   final int count;

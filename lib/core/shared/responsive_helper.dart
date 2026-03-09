@@ -25,7 +25,6 @@ class ResponsiveHelper {
     return MediaQuery.of(context).orientation == Orientation.landscape;
   }
 
-  // Get responsive value based on device type
   static T getResponsiveValue<T>(
     BuildContext context, {
     required T mobile,
@@ -37,7 +36,6 @@ class ResponsiveHelper {
     return mobile;
   }
 
-  // Get responsive value based on orientation
   static T getOrientationValue<T>(
     BuildContext context, {
     required T portrait,
@@ -46,7 +44,6 @@ class ResponsiveHelper {
     return isPortrait(context) ? portrait : landscape;
   }
 
-  // Combined device type and orientation responsive value
   static T getFullResponsiveValue<T>(
     BuildContext context, {
     required T mobilePortrait,
@@ -73,7 +70,6 @@ class ResponsiveHelper {
     return isPort ? mobilePortrait : mobileLandscape;
   }
 
-  // Get responsive padding
   static EdgeInsets getResponsivePadding(BuildContext context) {
     return getFullResponsiveValue(
       context,
@@ -104,7 +100,6 @@ class ResponsiveHelper {
     return 1.2;
   }
 
-  // Calculate responsive text size with a single base size
   static double getResponsiveSize(BuildContext context, double baseSize) {
     return baseSize * getTextScale(context);
   }

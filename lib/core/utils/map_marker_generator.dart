@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -17,17 +15,11 @@ class MapMarkerGenerator {
     final center = Offset(size / 2, size / 2);
     final ringRadius = size / 2;
     final circleRadius = size / 3;
-
-    // Draw outer ring (lighter color)
-    paint.color = fillColor.withOpacity(0.3);
+    paint.color = fillColor.withValues(alpha: 0.3);
     paint.style = PaintingStyle.fill;
     canvas.drawCircle(center, ringRadius, paint);
-
-    // Draw inner circle (solid color)
     paint.color = fillColor;
     canvas.drawCircle(center, circleRadius, paint);
-
-    // Add white border around inner circle for clarity
     paint.color = Colors.white;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2;
@@ -52,14 +44,10 @@ class MapMarkerGenerator {
     paint.isAntiAlias = true;
 
     final center = Offset(size / 2, size / 2);
-
-    // Rotate canvas to heading direction
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(heading * pi / 180);
     canvas.translate(-center.dx, -center.dy);
-
-    // Draw directional wedge/cone FIRST (largest)
     final wedgePath = Path();
     final wedgeLength = size * 0.35;
     final wedgeAngle = 50.0; // degrees on each side
@@ -70,8 +58,6 @@ class MapMarkerGenerator {
       center.dx - wedgeLength * sin(angleRad),
       center.dy - wedgeLength * cos(angleRad),
     );
-
-    // Draw arc manually with multiple points
     final arcSteps = 20;
     for (int i = 0; i <= arcSteps; i++) {
       final t = i / arcSteps;
@@ -83,32 +69,22 @@ class MapMarkerGenerator {
     }
 
     wedgePath.close();
-
-    // Fill wedge
-    paint.color = fillColor.withOpacity(isNearby ? 0.35 : 0.5);
+    paint.color = fillColor.withValues(alpha: isNearby ? 0.35 : 0.5);
     paint.style = PaintingStyle.fill;
     canvas.drawPath(wedgePath, paint);
 
     canvas.restore();
-
-    // Draw outer ring (lighter color)
     final ringRadius = size * 0.28;
-    paint.color = fillColor.withOpacity(isNearby ? 0.15 : 0.25);
+    paint.color = fillColor.withValues(alpha: isNearby ? 0.15 : 0.25);
     paint.style = PaintingStyle.fill;
     canvas.drawCircle(center, ringRadius, paint);
-
-    // Draw main circle
     final circleRadius = size * 0.2;
-    paint.color = isNearby ? fillColor.withOpacity(0.7) : fillColor;
+    paint.color = isNearby ? fillColor.withValues(alpha: 0.7) : fillColor;
     canvas.drawCircle(center, circleRadius, paint);
-
-    // Add white border to circle
     paint.color = Colors.white;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2.5;
     canvas.drawCircle(center, circleRadius, paint);
-
-    // Draw arrow on top of circle to show direction
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(heading * pi / 180);
@@ -134,8 +110,6 @@ class MapMarkerGenerator {
     return BitmapDescriptor.bytes(bytes!.buffer.asUint8List());
   }
 
-  /// Creates a circular marker with an icon inside
-  /// Used for pickup/dropoff location markers
   static Future<BitmapDescriptor> createLocationMarker({
     required Color color,
     required IconData icon,
@@ -143,26 +117,18 @@ class MapMarkerGenerator {
   }) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-
-    // Draw outer shadow/glow effect
     final shadowPaint = Paint()
       ..color = color.withAlpha(40)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
     canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 4, shadowPaint);
-
-    // Draw white border circle
     final borderPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 8, borderPaint);
-
-    // Draw colored inner circle
     final fillPaint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 14, fillPaint);
-
-    // Draw icon in center
     final iconPainter = TextPainter(textDirection: TextDirection.ltr);
     iconPainter.text = TextSpan(
       text: String.fromCharCode(icon.codePoint),
@@ -186,7 +152,6 @@ class MapMarkerGenerator {
     return BitmapDescriptor.bytes(bytes!.buffer.asUint8List());
   }
 
-  /// Convenience method to create pickup marker
   static Future<BitmapDescriptor> createPickupMarker() {
     return createLocationMarker(
       color: pickupColor,
@@ -194,7 +159,6 @@ class MapMarkerGenerator {
     );
   }
 
-  /// Convenience method to create dropoff marker
   static Future<BitmapDescriptor> createDropoffMarker() {
     return createLocationMarker(
       color: const Color(0xFFEF4444),
@@ -202,7 +166,6 @@ class MapMarkerGenerator {
     );
   }
 
-  /// Predefined marker colors
   static const Color pickupColor = Color(0xFF2196F3); // Blue
   static const Color dropoffColor = Color(0xFFEF4444); // Red
   static const Color riderColor = Color(0xFF2196F3); // Blue

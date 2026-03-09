@@ -13,7 +13,6 @@ class TransactionStatusEntity {
   final UserInfoEntity seller;
   final UserInfoEntity buyer;
   final TransactionTimelineEntity timeline;
-  // Delivery fields
   final String? deliveryJobId;
   final String? pickupAddress;
   final String? dropoffAddress;

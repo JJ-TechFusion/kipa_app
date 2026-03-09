@@ -35,7 +35,6 @@ class GooglePlacesService {
     }
   }
 
-  /// Get place details including coordinates from place ID
   Future<LocationEntity?> getPlaceDetails(String placeId) async {
     try {
       final response = await _dio.get(
@@ -65,7 +64,6 @@ class GooglePlacesService {
     }
   }
 
-  /// Geocode an address string to get coordinates
   Future<LocationEntity?> geocodeAddress(String address) async {
     if (address.isEmpty) return null;
 

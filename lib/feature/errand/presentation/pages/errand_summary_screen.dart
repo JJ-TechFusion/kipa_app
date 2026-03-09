@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/core/shared/widgets/buttons/roundedbutton.dart';
-import 'package:kipa/core/shared/widgets/custom_snackbar.dart' show CustomSnackBar, SnackBarType;
+import 'package:kipa/core/shared/widgets/custom_snackbar.dart'
+    show CustomSnackBar, SnackBarType;
 import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
@@ -18,10 +19,14 @@ class ErrandSummaryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(errandNotifierProvider);
-    final currencyFormat = NumberFormat.currency(symbol: '\u20A6', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(
+      symbol: '\u20A6',
+      decimalDigits: 0,
+    );
 
     ref.listen(errandNotifierProvider, (prev, next) {
-      if (next.errorMessage != null && prev?.errorMessage != next.errorMessage) {
+      if (next.errorMessage != null &&
+          prev?.errorMessage != next.errorMessage) {
         CustomSnackBar.show(
           context,
           message: next.errorMessage!,
@@ -57,7 +62,6 @@ class ErrandSummaryScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Estimate Card
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
@@ -105,18 +109,27 @@ class ErrandSummaryScreen extends ConsumerWidget {
                     ),
                   ),
                   verticalSpace(24),
-                  // Route Details
-                  const BodyText('Route Details', fontWeight: FontWeight.w600, color: AppColor.darkPrimary),
+                  const BodyText(
+                    'Route Details',
+                    fontWeight: FontWeight.w600,
+                    color: AppColor.darkPrimary,
+                  ),
                   verticalSpace(12),
                   _buildRouteCard(),
                   verticalSpace(24),
-                  // Package Details
-                  const BodyText('Package Details', fontWeight: FontWeight.w600, color: AppColor.darkPrimary),
+                  const BodyText(
+                    'Package Details',
+                    fontWeight: FontWeight.w600,
+                    color: AppColor.darkPrimary,
+                  ),
                   verticalSpace(12),
                   _buildPackageCard(),
                   verticalSpace(24),
-                  // Contact Details
-                  const BodyText('Contact Details', fontWeight: FontWeight.w600, color: AppColor.darkPrimary),
+                  const BodyText(
+                    'Contact Details',
+                    fontWeight: FontWeight.w600,
+                    color: AppColor.darkPrimary,
+                  ),
                   verticalSpace(12),
                   _buildContactsCard(),
                 ],
@@ -300,23 +313,30 @@ class ErrandSummaryScreen extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          if (errand.packageDescription != null && errand.packageDescription!.isNotEmpty) ...[
+          if (errand.packageDescription != null &&
+              errand.packageDescription!.isNotEmpty) ...[
             _buildDetailRow('Description', errand.packageDescription!),
             if (errand.notes != null && errand.notes!.isNotEmpty)
               const Divider(height: 24),
           ],
           if (errand.notes != null && errand.notes!.isNotEmpty)
             _buildDetailRow('Pickup Instructions', errand.notes!),
-          if (errand.packageDescription == null && (errand.notes == null || errand.notes!.isEmpty))
-            const BodySmall('No package details provided', color: AppColor.lightText),
+          if (errand.packageDescription == null &&
+              (errand.notes == null || errand.notes!.isEmpty))
+            const BodySmall(
+              'No package details provided',
+              color: AppColor.lightText,
+            ),
         ],
       ),
     );
   }
 
   Widget _buildContactsCard() {
-    final hasPickupContact = errand.pickupContactName != null || errand.pickupContactPhone != null;
-    final hasDropoffContact = errand.dropoffContactName != null || errand.dropoffContactPhone != null;
+    final hasPickupContact =
+        errand.pickupContactName != null || errand.pickupContactPhone != null;
+    final hasDropoffContact =
+        errand.dropoffContactName != null || errand.dropoffContactPhone != null;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -345,7 +365,10 @@ class ErrandSummaryScreen extends ConsumerWidget {
             ),
           ],
           if (!hasPickupContact && !hasDropoffContact)
-            const BodySmall('No contact details provided', color: AppColor.lightText),
+            const BodySmall(
+              'No contact details provided',
+              color: AppColor.lightText,
+            ),
         ],
       ),
     );
@@ -355,10 +378,7 @@ class ErrandSummaryScreen extends ConsumerWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 2,
-          child: Caption(label, color: AppColor.lightText),
-        ),
+        Expanded(flex: 2, child: Caption(label, color: AppColor.lightText)),
         Expanded(
           flex: 3,
           child: BodySmall(
@@ -382,10 +402,7 @@ class ErrandSummaryScreen extends ConsumerWidget {
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            color: dotColor,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
         ),
         horizontalSpace(12),
         Expanded(

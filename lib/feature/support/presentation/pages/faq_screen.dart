@@ -15,17 +15,6 @@ class FaqScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
-        // leading: IconButton(
-        //   icon: Container(
-        //     padding: const EdgeInsets.all(8),
-        //     decoration: const BoxDecoration(
-        //       color: AppColor.primary,
-        //       shape: BoxShape.circle,
-        //     ),
-        //     child: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
-        //   ),
-        //   onPressed: () => Navigator.pop(context),
-        // ),
         title: const BodyText(
           'Frequently Asked Questions',
           fontWeight: FontWeight.w600,

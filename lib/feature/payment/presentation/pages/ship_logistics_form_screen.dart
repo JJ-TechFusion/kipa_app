@@ -230,8 +230,6 @@ class _ShipLogisticsFormScreenState
       );
       return;
     }
-
-    // Upload receipt first if not already uploaded
     final receiptUrl = await _uploadReceiptIfNeeded();
     if (receiptUrl == null) {
       if (!mounted) return;
@@ -249,7 +247,9 @@ class _ShipLogisticsFormScreenState
     final success = await paymentNotifier.shipLogisticsDelivery(
       logisticsDeliveryId: widget.logisticsDeliveryId,
       carrier: _carrier!,
-      carrierOtherName: _isOtherCarrier ? _carrierOtherNameController.text.trim() : null,
+      carrierOtherName: _isOtherCarrier
+          ? _carrierOtherNameController.text.trim()
+          : null,
       trackingNumber: _trackingNumberController.text.trim(),
       trackingUrl: _trackingUrlController.text.trim(),
       shipmentReceiptUrl: receiptUrl,
@@ -277,8 +277,18 @@ class _ShipLogisticsFormScreenState
 
   String _formatDateTime(DateTime dt) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
     final period = dt.hour >= 12 ? 'PM' : 'AM';
@@ -289,7 +299,8 @@ class _ShipLogisticsFormScreenState
   @override
   Widget build(BuildContext context) {
     final paymentState = ref.watch(paymentNotifierProvider);
-    final isLoading = paymentState.isShippingLogistics ||
+    final isLoading =
+        paymentState.isShippingLogistics ||
         paymentState.isUploadingShipmentReceipt;
 
     return Scaffold(
@@ -333,7 +344,9 @@ class _ShipLogisticsFormScreenState
               DropDownWidget(
                 label: 'Carrier',
                 hintText: 'Select logistics carrier',
-                initialValue: _carriers.map((c) => _carrierLabels[c] ?? c).toList(),
+                initialValue: _carriers
+                    .map((c) => _carrierLabels[c] ?? c)
+                    .toList(),
                 onSelect: (val) {
                   final selectedKey = _carrierLabels.entries
                       .firstWhere(
@@ -391,12 +404,7 @@ class _ShipLogisticsFormScreenState
                 },
               ),
               verticalSpace(16),
-
-              // Receipt Image Upload
-              const BodySmall(
-                'Shipment Receipt',
-                fontWeight: FontWeight.w500,
-              ),
+              const BodySmall('Shipment Receipt', fontWeight: FontWeight.w500),
               verticalSpace(8),
               GestureDetector(
                 onTap: isLoading ? null : _pickReceiptImage,
@@ -609,7 +617,10 @@ class _ShipLogisticsFormScreenState
                             ),
                           ),
                         )
-                      : CustomButton(title: 'Mark as Shipped', borderRadius: 30),
+                      : CustomButton(
+                          title: 'Mark as Shipped',
+                          borderRadius: 30,
+                        ),
                 ),
               ),
               verticalSpace(20),

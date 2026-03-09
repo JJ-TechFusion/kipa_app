@@ -265,7 +265,7 @@ class CreateErrandParams {
         'dropoff_contact_phone': dropoffContactPhone,
       if (packageDescription != null) 'package_description': packageDescription,
       'vehicle_type': vehicleType,
-      if (notes != null) 'notes': notes,
+      if (notes != null) 'pickup_instructions': notes,
     };
   }
 }

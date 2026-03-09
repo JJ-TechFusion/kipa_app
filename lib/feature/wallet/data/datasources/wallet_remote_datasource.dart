@@ -222,7 +222,8 @@ class WalletRemoteDataSource {
 
     if (response.success && response.data != null) {
       final dataMap = response.data as Map<String, dynamic>;
-      final banksList = (dataMap['banks'] as List<dynamic>?)
+      final banksList =
+          (dataMap['banks'] as List<dynamic>?)
               ?.map((e) => BankModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [];
@@ -242,7 +243,8 @@ class WalletRemoteDataSource {
 
     if (response.success && response.data != null) {
       final dataMap = response.data as Map<String, dynamic>;
-      final accountsList = (dataMap['bank_accounts'] as List<dynamic>?)
+      final accountsList =
+          (dataMap['bank_accounts'] as List<dynamic>?)
               ?.map((e) => BankAccountModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [];
@@ -344,7 +346,6 @@ class WalletRemoteDataSource {
     return response;
   }
 
-  // Virtual Account operations
   Future<NetworkResponse> getVirtualAccountStatus() async {
     final response = await apiService.getRequest(
       endpoint: ApiEndpoints.virtualAccountStatusUrl,
@@ -369,7 +370,8 @@ class WalletRemoteDataSource {
 
     if (response.success && response.data != null) {
       final dataMap = response.data as Map<String, dynamic>;
-      final virtualAccountData = dataMap['virtual_account'] as Map<String, dynamic>?;
+      final virtualAccountData =
+          dataMap['virtual_account'] as Map<String, dynamic>?;
       if (virtualAccountData != null) {
         return NetworkResponse(
           success: true,
@@ -388,7 +390,8 @@ class WalletRemoteDataSource {
 
     if (response.success && response.data != null) {
       final dataMap = response.data as Map<String, dynamic>;
-      final virtualAccountData = dataMap['virtual_account'] as Map<String, dynamic>?;
+      final virtualAccountData =
+          dataMap['virtual_account'] as Map<String, dynamic>?;
       if (virtualAccountData != null) {
         return NetworkResponse(
           success: true,

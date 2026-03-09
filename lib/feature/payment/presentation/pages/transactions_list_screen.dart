@@ -135,7 +135,8 @@ class _TransactionsListScreenState
 
     final statusColor = _statusColor(transaction.status);
     final status = PaymentRequestStatus.fromString(transaction.status);
-    final isInterState = transaction.deliveryType.toLowerCase() == 'inter_state';
+    final isInterState =
+        transaction.deliveryType.toLowerCase() == 'inter_state';
     final initials = transaction.counterpartyName
         .trim()
         .split(' ')
@@ -227,16 +228,14 @@ class _TransactionsListScreenState
                 ),
               ],
             ),
-            // Delivery action buttons for sellers
             if (transaction.isSeller) ...[
               if (isInterState) ...[
-                // Inter-state: Show "Mark as Shipped" for awaiting fulfillment
-                if (status.canMarkReady && transaction.deliveryJobId != null) ...[
+                if (status.canMarkReady &&
+                    transaction.deliveryJobId != null) ...[
                   verticalSpace(16),
                   _buildMarkAsShippedButton(transaction),
                 ],
               ] else ...[
-                // Intra-state: Show rider search/tracking buttons
                 if (status.canMarkReady) ...[
                   verticalSpace(16),
                   _buildReadyForPickupButton(transaction),
@@ -327,7 +326,6 @@ class _TransactionsListScreenState
             },
           ).then((result) {
             if (result == true) {
-              // Refresh transactions list after shipping
               ref
                   .read(transactionsListNotifierProvider.notifier)
                   .fetchTransactions();
@@ -364,7 +362,9 @@ class _TransactionsListScreenState
 
           ref
               .read(paymentNotifierProvider.notifier)
-              .markReadyForPickup(paymentRequestId: transaction.paymentRequestId);
+              .markReadyForPickup(
+                paymentRequestId: transaction.paymentRequestId,
+              );
         },
         color: AppColor.primary,
         textColor: Colors.white,
@@ -460,8 +460,9 @@ class _TransactionsListScreenState
             if (confirmed == true) {
               await ref
                   .read(paymentNotifierProvider.notifier)
-                  .cancelRiderSearch(paymentRequestId: transaction.paymentRequestId);
-              // Refresh transactions list
+                  .cancelRiderSearch(
+                    paymentRequestId: transaction.paymentRequestId,
+                  );
               ref
                   .read(transactionsListNotifierProvider.notifier)
                   .fetchTransactions();
@@ -496,7 +497,8 @@ class _TransactionsListScreenState
     TransactionListItemEntity transaction,
     PaymentRequestStatus status,
   ) {
-    final deliveryJobId = transaction.deliveryJobId ?? transaction.paymentRequestId;
+    final deliveryJobId =
+        transaction.deliveryJobId ?? transaction.paymentRequestId;
 
     return SizedBox(
       width: double.infinity,

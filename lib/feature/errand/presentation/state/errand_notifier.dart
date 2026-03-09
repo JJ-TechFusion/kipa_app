@@ -67,10 +67,14 @@ class ErrandNotifier extends Notifier<ErrandState> {
             : params.pickupAddress,
         pickupLatitude: apiErrand.pickupLatitude ?? params.pickupLatitude,
         pickupLongitude: apiErrand.pickupLongitude ?? params.pickupLongitude,
-        pickupContactName: (apiErrand.pickupContactName != null && apiErrand.pickupContactName!.isNotEmpty)
+        pickupContactName:
+            (apiErrand.pickupContactName != null &&
+                apiErrand.pickupContactName!.isNotEmpty)
             ? apiErrand.pickupContactName
             : params.pickupContactName,
-        pickupContactPhone: (apiErrand.pickupContactPhone != null && apiErrand.pickupContactPhone!.isNotEmpty)
+        pickupContactPhone:
+            (apiErrand.pickupContactPhone != null &&
+                apiErrand.pickupContactPhone!.isNotEmpty)
             ? apiErrand.pickupContactPhone
             : params.pickupContactPhone,
         dropoffAddress: apiErrand.dropoffAddress.isNotEmpty
@@ -78,13 +82,19 @@ class ErrandNotifier extends Notifier<ErrandState> {
             : params.dropoffAddress,
         dropoffLatitude: apiErrand.dropoffLatitude ?? params.dropoffLatitude,
         dropoffLongitude: apiErrand.dropoffLongitude ?? params.dropoffLongitude,
-        dropoffContactName: (apiErrand.dropoffContactName != null && apiErrand.dropoffContactName!.isNotEmpty)
+        dropoffContactName:
+            (apiErrand.dropoffContactName != null &&
+                apiErrand.dropoffContactName!.isNotEmpty)
             ? apiErrand.dropoffContactName
             : params.dropoffContactName,
-        dropoffContactPhone: (apiErrand.dropoffContactPhone != null && apiErrand.dropoffContactPhone!.isNotEmpty)
+        dropoffContactPhone:
+            (apiErrand.dropoffContactPhone != null &&
+                apiErrand.dropoffContactPhone!.isNotEmpty)
             ? apiErrand.dropoffContactPhone
             : params.dropoffContactPhone,
-        packageDescription: (apiErrand.packageDescription != null && apiErrand.packageDescription!.isNotEmpty)
+        packageDescription:
+            (apiErrand.packageDescription != null &&
+                apiErrand.packageDescription!.isNotEmpty)
             ? apiErrand.packageDescription
             : params.packageDescription,
         packageSize: apiErrand.packageSize,
@@ -111,12 +121,9 @@ class ErrandNotifier extends Notifier<ErrandState> {
         currentErrand: errand,
         activeErrand: errand,
       );
-
-      // Start tracking after confirmation
       if (errand.deliveryJob != null) {
         await _startTracking(errand.deliveryJob!.id);
       } else {
-        // Start polling for rider assignment
         _startPolling(errandId);
       }
 
@@ -215,10 +222,7 @@ class ErrandNotifier extends Notifier<ErrandState> {
 
     try {
       final errands = await _datasource.getErrands();
-      state = state.copyWith(
-        isFetchingErrands: false,
-        errands: errands,
-      );
+      state = state.copyWith(isFetchingErrands: false, errands: errands);
     } catch (e) {
       state = state.copyWith(
         isFetchingErrands: false,
@@ -322,7 +326,7 @@ class ErrandNotifier extends Notifier<ErrandState> {
           await _startTracking(errand.deliveryJob!.id);
         }
       } catch (e) {
-        // Continue polling on error
+        state = state.copyWith(errorMessage: e.toString());
       }
     });
   }

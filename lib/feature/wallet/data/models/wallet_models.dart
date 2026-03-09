@@ -285,16 +285,10 @@ class WalletSyncResponseModel extends WalletSyncResponseEntity {
 }
 
 class WithdrawRequestModel extends WithdrawRequestEntity {
-  WithdrawRequestModel({
-    required super.bankAccountId,
-    required super.amount,
-  });
+  WithdrawRequestModel({required super.bankAccountId, required super.amount});
 
   Map<String, dynamic> toJson() {
-    return {
-      'bank_account_id': bankAccountId,
-      'amount': amount,
-    };
+    return {'bank_account_id': bankAccountId, 'amount': amount};
   }
 }
 
@@ -324,7 +318,6 @@ class WithdrawalModel extends WithdrawalEntity {
   }
 }
 
-// Virtual Account Models
 class VirtualAccountModel extends VirtualAccountEntity {
   VirtualAccountModel({
     required super.accountNumber,
@@ -357,13 +350,16 @@ class VirtualAccountStatusModel extends VirtualAccountStatusEntity {
       hasAccount: json['has_account'] ?? false,
       declined: json['declined'] ?? false,
       account: json['account'] != null
-          ? VirtualAccountModel.fromJson(json['account'] as Map<String, dynamic>)
+          ? VirtualAccountModel.fromJson(
+              json['account'] as Map<String, dynamic>,
+            )
           : null,
     );
   }
 }
 
-class CreateVirtualAccountRequestModel extends CreateVirtualAccountRequestEntity {
+class CreateVirtualAccountRequestModel
+    extends CreateVirtualAccountRequestEntity {
   CreateVirtualAccountRequestModel({required super.bvn});
 
   Map<String, dynamic> toJson() {

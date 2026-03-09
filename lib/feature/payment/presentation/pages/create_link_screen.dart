@@ -81,7 +81,6 @@ class _CreateLinkActionScreenState
       _selectedImage = file;
       _uploadedImageUrl = null;
     });
-    // Start uploading immediately in the background
     _imageUploadFuture = _uploadImage(file);
   }
 
@@ -348,11 +347,8 @@ class _CreateLinkActionScreenState
       _showError('Please select processing time');
       return;
     }
-
-    // If image was selected, wait for its background upload to finish
     List<String> itemImageUrls = [];
     if (_selectedImage != null) {
-      // Await the in-flight upload if it hasn't completed yet
       final url = _uploadedImageUrl ?? await _imageUploadFuture;
       if (url != null) {
         itemImageUrls = [url];

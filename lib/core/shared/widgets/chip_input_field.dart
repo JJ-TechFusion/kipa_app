@@ -58,14 +58,13 @@ class _ChipInputFieldState extends State<ChipInputField> {
 
     setState(() {
       showSuggestions = true;
-      filteredSuggestions =
-          widget.suggestions!
-              .where(
-                (suggestion) =>
-                    suggestion.toLowerCase().contains(query) &&
-                    !widget.selectedItems.contains(suggestion),
-              )
-              .toList();
+      filteredSuggestions = widget.suggestions!
+          .where(
+            (suggestion) =>
+                suggestion.toLowerCase().contains(query) &&
+                !widget.selectedItems.contains(suggestion),
+          )
+          .toList();
     });
   }
 
@@ -89,9 +88,7 @@ class _ChipInputFieldState extends State<ChipInputField> {
           hintText: widget.hintText,
           controller: widget.controller,
           onEditingDone: _addItem,
-          onChanged: (value) {
-            // Filtering is handled by the listener
-          },
+          onChanged: (value) {},
           prefixIcon: Icon(CupertinoIcons.search),
           suffixIcon: IconButton(
             icon: Icon(Icons.add, color: AppColor.primary),
@@ -106,71 +103,60 @@ class _ChipInputFieldState extends State<ChipInputField> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
-              // boxShadow: [
-              //   BoxShadow(
-              //     color: Colors.black.withOpacity(0.1),
-              //     blurRadius: 4,
-              //     offset: const Offset(0, 2),
-              //   ),
-              // ],
             ),
             child: Column(
-              children:
-                  filteredSuggestions
-                      .take(5) // Limit number of suggestions
-                      .map(
-                        (suggestion) => ListTile(
-                          dense: true,
-                          title: Text(suggestion),
-                          onTap: () {
-                            widget.controller.clear();
-                            widget.onAddItem(suggestion);
-                            setState(() {
-                              showSuggestions = false;
-                            });
-                          },
-                        ),
-                      )
-                      .toList(),
+              children: filteredSuggestions
+                  .take(5) // Limit number of suggestions
+                  .map(
+                    (suggestion) => ListTile(
+                      dense: true,
+                      title: Text(suggestion),
+                      onTap: () {
+                        widget.controller.clear();
+                        widget.onAddItem(suggestion);
+                        setState(() {
+                          showSuggestions = false;
+                        });
+                      },
+                    ),
+                  )
+                  .toList(),
             ),
           ),
-
-        // verticalSpace(5),
         if (widget.selectedItems.isNotEmpty)
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children:
-                widget.selectedItems
-                    .map(
-                      (item) => Container(
-                        decoration: BoxDecoration(
-                          color: AppColor.neutral,
-                          borderRadius: BorderRadius.circular(100),
+            children: widget.selectedItems
+                .map(
+                  (item) => Container(
+                    decoration: BoxDecoration(
+                      color: AppColor.neutral,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 5,
+                    ),
+                    margin: const EdgeInsets.only(bottom: 5),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        BodySmall(item, color: AppColor.lightText),
+                        const SizedBox(width: 10),
+                        InkWell(
+                          onTap: () => widget.onRemoveItem(item),
+                          child: Icon(
+                            CupertinoIcons.clear_circled_solid,
+                            color: AppColor.primaryText,
+                            size: 18,
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 5,
-                        ),
-                        margin: const EdgeInsets.only(bottom: 5),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            BodySmall(item, color: AppColor.lightText),
-                            const SizedBox(width: 10),
-                            InkWell(
-                              onTap: () => widget.onRemoveItem(item),
-                              child: Icon(
-                                CupertinoIcons.clear_circled_solid,
-                                color: AppColor.primaryText,
-                                size: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
           ),
       ],
     );

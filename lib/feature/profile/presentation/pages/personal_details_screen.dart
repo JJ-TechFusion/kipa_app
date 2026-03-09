@@ -367,15 +367,12 @@ class _EditPhotoSheetState extends ConsumerState<_EditPhotoSheet> {
       ).showSnackBar(const SnackBar(content: Text('Please select an image')));
       return;
     }
-
-    // Upload image
     await ref
         .read(authNotifierProvider.notifier)
         .uploadProfilePicture(_selectedImage!.path);
 
     final authState = ref.read(authNotifierProvider);
     if (authState.uploadedImageUrl != null) {
-      // Update profile with new image URL
       await ref
           .read(authNotifierProvider.notifier)
           .updateProfile(profilePhotoUrl: authState.uploadedImageUrl);
@@ -391,8 +388,6 @@ class _EditPhotoSheetState extends ConsumerState<_EditPhotoSheet> {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.currentUser;
     final isLoading = authState.isUploadingImage || authState.isUpdatingProfile;
-
-    // Listen for upload errors
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (previous?.isUploadingImage == true &&
           next.isUploadingImage == false) {

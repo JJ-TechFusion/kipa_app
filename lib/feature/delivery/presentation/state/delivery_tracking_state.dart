@@ -1,6 +1,5 @@
 import '../../domain/entities/delivery_entities.dart';
 
-/// State for delivery tracking
 class DeliveryTrackingState {
   final DeliveryJobEntity? job;
   final RiderLocationEntity? riderLocation;

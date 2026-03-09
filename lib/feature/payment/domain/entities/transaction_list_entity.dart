@@ -11,7 +11,6 @@ class TransactionListItemEntity {
   final String counterpartyRole;
   final DateTime createdAt;
   final DateTime? paidAt;
-  // Delivery fields
   final String? deliveryJobId;
   final String? logisticsDeliveryId;
   final String? pickupAddress;
@@ -49,11 +48,7 @@ class TransactionListItemEntity {
 
   bool get isInterState => deliveryType == 'inter_state';
   bool get isIntraState => deliveryType == 'intra_state';
-
-  /// For intra-state: true when rider has accepted (deliveryJobId exists)
   bool get hasActiveDeliveryJob => deliveryJobId != null;
-
-  /// For inter-state: true when logistics delivery exists
   bool get hasLogisticsDelivery => logisticsDeliveryId != null;
 
   bool get isActive => !['completed', 'refunded', 'cancelled'].contains(status);

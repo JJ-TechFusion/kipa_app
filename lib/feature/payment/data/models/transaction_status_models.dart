@@ -15,7 +15,6 @@ class TransactionStatusModel {
   final UserInfoModel seller;
   final UserInfoModel buyer;
   final TransactionTimelineModel timeline;
-  // Delivery fields
   final String? deliveryJobId;
   final String? pickupAddress;
   final String? dropoffAddress;
@@ -65,7 +64,6 @@ class TransactionStatusModel {
       return null;
     }
 
-    // Parse delivery object if present
     final delivery = json['delivery'] as Map<String, dynamic>?;
 
     return TransactionStatusModel(
@@ -95,8 +93,9 @@ class TransactionStatusModel {
       timeline: TransactionTimelineModel.fromJson(
         json['timeline'] as Map<String, dynamic>? ?? {},
       ),
-      // Try delivery_job_id at root first, then from delivery object
-      deliveryJobId: json['delivery_job_id']?.toString() ?? delivery?['job_id']?.toString(),
+      deliveryJobId:
+          json['delivery_job_id']?.toString() ??
+          delivery?['job_id']?.toString(),
       pickupAddress: delivery?['pickup_address']?.toString(),
       dropoffAddress: delivery?['dropoff_address']?.toString(),
       pickupLat: parseNullableDouble(delivery?['pickup_lat']),
@@ -166,8 +165,9 @@ class FeeInfoModel {
           ? parseDouble(json['platform_fee'])
           : null,
       buyerPaysTotal: parseDouble(json['buyer_pays_total']),
-      youReceive:
-          json['you_receive'] != null ? parseDouble(json['you_receive']) : null,
+      youReceive: json['you_receive'] != null
+          ? parseDouble(json['you_receive'])
+          : null,
     );
   }
 
@@ -244,11 +244,7 @@ class UserInfoModel {
   }
 
   UserInfoEntity toEntity() {
-    return UserInfoEntity(
-      id: id,
-      name: name,
-      phoneNumber: phoneNumber,
-    );
+    return UserInfoEntity(id: id, name: name, phoneNumber: phoneNumber);
   }
 }
 
@@ -277,7 +273,8 @@ class TransactionTimelineModel {
     }
 
     return TransactionTimelineModel(
-      steps: (json['steps'] as List<dynamic>?)
+      steps:
+          (json['steps'] as List<dynamic>?)
               ?.map(
                 (e) => TransactionTimelineStepModel.fromJson(
                   e as Map<String, dynamic>,

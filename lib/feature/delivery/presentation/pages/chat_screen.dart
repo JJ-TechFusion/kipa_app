@@ -39,6 +39,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.initState();
     _chatDatasource = ChatRemoteDatasource(getIt<ApiService>());
     _loadChatHistory();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(deliveryTrackingProvider.notifier)
+          .startTracking(jobId: widget.jobId);
+    });
   }
 
   Future<void> _loadChatHistory() async {
@@ -98,13 +103,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final messages = _allMessages;
-
-    // Auto-scroll when new messages arrive
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         final maxScroll = _scrollController.position.maxScrollExtent;
         final currentScroll = _scrollController.offset;
-        // Only auto-scroll if user is near bottom
         if (maxScroll - currentScroll < 150) {
           _scrollToBottom();
         }
@@ -167,7 +169,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           Column(
             children: [
-              // Messages list
               Expanded(
                 child: _isLoadingHistory
                     ? const Center(
@@ -211,12 +212,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         },
                       ),
               ),
-              // Input bar
               _buildInputBar(),
             ],
           ),
-
-          // Floating back button
         ],
       ),
     );
@@ -389,8 +387,24 @@ class _ChatBubble extends StatelessWidget {
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
+            if (!isMe)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  message.displaySenderName,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: message.senderType == 'rider'
+                        ? AppColor.primary
+                        : Colors.blueGrey[700],
+                  ),
+                ),
+              ),
             if (message.isImage && message.mediaUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),

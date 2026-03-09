@@ -63,7 +63,6 @@ class _ErrandCompleteScreenState extends ConsumerState<ErrandCompleteScreen> {
         _showSuccess = true;
       });
     } else {
-      // Reset code on failure
       setState(() {
         _code = '';
       });

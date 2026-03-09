@@ -26,8 +26,6 @@ class ApiEndpoints {
 
   static String getTransactionStatusUrl(String paymentRequestId) =>
       '/transactions/$paymentRequestId';
-
-  // Wallet endpoints
   static const String walletUrl = '/wallet';
   static const String walletTopUpUrl = '/wallet/flutterwave/topup/initialize';
   static const String walletTopUpVerifyUrl = '/wallet/flutterwave/topup/verify';
@@ -35,20 +33,16 @@ class ApiEndpoints {
   static const String walletPendingUrl = '/wallet/pending';
 
   static const String walletSyncUrl = '/wallet/flutterwave/sync';
-
-  // Virtual Account endpoints
   static const String virtualAccountUrl = '/wallet/flutterwave/virtual-account';
-  static const String virtualAccountStatusUrl = '/wallet/flutterwave/virtual-account/status';
-  static const String virtualAccountDeclineUrl = '/wallet/flutterwave/virtual-account/decline';
-
-  // Wallet PIN endpoints
+  static const String virtualAccountStatusUrl =
+      '/wallet/flutterwave/virtual-account/status';
+  static const String virtualAccountDeclineUrl =
+      '/wallet/flutterwave/virtual-account/decline';
   static const String walletPinStatusUrl = '/wallet/pin/status';
   static const String walletPinUrl = '/wallet/pin';
   static const String walletPinVerifyUrl = '/wallet/pin/verify';
   static const String walletPinResetRequestUrl = '/wallet/pin/reset/request';
   static const String walletPinResetConfirmUrl = '/wallet/pin/reset/confirm';
-
-  // Bank Accounts endpoints
   static const String bankAccountsUrl = '/wallet/bank-accounts';
   static String setBankAccountDefaultUrl(String id) =>
       '/wallet/bank-accounts/$id/default';
@@ -56,15 +50,11 @@ class ApiEndpoints {
   static const String flutterwaveBanksUrl = '/wallet/flutterwave/banks';
   static const String resolveAccountUrl = '/wallet/flutterwave/resolve-account';
   static const String withdrawUrl = '/wallet/flutterwave/withdraw';
-
-  // Payment request actions
   static String markReadyForPickupUrl(String paymentRequestId) =>
       '/payment-requests/$paymentRequestId/ready-for-pickup';
 
   static String cancelRiderSearchUrl(String paymentRequestId) =>
       '/payment-requests/$paymentRequestId/cancel-search';
-
-  // Tracking endpoints
   static String getRiderInfoUrl(String deliveryJobId) =>
       '/tracking/jobs/$deliveryJobId/rider';
 
@@ -76,12 +66,8 @@ class ApiEndpoints {
 
   static String getLocationHistoryUrl(String deliveryJobId) =>
       '/tracking/jobs/$deliveryJobId/location/history';
-
-  // Seller sales endpoints
   static const String sellerSalesUrl = '/seller/sales';
   static String sellerSaleByIdUrl(String orderId) => '/seller/sales/$orderId';
-
-  // Buyer purchases endpoints
   static const String buyerPurchasesUrl = '/purchases';
   static String buyerPurchaseByIdUrl(String purchaseId) =>
       '/purchases/$purchaseId';
@@ -96,8 +82,6 @@ class ApiEndpoints {
 
   static String confirmReturnUrl(String orderId) =>
       '/seller/sales/$orderId/confirm-return';
-
-  // Dispute endpoints
   static String openDisputeUrl(String purchaseId) =>
       '/purchases/$purchaseId/dispute';
 
@@ -106,55 +90,31 @@ class ApiEndpoints {
 
   static const String uploadDisputeEvidenceUrl = '/uploads/dispute-evidence';
   static const String uploadItemImageUrl = '/uploads/item-image';
-
-  // Active deliveries endpoint
   static const String activeDeliveriesUrl = '/transactions/active-deliveries';
-
-  // Device token registration
   static const String registerDeviceTokenUrl = '/users/device-token';
-
-  // Chat endpoints
   static String chatHistoryUrl(String jobId) => '/chat/$jobId/history';
   static String markReadUrl(String jobId) => '/chat/$jobId/read';
   static String unreadCountUrl(String jobId) => '/chat/$jobId/unread';
-
-  // Errand endpoints
   static const String errandsUrl = '/errands';
   static const String activeErrandUrl = '/errands/active';
   static String errandByIdUrl(String id) => '/errands/$id';
   static String confirmErrandUrl(String id) => '/errands/$id/confirm';
   static String completeErrandUrl(String id) => '/errands/$id/complete';
-
-  // Logistics shipping endpoint (interstate delivery)
   static String shipLogisticsDeliveryUrl(String logisticsDeliveryId) =>
       '/logistics/$logisticsDeliveryId/ship';
-
-  // Shipment receipt upload
   static const String uploadShipmentReceiptUrl = '/uploads/shipment-receipt';
-
-  // Logistics deliveries (interstate)
   static const String logisticsSellerUrl = '/logistics/seller';
   static const String logisticsBuyerUrl = '/logistics/buyer';
-
-  // Logistics delivery details
   static String logisticsDetailsUrl(String logisticsDeliveryId) =>
       '/logistics/$logisticsDeliveryId/details';
-
-  // Logistics buyer actions
   static String claimLogisticsDeliveryUrl(String logisticsDeliveryId) =>
       '/logistics/$logisticsDeliveryId/claim-delivery';
 
   static String confirmLogisticsDeliveryUrl(String logisticsDeliveryId) =>
       '/logistics/$logisticsDeliveryId/confirm';
-
-  // Delivery proof upload
   static const String uploadDeliveryProofUrl = '/uploads/shipment-receipt';
-
-  // Logistics dispute
   static String openLogisticsDisputeUrl(String logisticsDeliveryId) =>
       '/logistics/$logisticsDeliveryId/dispute';
-
-  // Logistics return flow
   static String returnShippedUrl(String logisticsDeliveryId) =>
       '/logistics/$logisticsDeliveryId/return-shipped';
 

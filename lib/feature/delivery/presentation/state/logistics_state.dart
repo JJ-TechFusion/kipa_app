@@ -47,20 +47,21 @@ class LogisticsState {
       errorMessage: errorMessage,
       total: total ?? this.total,
       isFetchingDetails: isFetchingDetails ?? this.isFetchingDetails,
-      currentDetails: clearDetails ? null : (currentDetails ?? this.currentDetails),
+      currentDetails: clearDetails
+          ? null
+          : (currentDetails ?? this.currentDetails),
       isClaimingDelivery: isClaimingDelivery ?? this.isClaimingDelivery,
       isConfirmingDelivery: isConfirmingDelivery ?? this.isConfirmingDelivery,
       isOpeningDispute: isOpeningDispute ?? this.isOpeningDispute,
-      isMarkingReturnShipped: isMarkingReturnShipped ?? this.isMarkingReturnShipped,
+      isMarkingReturnShipped:
+          isMarkingReturnShipped ?? this.isMarkingReturnShipped,
       isConfirmingReturn: isConfirmingReturn ?? this.isConfirmingReturn,
     );
   }
 
-  // Status counts for filters
   int get awaitingShipmentCount =>
       deliveries.where((d) => d.status == 'awaiting_shipment').length;
-  int get shippedCount =>
-      deliveries.where((d) => d.status == 'shipped').length;
+  int get shippedCount => deliveries.where((d) => d.status == 'shipped').length;
   int get deliveredCount =>
       deliveries.where((d) => d.status == 'delivered').length;
   int get allCount => deliveries.length;

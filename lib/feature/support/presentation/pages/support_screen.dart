@@ -132,8 +132,6 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                     ],
                   ),
                   const SizedBox(height: 30),
-
-                  /// Active Disputes
                   const BodyText(
                     "Active Disputes",
                     fontWeight: FontWeight.w600,
@@ -201,8 +199,6 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
       ),
     );
   }
-
-  // ================= Helpers =================
 
   Widget _buildContactCard({
     required IconData icon,

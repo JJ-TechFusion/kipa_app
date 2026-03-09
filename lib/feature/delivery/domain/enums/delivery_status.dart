@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Enum representing all possible delivery job statuses
 enum DeliveryStatus {
   created,
   searching,
@@ -23,7 +22,6 @@ enum DeliveryStatus {
   returnRefunded,
   unknown;
 
-  /// Parse status string from API to enum
   static DeliveryStatus fromString(String status) {
     switch (status.toLowerCase()) {
       case 'created':
@@ -72,7 +70,6 @@ enum DeliveryStatus {
     }
   }
 
-  /// Convert enum to API string format
   String toApiString() {
     switch (this) {
       case DeliveryStatus.created:
@@ -119,9 +116,7 @@ enum DeliveryStatus {
   }
 }
 
-/// Extension methods for DeliveryStatus
 extension DeliveryStatusExtension on DeliveryStatus {
-  /// Get display label for the status
   String get label {
     switch (this) {
       case DeliveryStatus.created:
@@ -167,7 +162,6 @@ extension DeliveryStatusExtension on DeliveryStatus {
     }
   }
 
-  /// Get color for the status badge
   Color get color {
     switch (this) {
       case DeliveryStatus.created:
@@ -203,7 +197,6 @@ extension DeliveryStatusExtension on DeliveryStatus {
     }
   }
 
-  /// Check if status is in active delivery phase (should show ETA)
   bool get shouldShowEta {
     return this == DeliveryStatus.accepted ||
         this == DeliveryStatus.enRoutePickup ||
@@ -211,18 +204,15 @@ extension DeliveryStatusExtension on DeliveryStatus {
         this == DeliveryStatus.inTransit;
   }
 
-  /// Check if rider is heading to pickup location
   bool get isHeadingToPickup {
     return this == DeliveryStatus.accepted ||
         this == DeliveryStatus.enRoutePickup;
   }
 
-  /// Check if rider is heading to dropoff location
   bool get isHeadingToDropoff {
     return this == DeliveryStatus.pickedUp || this == DeliveryStatus.inTransit;
   }
 
-  /// Check if delivery is complete (success or failure)
   bool get isComplete {
     return this == DeliveryStatus.delivered ||
         this == DeliveryStatus.paidOut ||
@@ -231,7 +221,6 @@ extension DeliveryStatusExtension on DeliveryStatus {
         this == DeliveryStatus.timeout;
   }
 
-  /// Check if status indicates a problem
   bool get hasError {
     return this == DeliveryStatus.timeout ||
         this == DeliveryStatus.cancelled ||
@@ -240,7 +229,6 @@ extension DeliveryStatusExtension on DeliveryStatus {
         this == DeliveryStatus.sellerUnavailable;
   }
 
-  /// Check if rider info should be fetched for this status
   bool get shouldFetchRiderInfo {
     return this == DeliveryStatus.accepted ||
         this == DeliveryStatus.enRoutePickup ||
@@ -248,7 +236,6 @@ extension DeliveryStatusExtension on DeliveryStatus {
         this == DeliveryStatus.inTransit;
   }
 
-  /// Get order index for status progression (main flow only)
   int get progressionOrder {
     const order = [
       DeliveryStatus.created,
@@ -264,7 +251,6 @@ extension DeliveryStatusExtension on DeliveryStatus {
     return index >= 0 ? index : -1;
   }
 
-  /// Check if this status comes after another status in progression
   bool isAfter(DeliveryStatus other) {
     final thisOrder = progressionOrder;
     final otherOrder = other.progressionOrder;
@@ -272,7 +258,6 @@ extension DeliveryStatusExtension on DeliveryStatus {
     return thisOrder > otherOrder;
   }
 
-  /// Check if this status is at or after another status in progression
   bool isAtOrAfter(DeliveryStatus other) {
     final thisOrder = progressionOrder;
     final otherOrder = other.progressionOrder;

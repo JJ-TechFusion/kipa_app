@@ -77,17 +77,9 @@ class WebSocketService {
   String? _currentToken;
   String? _currentJobId;
   String? _currentRole;
-
-  /// Stream of incoming WebSocket messages
   Stream<WebSocketMessage> get messageStream => _messageController.stream;
-
-  /// Stream of connection status changes
   Stream<bool> get connectionStream => _connectionController.stream;
-
-  /// Current connection status
   bool get isConnected => _isConnected;
-
-  /// Connect to WebSocket server
   Future<void> connect({
     required String token,
     required String jobId,
@@ -106,7 +98,6 @@ class WebSocketService {
     if (_currentToken == null || _currentJobId == null) return;
 
     try {
-      // Build WebSocket URL
       final wsBaseUrl = ApiEndpoints.baseUrl
           .replaceFirst('https://', 'wss://')
           .replaceFirst('http://', 'ws://');
@@ -118,15 +109,11 @@ class WebSocketService {
       logMessage('WebSocketService', 'Connecting to: $wsUrl');
 
       _channel = WebSocketChannel.connect(wsUrl);
-
-      // Listen to messages
       _channel!.stream.listen(_onMessage, onError: _onError, onDone: _onDone);
 
       _isConnected = true;
       _connectionController.add(true);
       _reconnectAttempts = 0;
-
-      // Start heartbeat
       _startHeartbeat();
 
       logMessage('WebSocketService', 'Connected successfully');
@@ -209,7 +196,6 @@ class WebSocketService {
     _heartbeatTimer = null;
   }
 
-  /// Send a message through WebSocket
   void send(Map<String, dynamic> data) {
     if (!_isConnected || _channel == null) {
       logMessage('WebSocketService', 'Cannot send: not connected');
@@ -225,7 +211,6 @@ class WebSocketService {
     }
   }
 
-  /// Send a chat message
   void sendChatMessage(
     String content, {
     String? mediaUrl,
@@ -240,7 +225,6 @@ class WebSocketService {
     });
   }
 
-  /// Disconnect from WebSocket
   Future<void> disconnect() async {
     _shouldReconnect = false;
     _reconnectTimer?.cancel();
@@ -255,7 +239,6 @@ class WebSocketService {
     logMessage('WebSocketService', 'Disconnected');
   }
 
-  /// Dispose resources
   void dispose() {
     disconnect();
     _messageController.close();

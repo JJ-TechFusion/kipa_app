@@ -187,7 +187,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 ),
               ),
             ),
-      // Virtual Account Prompt Bottom Bar
       bottomNavigationBar: showVirtualAccountPrompt
           ? _VirtualAccountPromptBar(
               onAccept: _showCreateVirtualAccountSheet,
@@ -1404,7 +1403,6 @@ class _CreateVirtualAccountSheetState
                     ),
                   ),
                   verticalSpace(24),
-                  // User info display
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(

@@ -151,8 +151,6 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
         child: CircularProgressIndicator(color: AppColor.primary),
       );
     }
-
-    // Filter out drafts from active links
     final links = (state.paymentRequests ?? [])
         .where((link) => link.status.toLowerCase() != 'draft')
         .toList();
@@ -239,8 +237,6 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
         child: CircularProgressIndicator(color: AppColor.primary),
       );
     }
-
-    // Filter only draft status
     final drafts = (state.paymentRequests ?? [])
         .where((link) => link.status.toLowerCase() == 'draft')
         .toList();
@@ -419,7 +415,6 @@ class _PaymentLinkListScreenState extends ConsumerState<PaymentLinkListScreen>
                     message: 'Payment link deleted successfully',
                     type: SnackBarType.success,
                   );
-                  // Refresh the list
                   ref
                       .read(paymentNotifierProvider.notifier)
                       .fetchPaymentRequests();

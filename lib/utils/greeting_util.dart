@@ -11,7 +11,6 @@ class GreetingUtil {
     }
   }
 
-  /// Returns a personalized greeting with the user's name
   static String getPersonalizedGreeting(String? firstName) {
     if (firstName == null || firstName.isEmpty) {
       return getGreeting();

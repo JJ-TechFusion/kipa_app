@@ -26,11 +26,9 @@ class _DependencyLevelSliderState extends State<DependencyLevelSlider> {
   @override
   void initState() {
     super.initState();
-    // Convert the integer level (0, 1, 2) to a double value (0.0 to 2.0)
     _value = widget.initialValue.toDouble().clamp(0.0, 2.0);
   }
 
-  // Get the current level (0, 1, or 2) from the continuous value
   int get _currentLevel => _value.round().clamp(0, 2);
 
   Color _getThumbColor() {
@@ -102,7 +100,6 @@ class _DependencyLevelSliderState extends State<DependencyLevelSlider> {
                   ],
                 ),
               ),
-              // Actual slider
               Slider(
                 value: _value,
                 min: 0.0,
@@ -127,7 +124,6 @@ class _DependencyLevelSliderState extends State<DependencyLevelSlider> {
   }
 }
 
-// Custom thumb shape with border
 class _CustomThumbShape extends SliderComponentShape {
   final double thumbRadius;
   final Color borderColor;
@@ -158,20 +154,14 @@ class _CustomThumbShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
-
-    // Draw shadow
     final shadowPaint = Paint()
       ..color = AppColor.neutral.withAlpha(10)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
     canvas.drawCircle(center, thumbRadius + 1, shadowPaint);
-
-    // Draw white fill
     final fillPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, thumbRadius, fillPaint);
-
-    // Draw colored border
     final borderPaint = Paint()
       ..color = borderColor
       ..style = PaintingStyle.stroke

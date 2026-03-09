@@ -5,7 +5,6 @@ import 'package:kipa/utils/constant.dart';
 import 'package:intl/intl.dart';
 import 'package:kipa/feature/delivery/domain/enums/delivery_status.dart';
 
-/// Helper function to get rider status text based on delivery status
 String getRiderStatusText(DeliveryStatus status, {bool isBuyer = true}) {
   switch (status) {
     case DeliveryStatus.searching:
@@ -39,7 +38,6 @@ String getRiderStatusText(DeliveryStatus status, {bool isBuyer = true}) {
   }
 }
 
-/// Card showing "Payment Successful" with amount and date
 class PaymentStatusCard extends StatelessWidget {
   final double amount;
   final DateTime date;
@@ -86,10 +84,7 @@ class PaymentStatusCard extends StatelessWidget {
           verticalSpace(16),
           BodyText(statusText, fontWeight: FontWeight.w600),
           verticalSpace(8),
-          H3(
-            currencyFormatter.format(amount),
-            // fontSize: 24 is default for H3, weight is w600
-          ),
+          H3(currencyFormatter.format(amount)),
           verticalSpace(8),
           Caption(dateFormatter.format(date), color: AppColor.lightText),
         ],
@@ -98,7 +93,6 @@ class PaymentStatusCard extends StatelessWidget {
   }
 }
 
-/// Orange card showing "Processing Ongoing" and timer
 class ProcessingStatusCard extends StatelessWidget {
   final int daysLeft;
   final String description;
@@ -158,7 +152,6 @@ class ProcessingStatusCard extends StatelessWidget {
   }
 }
 
-/// Banner showing rider status based on delivery status
 class RiderInfoBanner extends StatelessWidget {
   final String statusText;
   final VoidCallback? onTap;

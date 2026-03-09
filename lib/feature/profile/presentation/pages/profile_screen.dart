@@ -225,16 +225,6 @@ class ProfileScreen extends ConsumerWidget {
                   },
                 ),
                 verticalSpace(24),
-
-                // const BodyText("Support", fontWeight: FontWeight.bold),
-                // verticalSpace(16),
-                // _buildMenuItem(
-                //   context,
-                //   icon: Icons.info_outline,
-                //   title: "Help Centre",
-                //   onTap: () {},
-                // ),
-                // verticalSpace(24),
                 const BodyText("Actions", fontWeight: FontWeight.bold),
                 verticalSpace(16),
                 _buildMenuItem(

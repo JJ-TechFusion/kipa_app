@@ -81,7 +81,6 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -111,9 +110,8 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
               ),
             ),
             verticalSpace(20),
-
-            // Timeline
-            if (errand.timeline != null && errand.timeline!.steps.isNotEmpty) ...[
+            if (errand.timeline != null &&
+                errand.timeline!.steps.isNotEmpty) ...[
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -125,8 +123,6 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
               ),
               verticalSpace(20),
             ],
-
-            // Package info
             _buildSectionTitle('Package Details'),
             verticalSpace(12),
             Container(
@@ -139,7 +135,8 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (errand.packageDescription != null && errand.packageDescription!.isNotEmpty) ...[
+                  if (errand.packageDescription != null &&
+                      errand.packageDescription!.isNotEmpty) ...[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -153,7 +150,8 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
                         ),
                       ],
                     ),
-                    if (errand.packageSize != null || (errand.notes != null && errand.notes!.isNotEmpty))
+                    if (errand.packageSize != null ||
+                        (errand.notes != null && errand.notes!.isNotEmpty))
                       verticalSpace(12),
                   ],
                   if (errand.packageSize != null) ...[
@@ -185,15 +183,17 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
                       ],
                     ),
                   if (errand.packageSize == null &&
-                      (errand.packageDescription == null || errand.packageDescription!.isEmpty) &&
+                      (errand.packageDescription == null ||
+                          errand.packageDescription!.isEmpty) &&
                       (errand.notes == null || errand.notes!.isEmpty))
-                    const BodySmall('No package details provided', color: AppColor.lightText),
+                    const BodySmall(
+                      'No package details provided',
+                      color: AppColor.lightText,
+                    ),
                 ],
               ),
             ),
             verticalSpace(20),
-
-            // Route info
             _buildSectionTitle('Route'),
             verticalSpace(12),
             Container(
@@ -209,8 +209,6 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
               ),
             ),
             verticalSpace(20),
-
-            // Fee breakdown
             _buildSectionTitle('Fee Breakdown'),
             verticalSpace(12),
             Container(
@@ -261,12 +259,14 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
               ),
             ),
             verticalSpace(20),
-
-            // Contact info
-            if ((errand.pickupContactName != null && errand.pickupContactName!.isNotEmpty) ||
-                (errand.pickupContactPhone != null && errand.pickupContactPhone!.isNotEmpty) ||
-                (errand.dropoffContactName != null && errand.dropoffContactName!.isNotEmpty) ||
-                (errand.dropoffContactPhone != null && errand.dropoffContactPhone!.isNotEmpty)) ...[
+            if ((errand.pickupContactName != null &&
+                    errand.pickupContactName!.isNotEmpty) ||
+                (errand.pickupContactPhone != null &&
+                    errand.pickupContactPhone!.isNotEmpty) ||
+                (errand.dropoffContactName != null &&
+                    errand.dropoffContactName!.isNotEmpty) ||
+                (errand.dropoffContactPhone != null &&
+                    errand.dropoffContactPhone!.isNotEmpty)) ...[
               _buildSectionTitle('Contacts'),
               verticalSpace(12),
               Container(
@@ -278,20 +278,28 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
                 ),
                 child: Column(
                   children: [
-                    if ((errand.pickupContactName != null && errand.pickupContactName!.isNotEmpty) ||
-                        (errand.pickupContactPhone != null && errand.pickupContactPhone!.isNotEmpty))
+                    if ((errand.pickupContactName != null &&
+                            errand.pickupContactName!.isNotEmpty) ||
+                        (errand.pickupContactPhone != null &&
+                            errand.pickupContactPhone!.isNotEmpty))
                       _buildContactRow(
                         'Pickup Contact',
                         errand.pickupContactName ?? 'Not provided',
                         errand.pickupContactPhone ?? 'Not provided',
                       ),
-                    if ((errand.pickupContactName != null && errand.pickupContactName!.isNotEmpty) ||
-                        (errand.pickupContactPhone != null && errand.pickupContactPhone!.isNotEmpty))
-                      if ((errand.dropoffContactName != null && errand.dropoffContactName!.isNotEmpty) ||
-                          (errand.dropoffContactPhone != null && errand.dropoffContactPhone!.isNotEmpty))
+                    if ((errand.pickupContactName != null &&
+                            errand.pickupContactName!.isNotEmpty) ||
+                        (errand.pickupContactPhone != null &&
+                            errand.pickupContactPhone!.isNotEmpty))
+                      if ((errand.dropoffContactName != null &&
+                              errand.dropoffContactName!.isNotEmpty) ||
+                          (errand.dropoffContactPhone != null &&
+                              errand.dropoffContactPhone!.isNotEmpty))
                         verticalSpace(16),
-                    if ((errand.dropoffContactName != null && errand.dropoffContactName!.isNotEmpty) ||
-                        (errand.dropoffContactPhone != null && errand.dropoffContactPhone!.isNotEmpty))
+                    if ((errand.dropoffContactName != null &&
+                            errand.dropoffContactName!.isNotEmpty) ||
+                        (errand.dropoffContactPhone != null &&
+                            errand.dropoffContactPhone!.isNotEmpty))
                       _buildContactRow(
                         'Dropoff Contact',
                         errand.dropoffContactName ?? 'Not provided',
@@ -301,8 +309,6 @@ class _ErrandDetailsScreenState extends ConsumerState<ErrandDetailsScreen> {
                 ),
               ),
             ],
-
-            // Rider info (if available)
             if (errand.deliveryJob?.rider != null) ...[
               verticalSpace(20),
               _buildSectionTitle('Rider'),

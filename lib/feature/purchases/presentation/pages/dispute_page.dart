@@ -436,8 +436,6 @@ class _DisputePageState extends ConsumerState<DisputePage> {
                 color: AppColor.lightText,
               ),
               verticalSpace(16),
-
-              // Evidence grid
               if (purchasesState.uploadedEvidenceUrls.isNotEmpty) ...[
                 GridView.builder(
                   shrinkWrap: true,
@@ -510,8 +508,6 @@ class _DisputePageState extends ConsumerState<DisputePage> {
                 ),
                 verticalSpace(16),
               ],
-
-              // Add evidence button
               GestureDetector(
                 onTap: purchasesState.isUploadingEvidence
                     ? null
@@ -564,8 +560,6 @@ class _DisputePageState extends ConsumerState<DisputePage> {
               ),
 
               verticalSpace(40),
-
-              // Submit button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 42),
                 child: CustomButton(

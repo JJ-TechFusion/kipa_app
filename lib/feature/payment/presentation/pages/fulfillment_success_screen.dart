@@ -63,7 +63,6 @@ class _FulfillmentSuccessScreenState
           child: Column(
             children: [
               verticalSpace(40),
-              // Success Icon
               SizedBox(
                 width: 120,
                 height: 120,

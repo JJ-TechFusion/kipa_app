@@ -735,8 +735,6 @@ class _LogisticsDeliveryDetailsScreenState
     required bool isBuyer,
   }) {
     final currentStatus = details.timeline?.currentStatus ?? '';
-
-    // Seller: show Claim Delivery while current step is 'shipped'
     if (isSeller && currentStatus == 'shipped') {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 36.0),
@@ -749,8 +747,6 @@ class _LogisticsDeliveryDetailsScreenState
         ),
       );
     }
-
-    // Buyer: show Confirm + Dispute while current step is 'delivery_claimed'
     if (isBuyer && currentStatus == 'delivery_claimed') {
       return Column(
         children: [
@@ -778,8 +774,6 @@ class _LogisticsDeliveryDetailsScreenState
         ],
       );
     }
-
-    // Buyer: dispute resolved in their favour — ship the return back to seller
     if (isBuyer && currentStatus == 'return_required') {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 36.0),
@@ -792,8 +786,6 @@ class _LogisticsDeliveryDetailsScreenState
         ),
       );
     }
-
-    // Seller: buyer has shipped the return — confirm receipt or dispute
     if (isSeller && currentStatus == 'return_shipped') {
       return Column(
         children: [

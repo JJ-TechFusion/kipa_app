@@ -28,7 +28,6 @@ class _ResetPinSheetState extends ConsumerState<ResetPinSheet> {
   @override
   void initState() {
     super.initState();
-    // Automatically request OTP when sheet opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _requestOtp();
     });
@@ -43,7 +42,9 @@ class _ResetPinSheetState extends ConsumerState<ResetPinSheet> {
   }
 
   Future<void> _requestOtp() async {
-    final success = await ref.read(walletNotifierProvider.notifier).requestPinReset();
+    final success = await ref
+        .read(walletNotifierProvider.notifier)
+        .requestPinReset();
 
     if (success && mounted) {
       setState(() {
@@ -58,7 +59,6 @@ class _ResetPinSheetState extends ConsumerState<ResetPinSheet> {
   }
 
   Future<void> _handleConfirm() async {
-    // Validate OTP
     if (_otpController.text.length != 6) {
       CustomSnackBar.show(
         context,
@@ -67,8 +67,6 @@ class _ResetPinSheetState extends ConsumerState<ResetPinSheet> {
       );
       return;
     }
-
-    // Validate new PIN
     if (_newPinController.text.length != 4) {
       CustomSnackBar.show(
         context,
@@ -77,8 +75,6 @@ class _ResetPinSheetState extends ConsumerState<ResetPinSheet> {
       );
       return;
     }
-
-    // Validate confirmation
     if (_confirmPinController.text != _newPinController.text) {
       CustomSnackBar.show(
         context,
@@ -87,12 +83,9 @@ class _ResetPinSheetState extends ConsumerState<ResetPinSheet> {
       );
       return;
     }
-
-    // Call confirm API
-    final success = await ref.read(walletNotifierProvider.notifier).confirmPinReset(
-          _otpController.text,
-          _newPinController.text,
-        );
+    final success = await ref
+        .read(walletNotifierProvider.notifier)
+        .confirmPinReset(_otpController.text, _newPinController.text);
 
     if (success && mounted) {
       Navigator.pop(context);
@@ -106,9 +99,8 @@ class _ResetPinSheetState extends ConsumerState<ResetPinSheet> {
   @override
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletNotifierProvider);
-    final isLoading = walletState.isRequestingPinReset || walletState.isConfirmingPinReset;
-
-    // Listen for errors
+    final isLoading =
+        walletState.isRequestingPinReset || walletState.isConfirmingPinReset;
     ref.listen<WalletState>(walletNotifierProvider, (previous, next) {
       if (previous?.isRequestingPinReset == true &&
           next.isRequestingPinReset == false) {
@@ -185,10 +177,7 @@ class _ResetPinSheetState extends ConsumerState<ResetPinSheet> {
           ),
           verticalSpace(8),
           if (_currentStep == 0)
-            const BodySmall(
-              'Requesting OTP...',
-              color: AppColor.lightText,
-            )
+            const BodySmall('Requesting OTP...', color: AppColor.lightText)
           else
             const BodySmall(
               'Enter the OTP sent to your phone and set a new PIN',
@@ -197,10 +186,8 @@ class _ResetPinSheetState extends ConsumerState<ResetPinSheet> {
           verticalSpace(40),
 
           if (_currentStep == 0)
-            // Loading state
             const Center(child: CircularProgressIndicator())
           else
-            // OTP and PIN entry
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

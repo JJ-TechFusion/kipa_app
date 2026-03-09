@@ -51,14 +51,6 @@ class DashboardHeader extends StatelessWidget {
             ],
           ),
         ),
-        // IconButton(
-        //   onPressed: onNotificationTap,
-        //   icon: const Icon(
-        //     CupertinoIcons.bell,
-        //     color: AppColor.primaryText,
-        //     size: 24,
-        //   ),
-        // ),
       ],
     );
   }

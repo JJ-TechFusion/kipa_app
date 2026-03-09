@@ -74,7 +74,6 @@ class _PaymentRequestDetailsSheetState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Handle
                   Center(
                     child: Container(
                       margin: const EdgeInsets.only(top: 12),
@@ -93,7 +92,6 @@ class _PaymentRequestDetailsSheetState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header with status
                         Row(
                           children: [
                             const Expanded(
@@ -107,8 +105,6 @@ class _PaymentRequestDetailsSheetState
                           ],
                         ),
                         verticalSpace(24),
-
-                        // Item details
                         _buildSectionHeader('Item Details'),
                         verticalSpace(12),
                         _buildInfoCard(
@@ -130,8 +126,6 @@ class _PaymentRequestDetailsSheetState
                           ],
                         ),
                         verticalSpace(24),
-
-                        // Pricing breakdown
                         _buildSectionHeader('Pricing'),
                         verticalSpace(12),
                         _buildInfoCard(
@@ -176,8 +170,6 @@ class _PaymentRequestDetailsSheetState
                           ],
                         ),
                         verticalSpace(24),
-
-                        // Delivery details
                         if (details.pickupAddress != null ||
                             details.dropoffAddress != null) ...[
                           _buildSectionHeader('Delivery Details'),
@@ -207,8 +199,6 @@ class _PaymentRequestDetailsSheetState
                           ),
                           verticalSpace(24),
                         ],
-
-                        // Payment info
                         _buildSectionHeader('Payment Information'),
                         verticalSpace(12),
                         _buildInfoCard(
@@ -234,8 +224,6 @@ class _PaymentRequestDetailsSheetState
                           ],
                         ),
                         verticalSpace(32),
-
-                        // Action button
                         _buildActionButton(details),
                         verticalSpace(24),
                       ],
@@ -249,8 +237,6 @@ class _PaymentRequestDetailsSheetState
 
   Widget _buildActionButton(dynamic details) {
     final status = PaymentRequestStatus.fromString(details.status);
-
-    // If payment is paid, show "View Transaction" button
     if (status.isPaid) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -268,8 +254,6 @@ class _PaymentRequestDetailsSheetState
         ),
       );
     }
-
-    // Otherwise, show "Generate Payment Link" button if applicable
     if (!(details.status == 'completed' && details.isReusable == false)) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),

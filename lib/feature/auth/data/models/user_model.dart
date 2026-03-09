@@ -47,8 +47,6 @@ class UserModel {
       profileImageUrl: json['profile_photo_url'],
     );
   }
-
-  // Convert from Entity to Model
   factory UserModel.fromEntity(UserEntity entity) {
     return UserModel(
       id: entity.id,
@@ -65,8 +63,6 @@ class UserModel {
       profileImageUrl: entity.profileImageUrl,
     );
   }
-
-  // Convert from Model to Entity
   UserEntity toEntity() {
     return UserEntity(
       id: id,
@@ -84,7 +80,6 @@ class UserModel {
     );
   }
 
-  // Convert from Model to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,

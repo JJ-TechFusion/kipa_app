@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// For validation
 extension ValidatingExtensions on String {
   String? validateAnyField({String? field}) {
     if (toString().isEmpty) {

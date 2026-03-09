@@ -44,7 +44,7 @@ class DashboardController extends StateNotifier<DashboardState> {
   final GetActiveDeliveriesUseCase _getActiveDeliveriesUseCase;
 
   DashboardController(this._getActiveDeliveriesUseCase)
-      : super(const DashboardState());
+    : super(const DashboardState());
 
   void toggleBalanceVisibility() {
     state = state.copyWith(isBalanceVisible: !state.isBalanceVisible);
@@ -83,24 +83,21 @@ class DashboardController extends StateNotifier<DashboardState> {
   }
 }
 
-// Data Sources
-final dashboardRemoteDataSourceProvider =
-    Provider<DashboardRemoteDataSource>((ref) {
+final dashboardRemoteDataSourceProvider = Provider<DashboardRemoteDataSource>((
+  ref,
+) {
   return DashboardRemoteDataSource(getIt<ApiService>());
 });
-
-// Repository
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
   return DashboardRepositoryImpl(ref.read(dashboardRemoteDataSourceProvider));
 });
-
-// Use Cases
-final getActiveDeliveriesUseCaseProvider =
-    Provider<GetActiveDeliveriesUseCase>((ref) {
-  return GetActiveDeliveriesUseCase(ref.read(dashboardRepositoryProvider));
-});
+final getActiveDeliveriesUseCaseProvider = Provider<GetActiveDeliveriesUseCase>(
+  (ref) {
+    return GetActiveDeliveriesUseCase(ref.read(dashboardRepositoryProvider));
+  },
+);
 
 final dashboardProvider =
     StateNotifierProvider<DashboardController, DashboardState>((ref) {
-  return DashboardController(ref.read(getActiveDeliveriesUseCaseProvider));
-});
+      return DashboardController(ref.read(getActiveDeliveriesUseCaseProvider));
+    });

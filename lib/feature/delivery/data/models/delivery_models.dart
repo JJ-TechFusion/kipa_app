@@ -38,7 +38,6 @@ class DeliveryJobModel {
 
 class RiderModel {
   static RiderEntity fromJson(Map<String, dynamic> json) {
-    // Handle both first_name+last_name and name formats
     String name =
         json['name']?.toString() ?? json['full_name']?.toString() ?? '';
     if (name.isEmpty &&
@@ -96,13 +95,9 @@ class RiderLocationModel {
 
   static DateTime _parseTimestamp(dynamic value) {
     if (value == null) return DateTime.now();
-
-    // Handle unix timestamp (seconds)
     if (value is int) {
       return DateTime.fromMillisecondsSinceEpoch(value * 1000);
     }
-
-    // Handle ISO date string
     if (value is String) {
       return DateTime.tryParse(value) ?? DateTime.now();
     }
@@ -112,21 +107,35 @@ class RiderLocationModel {
 }
 
 class ChatMessageModel {
-  static ChatMessageEntity fromJson(Map<String, dynamic> json) {
+  static ChatMessageEntity fromJson(
+    Map<String, dynamic> json, {
+    String? currentUserId,
+  }) {
+    final senderId = json['sender_id'] ?? '';
+    final senderType = json['sender_type'];
+
+    bool isFromRider = json['is_from_rider'] ?? senderType == 'rider';
+    bool isMe = json['is_me'] ?? false;
+    if (currentUserId != null && currentUserId.isNotEmpty) {
+      isMe = senderId == currentUserId;
+    }
+
     return ChatMessageEntity(
       id:
           json['id'] ??
           json['message_id'] ??
           DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: json['sender_id'] ?? '',
+      senderId: senderId,
       receiverId: json['receiver_id'] ?? '',
       message: json['message'] ?? json['content'] ?? '',
       mediaUrl: json['media_url'],
       mediaType: json['media_type'] ?? 'text',
       status: json['status'] ?? 'sent',
-      isFromRider: json['is_from_rider'] ?? json['sender_type'] == 'rider',
-      isMe: json['is_me'] ?? false,
+      isFromRider: isFromRider,
+      isMe: isMe,
       timestamp: _parseTimestamp(json['timestamp'] ?? json['created_at']),
+      senderName: json['sender_name'],
+      senderType: senderType,
     );
   }
 

@@ -126,8 +126,6 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
         state = state.copyWith(job: minimalJob);
       }
     }
-
-    // Check if we should fetch rider info (works for both cases)
     if (state.job != null) {
       final status = DeliveryStatus.fromString(newStatus);
       if (status == DeliveryStatus.accepted && state.job!.rider == null) {
@@ -141,19 +139,26 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
   }
 
   void _handleChatMessage(Map<String, dynamic> data) {
+    logMessage('DeliveryTracking', 'Received chat message data: $data');
+
     final message = ChatMessageModel.fromJson(data);
     final myId = _currentUserId;
 
-    if (myId != null && message.senderId == myId) return;
-
-    if (myId != null &&
-        message.senderId != myId &&
-        message.receiverId != myId) {
+    logMessage(
+      'DeliveryTracking',
+      'Chat: myId=$myId, senderId=${message.senderId}, receiverId=${message.receiverId}',
+    );
+    if (myId != null && message.senderId == myId) {
+      logMessage('DeliveryTracking', 'Skipping own message');
       return;
     }
 
     final updatedMessages = [...state.messages, message];
     state = state.copyWith(messages: updatedMessages);
+    logMessage(
+      'DeliveryTracking',
+      'Added message, total: ${updatedMessages.length}',
+    );
   }
 
   void _handleNearbyRiders(Map<String, dynamic> data) {
@@ -195,11 +200,9 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
         final jobData = response.data as Map<String, dynamic>;
         final updatedJob = DeliveryJobModel.fromJson(jobData);
         state = state.copyWith(job: updatedJob);
-      } else {
-        // Job not found - this might be normal if job hasn't been created yet
-      }
+      } else {}
     } catch (e) {
-      // Silently handle error - WebSocket will provide updates anyway
+      state = state.copyWith(errorMessage: e.toString());
     }
   }
 
@@ -220,7 +223,7 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
         }
       }
     } catch (e) {
-      // Handle error silently or log it
+      state = state.copyWith(errorMessage: e.toString());
     }
   }
 

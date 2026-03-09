@@ -13,7 +13,6 @@ class TransactionListItemModel {
   final String counterpartyRole;
   final DateTime createdAt;
   final DateTime? paidAt;
-  // Delivery fields
   final String? deliveryJobId;
   final String? logisticsDeliveryId;
   final String? pickupAddress;

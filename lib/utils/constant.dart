@@ -27,7 +27,6 @@ String formatCurrency(String amount) {
 }
 
 Future<void> initDependencies() async {
-  // Core services
   getIt.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
   );
@@ -43,20 +42,11 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<AppDio>(AppDio.fromConfig);
 
   getIt.registerLazySingleton<ApiService>(() => ApiService(getIt<AppDio>()));
-
-  // Notification services
   getIt.registerLazySingleton<NotificationService>(() => NotificationService());
 
   getIt.registerLazySingleton<NotificationRemoteDatasource>(
     () => NotificationRemoteDatasource(getIt<ApiService>()),
   );
-
-  // Property feature dependencies
-  // Data sources
-
-  // Use cases
-
-  // Provider
 
   await GoogleFonts.pendingFonts([
     GoogleFonts.dmSans(),

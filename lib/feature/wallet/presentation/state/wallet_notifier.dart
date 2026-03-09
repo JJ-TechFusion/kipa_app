@@ -56,10 +56,16 @@ class WalletNotifier extends Notifier<WalletState> {
     _confirmPinResetUseCase = ref.read(confirmPinResetUseCaseProvider);
     _withdrawUseCase = ref.read(withdrawUseCaseProvider);
     _syncWalletUseCase = ref.read(syncWalletUseCaseProvider);
-    _getVirtualAccountStatusUseCase = ref.read(getVirtualAccountStatusUseCaseProvider);
-    _createVirtualAccountUseCase = ref.read(createVirtualAccountUseCaseProvider);
+    _getVirtualAccountStatusUseCase = ref.read(
+      getVirtualAccountStatusUseCaseProvider,
+    );
+    _createVirtualAccountUseCase = ref.read(
+      createVirtualAccountUseCaseProvider,
+    );
     _getVirtualAccountUseCase = ref.read(getVirtualAccountUseCaseProvider);
-    _declineVirtualAccountUseCase = ref.read(declineVirtualAccountUseCaseProvider);
+    _declineVirtualAccountUseCase = ref.read(
+      declineVirtualAccountUseCaseProvider,
+    );
     return const WalletState();
   }
 
@@ -121,7 +127,6 @@ class WalletNotifier extends Notifier<WalletState> {
           isVerifyingTopUp: false,
           verifyTopUpResponse: response.data as VerifyTopUpResponseEntity?,
         );
-        // Refresh wallet balance after successful top-up
         await getWallet();
       } else {
         state = state.copyWith(
@@ -229,10 +234,7 @@ class WalletNotifier extends Notifier<WalletState> {
       final response = await _createPinUseCase(pin);
 
       if (response.success) {
-        state = state.copyWith(
-          isCreatingPin: false,
-          isPinVerified: true,
-        );
+        state = state.copyWith(isCreatingPin: false, isPinVerified: true);
         await getPinStatus();
         return true;
       } else {
@@ -258,10 +260,7 @@ class WalletNotifier extends Notifier<WalletState> {
       final response = await _verifyPinUseCase(pin);
 
       if (response.success) {
-        state = state.copyWith(
-          isVerifyingPin: false,
-          isPinVerified: true,
-        );
+        state = state.copyWith(isVerifyingPin: false, isPinVerified: true);
         await getPinStatus();
         return true;
       } else {
@@ -386,10 +385,7 @@ class WalletNotifier extends Notifier<WalletState> {
         return false;
       }
     } catch (e) {
-      state = state.copyWith(
-        isWithdrawing: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isWithdrawing: false, errorMessage: e.toString());
       return false;
     }
   }
@@ -412,15 +408,11 @@ class WalletNotifier extends Notifier<WalletState> {
         return null;
       }
     } catch (e) {
-      state = state.copyWith(
-        isSyncing: false,
-        errorMessage: e.toString(),
-      );
+      state = state.copyWith(isSyncing: false, errorMessage: e.toString());
       return null;
     }
   }
 
-  // Virtual Account Methods
   Future<void> getVirtualAccountStatus() async {
     state = state.copyWith(
       isFetchingVirtualAccountStatus: true,
@@ -465,7 +457,6 @@ class WalletNotifier extends Notifier<WalletState> {
           isCreatingVirtualAccount: false,
           virtualAccount: response.data as VirtualAccountEntity?,
         );
-        // Refresh the status
         await getVirtualAccountStatus();
         return true;
       } else {
@@ -494,7 +485,7 @@ class WalletNotifier extends Notifier<WalletState> {
         );
       }
     } catch (e) {
-      // Silently fail
+      state = state.copyWith(virtualAccountErrorMessage: e.toString());
     }
   }
 
@@ -508,7 +499,6 @@ class WalletNotifier extends Notifier<WalletState> {
       final response = await _declineVirtualAccountUseCase();
 
       if (response.success) {
-        // Optimistically update the local state to hide the prompt immediately
         final updatedStatus = VirtualAccountStatusEntity(
           hasAccount: state.virtualAccountStatus?.hasAccount ?? false,
           declined: true,

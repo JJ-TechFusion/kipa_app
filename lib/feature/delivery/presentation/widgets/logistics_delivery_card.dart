@@ -68,7 +68,6 @@ class LogisticsDeliveryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status and role badges
             Row(
               children: [
                 _buildStatusBadge(),
@@ -94,8 +93,6 @@ class LogisticsDeliveryCard extends StatelessWidget {
               ],
             ),
             verticalSpace(12),
-
-            // Item name and price
             BodySmall(delivery.itemName, fontWeight: FontWeight.w600),
             verticalSpace(4),
             Caption(
@@ -104,8 +101,6 @@ class LogisticsDeliveryCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
             verticalSpace(12),
-
-            // Route info
             Row(
               children: [
                 Icon(Icons.location_on, size: 14, color: Colors.green),
@@ -129,8 +124,6 @@ class LogisticsDeliveryCard extends StatelessWidget {
               ],
             ),
             verticalSpace(8),
-
-            // Carrier info (if shipped)
             if (delivery.isShipped &&
                 delivery.carrierDisplayName.isNotEmpty) ...[
               Row(
@@ -157,8 +150,6 @@ class LogisticsDeliveryCard extends StatelessWidget {
               ),
               verticalSpace(8),
             ],
-
-            // Counterparty info
             Row(
               children: [
                 Icon(
@@ -176,8 +167,6 @@ class LogisticsDeliveryCard extends StatelessWidget {
               ],
             ),
             verticalSpace(12),
-
-            // Ship deadline
             if (delivery.isAwaitingShipment) ...[
               Row(
                 children: [
@@ -199,8 +188,6 @@ class LogisticsDeliveryCard extends StatelessWidget {
               ),
               verticalSpace(12),
             ],
-
-            // Actions
             if (isSeller && delivery.canMarkShipped)
               SizedBox(
                 width: double.infinity,

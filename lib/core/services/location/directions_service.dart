@@ -21,8 +21,6 @@ class DirectionsService {
   final Dio _dio = Dio();
 
   DirectionsService({required this.apiKey});
-
-  /// Get route between two points using Google Directions API
   Future<List<LatLng>?> getRoute({
     required LatLng origin,
     required LatLng destination,
@@ -34,7 +32,6 @@ class DirectionsService {
     return routeInfo?.points;
   }
 
-  /// Get detailed route info including duration and distance
   Future<RouteInfo?> getRouteInfo({
     required LatLng origin,
     required LatLng destination,
@@ -59,12 +56,8 @@ class DirectionsService {
           final route = data['routes'][0];
           final polyline = route['overview_polyline']['points'] as String;
           final leg = route['legs'][0];
-
-          // Extract duration and distance
           final durationSeconds = leg['duration']['value'] as int? ?? 0;
           final distanceMeters = leg['distance']['value'] as int? ?? 0;
-
-          // Decode the polyline
           final points = _decodePolyline(polyline);
 
           return RouteInfo(
@@ -80,8 +73,6 @@ class DirectionsService {
     }
   }
 
-  /// Decode Google's encoded polyline format
-  /// https://developers.google.com/maps/documentation/utilities/polylinealgorithm
   List<LatLng> _decodePolyline(String encoded) {
     List<LatLng> points = [];
     int index = 0;

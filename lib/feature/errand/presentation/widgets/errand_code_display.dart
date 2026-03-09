@@ -30,31 +30,21 @@ class ErrandCodeDisplay extends StatelessWidget {
       ),
       child: Column(
         children: [
-          BodySmall(
-            title,
-            color: AppColor.lightText,
-          ),
+          BodySmall(title, color: AppColor.lightText),
           verticalSpace(8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: code.split('').map((digit) {
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: 48,
-                height: 56,
+                width: 40,
+                height: 43,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColor.primary.withAlpha(50),
-                  ),
+                  border: Border.all(color: AppColor.primary.withAlpha(50)),
                 ),
-                child: Center(
-                  child: H4(
-                    digit,
-                    color: AppColor.darkPrimary,
-                  ),
-                ),
+                child: Center(child: H4(digit, color: AppColor.darkPrimary)),
               );
             }).toList(),
           ),

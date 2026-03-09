@@ -100,7 +100,6 @@ class AuthNotifier extends Notifier<AuthState> {
       final response = await _verifyOtpUseCase(request);
 
       if (response.success) {
-        // Store tokens
         final accessToken = response.data?['access_token'];
         final refreshToken = response.data?['refresh_token'];
         final isNewUser = response.data?['is_new_user'] ?? false;
@@ -112,8 +111,6 @@ class AuthNotifier extends Notifier<AuthState> {
         if (refreshToken != null) {
           await secureStorage.writeData('refresh_token', refreshToken);
         }
-
-        // If not a new user, profile is already complete
         if (!isNewUser) {
           await secureStorage.writeData('profile_completed', 'true');
         }
@@ -210,11 +207,8 @@ class AuthNotifier extends Notifier<AuthState> {
       final response = await _updateProfileUseCase(request);
 
       if (response.success) {
-        // Mark profile as completed
         final secureStorage = getIt<SecureStorageService>();
         await secureStorage.writeData('profile_completed', 'true');
-
-        // Refresh current user data
         await fetchCurrentUser();
 
         state = state.copyWith(isUpdatingProfile: false, response: response);
@@ -266,7 +260,6 @@ class AuthNotifier extends Notifier<AuthState> {
 
       return response.success;
     } catch (e) {
-      // Even if API fails, clear local storage
       final secureStorage = getIt<SecureStorageService>();
       await secureStorage.clearStore();
       state = const AuthState();
@@ -280,7 +273,6 @@ class AuthNotifier extends Notifier<AuthState> {
       final response = await _deleteUserUseCase();
 
       if (response.success) {
-        // Clear local storage after successful deletion
         final secureStorage = getIt<SecureStorageService>();
         await secureStorage.clearStore();
 

@@ -77,14 +77,11 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     ref.listen(deliveryTrackingProvider.select((s) => s.job), (prev, next) {
       if (next != null &&
           (prev == null || prev.paymentRequestId != next.paymentRequestId)) {
-        // First fetch the request details to get the payment code (if needed) or basic info
         ref
             .read(paymentNotifierProvider.notifier)
             .fetchPaymentRequestDetails(next.paymentRequestId);
       }
     });
-
-    // If we have payment request details, try to fetch full details (with seller info) using payment code
     ref.listen(paymentNotifierProvider.select((s) => s.paymentRequestDetails), (
       prev,
       next,
@@ -122,7 +119,6 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     final String? orderStatus;
 
     if (widget.isBuyer) {
-      // Buyer: Use purchase detail
       final purchase = purchasesState.purchaseDetail;
       amount = purchase?.totalAmount ?? 0.0;
       date = purchase?.paidAt ?? purchase?.createdAt ?? job.createdAt;
@@ -139,7 +135,6 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
       deliveryStatus = purchase?.delivery?.status;
       orderStatus = purchase?.status;
     } else {
-      // Seller: Use sale detail
       final sale = salesState.saleDetail;
       amount = sale?.totalAmount ?? 0.0;
       date = sale?.paidAt ?? sale?.createdAt ?? job.createdAt;
@@ -163,8 +158,6 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     final String? displayCode;
     final String codeTitle;
     final String codeSubtitle;
-
-    // Check if this is a return flow based on timeline.phase
     final isReturnFlow = widget.isBuyer
         ? purchasesState.purchaseDetail?.timeline?.phase?.toLowerCase() ==
               'return'
@@ -172,12 +165,10 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
 
     if (widget.isBuyer) {
       if (isReturnFlow) {
-        // During return: buyer has pickup code from timeline (they're sending item back)
         displayCode = purchasesState.purchaseDetail?.timeline?.pickupCode;
         codeTitle = 'Your Pickup Code';
         codeSubtitle = 'Share this code with the rider picking up';
       } else {
-        // Normal delivery: buyer has dropoff code
         displayCode =
             purchasesState.purchaseDetail?.delivery?.dropoffCode ??
             purchasesState.purchaseDetail?.timeline?.dropoffCode;
@@ -189,14 +180,12 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
           salesState.saleDetail?.delivery?.status.toLowerCase() ==
           'forced_return';
       if (isReturnFlow || isForcedReturn) {
-        // During return or forced return: seller has dropoff code (they're receiving item back)
         displayCode =
             salesState.saleDetail?.timeline?.dropoffCode ??
             salesState.saleDetail?.delivery?.dropoffCode;
         codeTitle = 'Your Drop-off Code';
         codeSubtitle = 'Share this code with the rider returning the item';
       } else {
-        // Normal delivery: seller has pickup code
         displayCode =
             salesState.saleDetail?.delivery?.pickupCode ??
             salesState.saleDetail?.timeline?.pickupCode;
@@ -475,8 +464,6 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
               ),
               verticalSpace(16),
             ],
-
-            // Buyer: Rebook rider when buyer was unavailable
             if (widget.isBuyer &&
                 purchasesState.purchaseDetail?.prStatus?.toLowerCase() ==
                     'pending_rebook' &&
@@ -521,8 +508,6 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
               ),
               verticalSpace(16),
             ],
-
-            // Seller: Confirm return when return_delivered step is completed
             if (!widget.isBuyer && widget.saleId != null) ...[
               Builder(
                 builder: (context) {
@@ -754,12 +739,9 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     bool isReturnFlow = false,
     bool disabled = false,
   }) {
-    // Determine lat/lng from job
     final lat = job.pickupLat ?? 6.5244;
     final lng = job.pickupLng ?? 3.3792;
     final jobIdToTrack = trackingJobId ?? job.id;
-
-    // During return the item travels back: dropoff becomes origin, pickup becomes destination
     final topAddress = isReturnFlow
         ? (job.dropoffAddress.isNotEmpty ? job.dropoffAddress : 'Pickup Point')
         : (job.pickupAddress.isNotEmpty ? job.pickupAddress : 'Pickup Point');

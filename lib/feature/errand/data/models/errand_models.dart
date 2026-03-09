@@ -29,8 +29,6 @@ class ErrandModel {
         currentLongitude: _parseDouble(json['current_lng']),
       );
     }
-
-    // Parse timeline if present
     ErrandTimelineEntity? timeline;
     if (json['timeline'] != null) {
       timeline = ErrandTimelineModel.fromJson(json['timeline']);
@@ -53,7 +51,7 @@ class ErrandModel {
       packageSize: PackageSize.fromString(
         json['package_size'] ?? json['vehicle_type'] ?? 'small',
       ),
-      notes: json['notes'],
+      notes: json['pickup_instructions'],
       estimatedPrice: _parseDouble(
         json['delivery_fee'] ?? json['estimated_price'],
       ),

@@ -94,8 +94,6 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
-
-    // We will listen for profile update completion
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (previous?.isUploadingImage == true &&
           next.isUploadingImage == false) {
@@ -107,8 +105,6 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
           );
         }
       }
-
-      // We will handle profile update completion
       if (previous?.isUpdatingProfile == true &&
           next.isUpdatingProfile == false) {
         if (next.errorMessage != null) {

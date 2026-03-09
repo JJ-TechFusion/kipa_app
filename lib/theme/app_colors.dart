@@ -24,26 +24,18 @@ class AppColor {
   static const gradient2 = Color(0xFFF97116);
   static const deepBlue = Color(0xFF0E648C);
   static const subtitle = Color(0xFF595959);
-
-  // Onboarding colors
   static const onboardingPrimary = Color(0xFF2E3A87);
   static const onboardingTitleText = Color(0xFF1F2937);
   static const onboardingDescriptionText = Color(0xFF6B7280);
   static const onboardingIndicatorInactive = Color(0xFFD1D5DB);
-
-  // Onboarding backgrounds
   static const onboardingBackground1 = Color(0xFFE8E5F5);
   static const onboardingBackground2 = Color(0xFFE8F5EC);
   static const onboardingBackground3 = Color(0xFFFCE8ED);
   static const onboardingBackground4 = Color(0xFFFFF5E8);
-
-  // Dashboard colors
   static const pendingBalanceBackground = Color(0xFFE8EAF6);
   static const cardBackground = Color(0xFFFFFFFF);
   static const cardShadow = Color(0x0D000000);
   static const kipaProtectedBackground = Color(0xFFE8F5E9);
-
-  // Payment Flow Colors
   static const linkActiveBackground = Color(0xFFC0F0F3);
   static const linkActiveIcon = Color(0xFF00BFA5);
   static const tagBackground = Color(0xFFEEEEEE); // grey[200]

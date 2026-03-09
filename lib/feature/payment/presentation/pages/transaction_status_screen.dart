@@ -44,21 +44,6 @@ class _TransactionStatusScreenState
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          // leading: IconButton(
-          //   onPressed: () => Navigator.pop(context),
-          //   icon: Container(
-          //     padding: const EdgeInsets.all(8),
-          //     decoration: const BoxDecoration(
-          //       color: AppColor.primary,
-          //       shape: BoxShape.circle,
-          //     ),
-          //     child: const Icon(
-          //       Icons.arrow_back,
-          //       color: Colors.white,
-          //       size: 20,
-          //     ),
-          //   ),
-          // ),
           title: const BodyText(
             'Transaction Status',
             fontWeight: FontWeight.w600,
@@ -112,17 +97,6 @@ class _TransactionStatusScreenState
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        // leading: IconButton(
-        //   onPressed: () => Navigator.pop(context),
-        //   icon: Container(
-        //     padding: const EdgeInsets.all(8),
-        //     decoration: const BoxDecoration(
-        //       color: AppColor.primary,
-        //       shape: BoxShape.circle,
-        //     ),
-        //     child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-        //   ),
-        // ),
         title: const BodyText(
           'Transaction Status',
           fontWeight: FontWeight.w600,
@@ -142,79 +116,57 @@ class _TransactionStatusScreenState
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 22),
           child: Column(
-          children: [
-            isPaid ? _buildReceivedHeader(transaction) : _buildPendingHeader(),
-            verticalSpace(24),
-
-            if (isPaid && transaction.isSeller && _shouldShowProcessingBanner(transaction)) ...[
-              _buildProcessingBanner(transaction),
+            children: [
+              isPaid
+                  ? _buildReceivedHeader(transaction)
+                  : _buildPendingHeader(),
               verticalSpace(24),
-            ],
 
-            _buildTransactionDetailsCard(transaction, isBuyer, currencyFormat),
-            verticalSpace(32),
+              if (isPaid &&
+                  transaction.isSeller &&
+                  _shouldShowProcessingBanner(transaction)) ...[
+                _buildProcessingBanner(transaction),
+                verticalSpace(24),
+              ],
 
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TransactionTimeline(
-                steps: _getTimelineSteps(transaction.timeline),
+              _buildTransactionDetailsCard(
+                transaction,
+                isBuyer,
+                currencyFormat,
               ),
-            ),
-            verticalSpace(32),
+              verticalSpace(32),
 
-            // Show other party's info
-            if (isPaid) ...[
-              _buildUserInfo(transaction, isBuyer),
-              verticalSpace(32),
-              _buildFundsSecuredBanner(transaction, isBuyer, currencyFormat),
-              verticalSpace(32),
-              // if (transaction.isSeller &&
-              //     transaction.status == 'paid_awaiting_fulfillment') ...[
-              //   Padding(
-              //     padding: const EdgeInsets.symmetric(horizontal: 42),
-              //     child: CustomButton(
-              //       title: 'View Payment List',
-              //       onTap: () {
-              //         Navigator.pushReplacementNamed(
-              //           context,
-              //           RouteNames.paymentLinkListRoute,
-              //         );
-              //       },
-              //       icon: CupertinoIcons.cube_box,
-              //       borderRadius: 30,
-              //     ),
-              //   ),
-              //   verticalSpace(16),
-              // ],
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
-                child: CustomButton(
-                  title: 'Back to Home',
-                  onTap: () {
-                    Navigator.pushReplacementNamed(
-                      context,
-                      RouteNames.homeRoute,
-                    );
-                  },
-                  color: AppColor.primary,
-                  textColor: Colors.white,
-                  borderRadius: 30,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TransactionTimeline(
+                  steps: _getTimelineSteps(transaction.timeline),
                 ),
               ),
-              verticalSpace(12),
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 42),
-              //   child: CustomButton(
-              //     title: 'Report an Issue',
-              //     onTap: () {},
-              //     color: AppColor.kipaGrey.withAlpha(50),
-              //     textColor: AppColor.primaryText,
-              //     borderRadius: 30,
-              //   ),
-              // ),
+              verticalSpace(32),
+              if (isPaid) ...[
+                _buildUserInfo(transaction, isBuyer),
+                verticalSpace(32),
+                _buildFundsSecuredBanner(transaction, isBuyer, currencyFormat),
+                verticalSpace(32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 42),
+                  child: CustomButton(
+                    title: 'Back to Home',
+                    onTap: () {
+                      Navigator.pushReplacementNamed(
+                        context,
+                        RouteNames.homeRoute,
+                      );
+                    },
+                    color: AppColor.primary,
+                    textColor: Colors.white,
+                    borderRadius: 30,
+                  ),
+                ),
+                verticalSpace(12),
+              ],
             ],
-          ],
-        ),
+          ),
         ),
       ),
     );
@@ -278,12 +230,8 @@ class _TransactionStatusScreenState
   }
 
   bool _shouldShowProcessingBanner(TransactionStatusEntity transaction) {
-    // For inter-state deliveries, hide processing banner once order is fulfilled
     if (transaction.deliveryType.toLowerCase() == 'inter_state') {
-      // Check if current step has passed order fulfillment
       final currentStep = transaction.timeline.currentStep.toLowerCase();
-
-      // Hide banner if current step is at or past shipment/fulfillment stages
       if (currentStep.contains('shipped') ||
           currentStep.contains('fulfilled') ||
           currentStep.contains('in_transit') ||

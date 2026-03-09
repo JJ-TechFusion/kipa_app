@@ -11,11 +11,9 @@ class InitializePaymentResponseEntity {
   final String paymentRequestId;
   final String paymentMethod;
   final String reference;
-  // For wallet payment
   final String? escrowId;
   final String? message;
   final String? status;
-  // Delivery info
   final String? deliveryType;
   final String? pickupAddress;
   final String? dropoffAddress;
@@ -51,7 +49,6 @@ class VerifyPaymentResponseEntity {
   final String paymentRequestId;
   final String paymentStatus;
   final String status;
-  // Delivery info
   final String? deliveryType;
   final String? pickupAddress;
   final String? dropoffAddress;

@@ -18,8 +18,6 @@ class LogisticsNotifier extends Notifier<LogisticsState> {
 
     try {
       final apiService = getIt<ApiService>();
-
-      // Fetch both seller and buyer logistics in parallel
       final results = await Future.wait([
         apiService.getRequest(endpoint: ApiEndpoints.logisticsSellerUrl),
         apiService.getRequest(endpoint: ApiEndpoints.logisticsBuyerUrl),
@@ -39,7 +37,6 @@ class LogisticsNotifier extends Notifier<LogisticsState> {
       if (buyerResponse.success && buyerResponse.data != null) {
         final buyerData = buyerResponse.data as Map<String, dynamic>;
         final buyerList = LogisticsDeliveryListModel.fromJson(buyerData);
-        // Add buyer deliveries, avoiding duplicates by ID
         final existingIds = allDeliveries.map((d) => d.id).toSet();
         for (final delivery in buyerList.toEntity().deliveries) {
           if (!existingIds.contains(delivery.id)) {
@@ -47,8 +44,6 @@ class LogisticsNotifier extends Notifier<LogisticsState> {
           }
         }
       }
-
-      // Sort by created_at descending (newest first)
       allDeliveries.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       state = state.copyWith(
@@ -142,10 +137,7 @@ class LogisticsNotifier extends Notifier<LogisticsState> {
       final apiService = getIt<ApiService>();
       final response = await apiService.postRequest(
         endpoint: ApiEndpoints.claimLogisticsDeliveryUrl(logisticsDeliveryId),
-        requestBody: {
-          'delivery_proof_url': deliveryProofUrl,
-          'notes': notes,
-        },
+        requestBody: {'delivery_proof_url': deliveryProofUrl, 'notes': notes},
       );
 
       state = state.copyWith(isClaimingDelivery: false);
@@ -176,12 +168,8 @@ class LogisticsNotifier extends Notifier<LogisticsState> {
     try {
       final apiService = getIt<ApiService>();
       final response = await apiService.postRequest(
-        endpoint:
-            ApiEndpoints.confirmLogisticsDeliveryUrl(logisticsDeliveryId),
-        requestBody: {
-          'rating': rating,
-          'notes': notes,
-        },
+        endpoint: ApiEndpoints.confirmLogisticsDeliveryUrl(logisticsDeliveryId),
+        requestBody: {'rating': rating, 'notes': notes},
       );
 
       state = state.copyWith(isConfirmingDelivery: false);
@@ -245,10 +233,7 @@ class LogisticsNotifier extends Notifier<LogisticsState> {
       final apiService = getIt<ApiService>();
       final response = await apiService.postRequest(
         endpoint: ApiEndpoints.openLogisticsDisputeUrl(logisticsDeliveryId),
-        requestBody: {
-          'reason': reason,
-          'evidence_urls': evidenceUrls,
-        },
+        requestBody: {'reason': reason, 'evidence_urls': evidenceUrls},
       );
 
       state = state.copyWith(isOpeningDispute: false);
@@ -311,10 +296,7 @@ class LogisticsNotifier extends Notifier<LogisticsState> {
       final apiService = getIt<ApiService>();
       final response = await apiService.postRequest(
         endpoint: ApiEndpoints.confirmLogisticsReturnUrl(logisticsDeliveryId),
-        requestBody: {
-          'condition': condition,
-          'notes': notes,
-        },
+        requestBody: {'condition': condition, 'notes': notes},
       );
       state = state.copyWith(isConfirmingReturn: false);
       if (response.success) {

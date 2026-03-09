@@ -85,8 +85,6 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
                     ),
                   ),
                   verticalSpace(32),
-
-                  // Input Field
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -136,8 +134,6 @@ class _PayViaLinkScreenState extends State<PayViaLinkScreen> {
               ),
             ),
             verticalSpace(24),
-
-            // Security Banner
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(

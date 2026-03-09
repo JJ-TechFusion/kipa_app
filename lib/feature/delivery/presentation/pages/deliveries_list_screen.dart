@@ -272,28 +272,13 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
   Widget _buildIntraStateList() {
     final purchasesState = ref.watch(purchasesNotifierProvider);
     final salesState = ref.watch(salesNotifierProvider);
-
-    // Only show deliveries where rider has accepted
     final allPurchases = (purchasesState.purchases ?? [])
         .where((p) => p.deliveryType != 'inter_state')
         .where((p) => p.delivery?.riderAssigned == true)
         .toList();
-
-    const riderAcceptedStatuses = [
-      'rider_assigned',
-      'in_delivery',
-      'delivered',
-      'confirmation_window',
-      'completed',
-      'return_in_progress',
-      'return_delivered',
-      'return_confirmed',
-    ];
     final allSales = (salesState.sales ?? [])
         .where((s) => s.deliveryType != 'inter_state')
-        .where(
-          (s) => riderAcceptedStatuses.contains(s.orderStatus.toLowerCase()),
-        )
+        .where((s) => s.deliveryJobId != null && s.deliveryJobId!.isNotEmpty)
         .toList();
 
     final purchases = _selectedStatus == 'all'
@@ -306,8 +291,17 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
     final sales = _selectedStatus == 'all'
         ? allSales
         : allSales.where((s) {
-            final status = s.orderStatus.toLowerCase();
-            return status == _selectedStatus;
+            final prStatus = s.prStatus?.toLowerCase() ?? '';
+            if (_selectedStatus == 'processing') {
+              return prStatus.contains('awaiting') || prStatus == 'paid';
+            } else if (_selectedStatus == 'in_delivery') {
+              return prStatus == 'in_delivery';
+            } else if (_selectedStatus == 'completed') {
+              return prStatus == 'completed';
+            } else if (_selectedStatus == 'disputed') {
+              return prStatus == 'disputed';
+            }
+            return prStatus == _selectedStatus;
           }).toList();
 
     final isLoading =
@@ -355,26 +349,19 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
           } else {
             final saleIndex = index - purchases.length;
             final item = sales[saleIndex];
-            final orderStatus = item.orderStatus.toLowerCase();
-            final riderAssigned =
-                orderStatus == 'in_delivery' ||
-                orderStatus == 'completed' ||
-                orderStatus == 'delivered';
             return DeliveryListItem(
               sale: item,
-              onTap: riderAssigned
-                  ? () {
-                      Navigator.pushNamed(
-                        context,
-                        RouteNames.deliveryDetailsRoute,
-                        arguments: {
-                          'deliveryJobId': item.deliveryJobId ?? '',
-                          'saleId': item.id,
-                          'isBuyer': false,
-                        },
-                      );
-                    }
-                  : null,
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  RouteNames.deliveryDetailsRoute,
+                  arguments: {
+                    'deliveryJobId': item.deliveryJobId ?? '',
+                    'saleId': item.id,
+                    'isBuyer': false,
+                  },
+                );
+              },
             );
           }
         },
@@ -442,7 +429,6 @@ class _DeliveriesListScreenState extends ConsumerState<DeliveriesListScreen>
                   );
                   break;
                 default:
-                  // completed, cancelled, draft
                   Navigator.pushNamed(
                     context,
                     RouteNames.errandDetailsRoute,

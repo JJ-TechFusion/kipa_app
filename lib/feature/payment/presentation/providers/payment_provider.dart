@@ -28,19 +28,14 @@ import '../state/transaction_status_state.dart';
 import '../state/transactions_list_notifier.dart';
 import '../state/transactions_list_state.dart';
 
-// Data Sources
 final paymentRemoteDataSourceProvider = Provider<PaymentRemoteDataSource>((
   ref,
 ) {
   return PaymentRemoteDataSource(getIt<ApiService>());
 });
-
-// Repository
 final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
   return PaymentRepositoryImpl(ref.read(paymentRemoteDataSourceProvider));
 });
-
-// Use Cases
 final createPaymentRequestUseCaseProvider =
     Provider<CreatePaymentRequestUseCase>((ref) {
       return CreatePaymentRequestUseCase(ref.read(paymentRepositoryProvider));

@@ -134,8 +134,6 @@ class _VerifyTransactionModalState extends State<VerifyTransactionModal> {
             ),
           ),
           verticalSpace(20),
-
-          // Expiry info
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

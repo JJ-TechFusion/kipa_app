@@ -77,10 +77,7 @@ class _AppWebviewPageState extends State<AppWebviewPage> {
 
   bool _isPaymentComplete(String url) {
     final lowerUrl = url.toLowerCase();
-
-    // Check for Flutterwave completion patterns
     if (lowerUrl.contains('flutterwave')) {
-      // Success patterns
       if (lowerUrl.contains('status=successful') ||
           lowerUrl.contains('status=completed') ||
           lowerUrl.contains('tx_ref=') ||
@@ -88,8 +85,6 @@ class _AppWebviewPageState extends State<AppWebviewPage> {
         return true;
       }
     }
-
-    // Check for app's backend callback URLs
     if (lowerUrl.contains('getkipa.com')) {
       if (lowerUrl.contains('callback') ||
           lowerUrl.contains('verify') ||

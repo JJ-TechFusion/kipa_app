@@ -18,7 +18,6 @@ const String _googleMapsApiKey = 'AIzaSyDGctg74O3Vwa0IP_o2Eh2xwKe5CSuz-k0';
 
 class RiderSearchScreen extends ConsumerStatefulWidget {
   final String paymentRequestId;
-  // Optional initial data - if provided, skip fetching from state
   final String? pickupAddress;
   final String? dropoffAddress;
   final double? pickupLat;
@@ -46,26 +45,16 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
   GoogleMapController? _mapController;
   Timer? _pollingTimer;
   late GooglePlacesService _placesService;
-
-  // Animation controllers
   late AnimationController _pulseController;
-
-  // Default to Lagos, Nigeria
   static const LatLng _defaultLocation = LatLng(6.5244, 3.3792);
-
-  // Markers and map state
   Set<Marker> _markers = {};
   Set<Circle> _circles = {};
   Set<Polyline> _polylines = {};
-
-  // Payment request data
   String? _pickupAddress;
   String? _dropoffAddress;
   LatLng? _pickupLocation;
   LatLng? _dropoffLocation;
   bool _isLoadingLocations = true;
-
-  // Custom marker icons
   BitmapDescriptor? _pickupMarkerIcon;
   BitmapDescriptor? _dropoffMarkerIcon;
 
@@ -74,17 +63,11 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
     super.initState();
 
     _placesService = GooglePlacesService(apiKey: _googleMapsApiKey);
-
-    // Pulse animation for the search effect
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     )..repeat();
-
-    // Create custom markers
     _createCustomMarkers();
-
-    // Fetch payment request details and geocode addresses
     _fetchPaymentDetails();
     _startPolling();
   }
@@ -96,7 +79,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
   }
 
   Future<void> _fetchPaymentDetails() async {
-    // First, check if data was passed directly via widget parameters
     if (widget.pickupAddress != null && widget.dropoffAddress != null) {
       _pickupAddress = widget.pickupAddress;
       _dropoffAddress = widget.dropoffAddress;
@@ -107,8 +89,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
       if (widget.dropoffLat != null && widget.dropoffLng != null) {
         _dropoffLocation = LatLng(widget.dropoffLat!, widget.dropoffLng!);
       }
-
-      // If coordinates available, use them; otherwise geocode
       if (_pickupLocation != null && _dropoffLocation != null) {
         setState(() {
           _isLoadingLocations = false;
@@ -120,8 +100,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
         return;
       }
     }
-
-    // Fallback: try to get data from paymentRequests state
     final state = ref.read(paymentNotifierProvider);
     final paymentRequests = state.paymentRequests ?? [];
 
@@ -137,16 +115,12 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
 
     _pickupAddress = request.pickupAddress;
     _dropoffAddress = request.dropoffAddress;
-
-    // Use coordinates from backend if available, otherwise geocode
     if (request.pickupLat != null && request.pickupLng != null) {
       _pickupLocation = LatLng(request.pickupLat!, request.pickupLng!);
     }
     if (request.dropoffLat != null && request.dropoffLng != null) {
       _dropoffLocation = LatLng(request.dropoffLat!, request.dropoffLng!);
     }
-
-    // If coordinates not available from backend, geocode the addresses
     if (_pickupLocation == null || _dropoffLocation == null) {
       await _geocodeAddresses();
     } else {
@@ -164,13 +138,10 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
     }
 
     try {
-      // Geocode pickup address
       final pickupResult = await _placesService.geocodeAddress(_pickupAddress!);
       if (pickupResult != null) {
         _pickupLocation = LatLng(pickupResult.latitude, pickupResult.longitude);
       }
-
-      // Geocode dropoff address
       final dropoffResult = await _placesService.geocodeAddress(
         _dropoffAddress!,
       );
@@ -203,7 +174,9 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
         markerId: const MarkerId('pickup'),
         position: _pickupLocation!,
         anchor: const Offset(0.5, 0.5),
-        icon: _pickupMarkerIcon ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        icon:
+            _pickupMarkerIcon ??
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         infoWindow: InfoWindow(
           title: 'Pickup',
           snippet: _pickupAddress ?? 'Pickup location',
@@ -213,15 +186,15 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
         markerId: const MarkerId('dropoff'),
         position: _dropoffLocation!,
         anchor: const Offset(0.5, 0.5),
-        icon: _dropoffMarkerIcon ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        icon:
+            _dropoffMarkerIcon ??
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         infoWindow: InfoWindow(
           title: 'Dropoff',
           snippet: _dropoffAddress ?? 'Dropoff location',
         ),
       ),
     };
-
-    // Add pulsing circles around pickup
     _circles = {
       Circle(
         circleId: const CircleId('pickup_pulse'),
@@ -232,8 +205,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
         strokeWidth: 2,
       ),
     };
-
-    // Add polyline connecting pickup and dropoff
     _polylines = {
       Polyline(
         polylineId: const PolylineId('route'),
@@ -243,8 +214,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
         patterns: [PatternItem.dash(20), PatternItem.gap(10)],
       ),
     };
-
-    // Fit map to show both markers
     _fitMapToBounds();
   }
 
@@ -309,9 +278,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
       if (mounted) {
         final deliveryJobId =
             state.markReadyResponse?.deliveryJobId ?? currentRequest.id;
-
-        // Use 'accepted' as initial status since we only navigate here when rider is assigned
-        // fetchJobDetails will update with actual status after connecting
         final initialJob = DeliveryJobEntity(
           id: deliveryJobId,
           paymentRequestId: currentRequest.id,
@@ -404,8 +370,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
                 ),
               ),
             ),
-
-          // App bar overlay
           Positioned(
             top: 0,
             left: 0,
@@ -516,13 +480,9 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
           ),
 
           verticalSpace(20),
-
-          // Animated search indicator
           _buildSearchIndicator(),
 
           verticalSpace(20),
-
-          // Status text
           const BodyText(
             'Searching for Riders',
             fontWeight: FontWeight.w600,
@@ -538,13 +498,9 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
           ),
 
           verticalSpace(24),
-
-          // Location info
           _buildLocationInfo(),
 
           verticalSpace(24),
-
-          // Cancel button
           Consumer(
             builder: (context, ref, child) {
               final isCancelling = ref
@@ -576,7 +532,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Pulsing circles
           ...List.generate(3, (index) {
             return AnimatedBuilder(
               animation: _pulseController,
@@ -605,8 +560,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
               },
             );
           }),
-
-          // Center icon
           Container(
             width: 50,
             height: 50,
@@ -703,7 +656,6 @@ class _RiderSearchScreenState extends ConsumerState<RiderSearchScreen>
   }
 }
 
-// Custom painter for radar effect on map
 class RadarPainter extends CustomPainter {
   final double progress;
   final Offset center;
@@ -717,7 +669,6 @@ class RadarPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw 3 expanding circles
     for (int i = 0; i < 3; i++) {
       final delay = i * 0.33;
       final adjustedProgress = (progress + delay) % 1.0;

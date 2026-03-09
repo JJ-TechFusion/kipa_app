@@ -24,8 +24,6 @@ class WalletState {
   final List<PendingFundEntity> pendingFunds;
   final PinStatusEntity? pinStatus;
   final bool isPinVerified;
-
-  // Virtual Account
   final bool isFetchingVirtualAccountStatus;
   final bool isCreatingVirtualAccount;
   final bool isDecliningVirtualAccount;

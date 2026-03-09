@@ -37,8 +37,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
   GoogleMapController? _mapController;
   late GooglePlacesService _placesService;
   late DirectionsService _directionsService;
-
-  // Map state
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   LatLng? _pickupLocation;
@@ -62,8 +60,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
-
-    // Start tracking
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref
           .read(deliveryTrackingProvider.notifier)
@@ -74,8 +70,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
 
       _geocodeAddresses();
       _loadRiderIcon();
-
-      // Listen to job updates to refresh coordinates
       ref.listenManual(deliveryTrackingProvider.select((state) => state.job), (
         previous,
         next,
@@ -87,11 +81,8 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
     });
   }
 
-  /// Update coordinates when job data changes
   Future<void> _updateCoordinatesFromJob(DeliveryJobEntity job) async {
     bool needsUpdate = false;
-
-    // Update pickup location if we have coordinates
     if (job.pickupLat != null && job.pickupLng != null) {
       final newPickup = LatLng(job.pickupLat!, job.pickupLng!);
       if (_pickupLocation != newPickup) {
@@ -99,8 +90,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
         needsUpdate = true;
       }
     }
-
-    // Update dropoff location if we have coordinates
     if (job.dropoffLat != null && job.dropoffLng != null) {
       final newDropoff = LatLng(job.dropoffLat!, job.dropoffLng!);
       if (_dropoffLocation != newDropoff) {
@@ -110,7 +99,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
     }
 
     if (needsUpdate && mounted) {
-      // Fetch route if both locations are now available
       if (_pickupLocation != null &&
           _dropoffLocation != null &&
           _routePoints.isEmpty) {
@@ -120,8 +108,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
       setState(() {
         _updateMapElements();
       });
-
-      // Fit map bounds to show all markers
       if (_pickupLocation != null && _dropoffLocation != null) {
         _fitMapToBounds();
       }
@@ -129,18 +115,15 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
   }
 
   Future<void> _loadRiderIcon() async {
-    // Generate custom markers for pickup and dropoff
     _pickupIcon = await MapMarkerGenerator.createCircleMarker(
       fillColor: MapMarkerGenerator.pickupColor,
     );
     _dropoffIcon = await MapMarkerGenerator.createCircleMarker(
       fillColor: MapMarkerGenerator.dropoffColor,
     );
-    // Rider markers are generated dynamically with heading in _updateMapElements
     if (mounted) setState(() {});
   }
 
-  /// Fetch real road route from Google Directions API
   Future<void> _fetchRoute() async {
     if (_pickupLocation == null || _dropoffLocation == null) return;
 
@@ -157,24 +140,18 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
     }
   }
 
-  /// Calculate ETA based on rider's current location
   String _calculateETA() {
     final trackingState = ref.read(deliveryTrackingProvider);
     final riderLocation = trackingState.riderLocation;
     final job = trackingState.job;
 
     if (riderLocation == null) return 'Calculating...';
-
-    // Use backend-calculated ETA if available (updated every 30 seconds)
     if (riderLocation.etaMinutes != null) {
       final etaMinutes = riderLocation.etaMinutes!;
       if (etaMinutes < 1) return 'Arriving now';
       if (etaMinutes == 1) return '1 min';
       return '$etaMinutes mins';
     }
-
-    // Fallback to client-side calculation if backend ETA is null
-    // Determine destination based on delivery status
     LatLng? destination;
     if (job?.status != null) {
       final deliveryStatus = DeliveryStatus.fromString(job!.status);
@@ -186,16 +163,12 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
     }
 
     if (destination == null) return 'Calculating...';
-
-    // Simple distance-based ETA (you can enhance this with live traffic)
     final distance = _calculateDistance(
       riderLocation.latitude,
       riderLocation.longitude,
       destination.latitude,
       destination.longitude,
     );
-
-    // Assume average speed of 30 km/h in city traffic
     final averageSpeedKmh = 30.0;
     final etaMinutes = (distance / averageSpeedKmh * 60).round();
 
@@ -267,8 +240,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
     final job = trackingState.job;
 
     _markers = {};
-
-    // Pickup marker
     if (_pickupLocation != null && _pickupIcon != null) {
       _markers.add(
         Marker(
@@ -280,8 +251,6 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
         ),
       );
     }
-
-    // Dropoff marker
     if (_dropoffLocation != null && _dropoffIcon != null) {
       _markers.add(
         Marker(
@@ -293,19 +262,13 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
         ),
       );
     }
-
-    // Nearby riders - show only when searching for a rider
     if (job?.status == 'searching' && nearbyRiders.isNotEmpty) {
       for (final nearbyRider in nearbyRiders) {
         _generateNearbyRiderMarker(nearbyRider);
       }
     }
-
-    // Rider marker - ALWAYS show if we have rider location
     if (riderLocation != null) {
       _generateAssignedRiderMarker(riderLocation);
-
-      // Auto-center camera on rider if no pickup/dropoff locations
       if (_pickupLocation == null &&
           _dropoffLocation == null &&
           _mapController != null) {
@@ -316,11 +279,8 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
         _mapController?.animateCamera(CameraUpdate.newLatLngZoom(riderPos, 15));
       }
     }
-
-    // Route polyline - use actual route points if available
     _polylines = {};
     if (_routePoints.isNotEmpty) {
-      // Use the real road route from Google Directions
       _polylines.add(
         Polyline(
           polylineId: const PolylineId('route'),
@@ -770,16 +730,12 @@ class _DeliveryTrackingScreenState extends ConsumerState<DeliveryTrackingScreen>
     if (job?.status == null) return const SizedBox.shrink();
 
     final deliveryStatus = DeliveryStatus.fromString(job!.status);
-
-    // Only show ETA for active delivery statuses
     if (!deliveryStatus.shouldShowEta) {
       return const SizedBox.shrink();
     }
 
     final eta = _calculateETA();
     if (eta == 'Calculating...') return const SizedBox.shrink();
-
-    // Determine the destination text based on status
     String destinationText = 'arrives';
     if (deliveryStatus.isHeadingToPickup) {
       destinationText = 'arrives at pickup';

@@ -15,7 +15,6 @@ class TextSizes {
   static const double overline = 10.0;
 }
 
-// Streamlined ResponsiveText widget
 class ResponsiveText extends StatelessWidget {
   final String text;
   final double baseSize;
@@ -64,7 +63,6 @@ class ResponsiveText extends StatelessWidget {
   }
 }
 
-// Semantic text widgets for common use cases
 class H1 extends StatelessWidget {
   final String text;
   final Color? color;

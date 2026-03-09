@@ -305,8 +305,6 @@ class _CreateErrandScreenState extends ConsumerState<CreateErrandScreen> {
               ),
 
               verticalSpace(24),
-
-              // Vehicle Type Selection
               const BodyText(
                 'Vehicle Type',
                 fontWeight: FontWeight.w600,

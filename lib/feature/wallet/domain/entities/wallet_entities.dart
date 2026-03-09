@@ -287,10 +287,7 @@ class WithdrawRequestEntity {
   final String bankAccountId;
   final double amount;
 
-  WithdrawRequestEntity({
-    required this.bankAccountId,
-    required this.amount,
-  });
+  WithdrawRequestEntity({required this.bankAccountId, required this.amount});
 }
 
 class WithdrawalEntity {
@@ -315,7 +312,6 @@ class WithdrawalEntity {
   });
 }
 
-// Virtual Account Entities
 class VirtualAccountEntity {
   final String accountNumber;
   final String bankName;

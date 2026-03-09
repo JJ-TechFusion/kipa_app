@@ -24,17 +24,12 @@ import '../../domain/usecases/decline_virtual_account_usecase.dart';
 import '../state/wallet_notifier.dart';
 import '../state/wallet_state.dart';
 
-// Data Source
 final walletRemoteDataSourceProvider = Provider<WalletRemoteDataSource>((ref) {
   return WalletRemoteDataSource(getIt<ApiService>());
 });
-
-// Repository
 final walletRepositoryProvider = Provider<WalletRepository>((ref) {
   return WalletRepositoryImpl(ref.read(walletRemoteDataSourceProvider));
 });
-
-// Use Cases
 final getWalletUseCaseProvider = Provider<GetWalletUseCase>((ref) {
   return GetWalletUseCase(ref.read(walletRepositoryProvider));
 });
@@ -55,8 +50,6 @@ final getWalletTransactionsUseCaseProvider =
 final getPendingFundsUseCaseProvider = Provider<GetPendingFundsUseCase>((ref) {
   return GetPendingFundsUseCase(ref.read(walletRepositoryProvider));
 });
-
-// PIN Use Cases
 final getPinStatusUseCaseProvider = Provider<GetPinStatusUseCase>((ref) {
   return GetPinStatusUseCase(ref.read(walletRepositoryProvider));
 });
@@ -88,29 +81,26 @@ final withdrawUseCaseProvider = Provider<WithdrawUseCase>((ref) {
 final syncWalletUseCaseProvider = Provider<SyncWalletUseCase>((ref) {
   return SyncWalletUseCase(ref.read(walletRepositoryProvider));
 });
-
-// Virtual Account Use Cases
 final getVirtualAccountStatusUseCaseProvider =
     Provider<GetVirtualAccountStatusUseCase>((ref) {
-  return GetVirtualAccountStatusUseCase(ref.read(walletRepositoryProvider));
-});
+      return GetVirtualAccountStatusUseCase(ref.read(walletRepositoryProvider));
+    });
 
 final createVirtualAccountUseCaseProvider =
     Provider<CreateVirtualAccountUseCase>((ref) {
-  return CreateVirtualAccountUseCase(ref.read(walletRepositoryProvider));
-});
+      return CreateVirtualAccountUseCase(ref.read(walletRepositoryProvider));
+    });
 
-final getVirtualAccountUseCaseProvider =
-    Provider<GetVirtualAccountUseCase>((ref) {
+final getVirtualAccountUseCaseProvider = Provider<GetVirtualAccountUseCase>((
+  ref,
+) {
   return GetVirtualAccountUseCase(ref.read(walletRepositoryProvider));
 });
 
 final declineVirtualAccountUseCaseProvider =
     Provider<DeclineVirtualAccountUseCase>((ref) {
-  return DeclineVirtualAccountUseCase(ref.read(walletRepositoryProvider));
-});
-
-// Notifier
+      return DeclineVirtualAccountUseCase(ref.read(walletRepositoryProvider));
+    });
 final walletNotifierProvider = NotifierProvider<WalletNotifier, WalletState>(
   WalletNotifier.new,
 );

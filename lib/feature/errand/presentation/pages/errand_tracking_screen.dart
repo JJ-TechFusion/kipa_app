@@ -36,8 +36,6 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
     with TickerProviderStateMixin {
   GoogleMapController? _mapController;
   late DirectionsService _directionsService;
-
-  // Map state
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   LatLng? _pickupLocation;
@@ -343,7 +341,6 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Map
           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: _pickupLocation ?? const LatLng(6.5244, 3.3792),
@@ -491,7 +488,6 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle
           Container(
             margin: const EdgeInsets.only(top: 12),
             width: 40,
@@ -510,7 +506,6 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
                   _buildRiderCard(rider, errand),
                   verticalSpace(16),
                 ],
-                // Pickup code - sender gives this to rider at pickup
                 if (errand.deliveryJob?.pickupCode != null &&
                     status == ErrandStatus.accepted) ...[
                   ErrandCodeDisplay(
@@ -521,8 +516,6 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
                   ),
                   verticalSpace(12),
                 ],
-
-                // Dropoff code (for rider) - recipient gives this to rider at delivery
                 if (errand.deliveryJob?.dropoffCode != null &&
                     (status == ErrandStatus.pickedUp ||
                         status == ErrandStatus.inTransit)) ...[
@@ -530,7 +523,7 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
                     title: 'Dropoff Code',
                     code: errand.deliveryJob!.dropoffCode!,
                     subtitle:
-                        'Share this code with recipient - they give it to the rider',
+                        'Share this code with the rider to confirm delivery',
                     backgroundColor: Colors.blue.withAlpha(25),
                   ),
                   verticalSpace(12),
@@ -545,7 +538,10 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
                         ? null
                         : () => _showCancelDialog(errand, status),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 10,
+                      ),
                       side: const BorderSide(color: AppColor.errorColor),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -560,7 +556,7 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
                               color: AppColor.errorColor,
                             ),
                           )
-                        : const BodyText(
+                        : const BodySmall(
                             'Cancel Errand',
                             color: AppColor.errorColor,
                             fontWeight: FontWeight.w600,
@@ -679,7 +675,6 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
             ],
           ),
         ),
-        // Action buttons
         Row(
           children: [
             GestureDetector(

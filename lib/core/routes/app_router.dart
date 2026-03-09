@@ -231,33 +231,29 @@ class AppRouter {
       case RouteNames.errandSummaryRoute:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => ErrandSummaryScreen(
-            errand: args?['errand'] as ErrandEntity,
-          ),
+          builder: (_) =>
+              ErrandSummaryScreen(errand: args?['errand'] as ErrandEntity),
         );
 
       case RouteNames.errandSearchingRoute:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => ErrandSearchingScreen(
-            errand: args?['errand'] as ErrandEntity,
-          ),
+          builder: (_) =>
+              ErrandSearchingScreen(errand: args?['errand'] as ErrandEntity),
         );
 
       case RouteNames.errandTrackingRoute:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => ErrandTrackingScreen(
-            errand: args?['errand'] as ErrandEntity,
-          ),
+          builder: (_) =>
+              ErrandTrackingScreen(errand: args?['errand'] as ErrandEntity),
         );
 
       case RouteNames.errandCompleteRoute:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => ErrandCompleteScreen(
-            errand: args?['errand'] as ErrandEntity,
-          ),
+          builder: (_) =>
+              ErrandCompleteScreen(errand: args?['errand'] as ErrandEntity),
         );
 
       case RouteNames.disputeDetailRoute:
@@ -271,9 +267,8 @@ class AppRouter {
       case RouteNames.errandDetailsRoute:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => ErrandDetailsScreen(
-            errandId: args?['errandId'] as String? ?? '',
-          ),
+          builder: (_) =>
+              ErrandDetailsScreen(errandId: args?['errandId'] as String? ?? ''),
         );
 
       case RouteNames.logisticsDeliveryDetailsRoute:
@@ -288,33 +283,6 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const NotFoundPage());
     }
   }
-
-  // static String getInitialRoute(BuildContext context) {
-  //   final authProvider = context.read<AuthProvider>();
-  //   final isAuthenticated = authProvider.isAuthenticated;
-  //   final isInitial = authProvider.state.isInitial;
-
-  //   if (isInitial) {
-  //     return '/';
-  //   }
-
-  //   return isAuthenticated ? RouteNames.dashboardRoute : RouteNames.loginRoute;
-  // }
-
-  // static bool canAccess(BuildContext context, String routeName) {
-  //   final authProvider = context.read<AuthProvider>();
-  //   final protectedRoutes = [
-  //     RouteNames.dashboardRoute,
-  //     // RouteNames.profileRoute,
-  //     // RouteNames.settingsRoute,
-  //   ];
-
-  //   if (protectedRoutes.contains(routeName)) {
-  //     return authProvider.isAuthenticated;
-  //   }
-
-  //   return true;
-  // }
 }
 
 class NotFoundPage extends StatelessWidget {

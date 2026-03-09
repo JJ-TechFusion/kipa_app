@@ -19,7 +19,6 @@ class DeviceInfoService {
       }
       return 'unknown-device';
     } catch (e) {
-      // Log the error for debugging
       debugPrint('DeviceInfoService error: $e');
       return 'error-device-id-${DateTime.now().millisecondsSinceEpoch}';
     }

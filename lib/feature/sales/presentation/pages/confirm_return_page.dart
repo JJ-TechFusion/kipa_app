@@ -235,7 +235,6 @@ class _ConfirmReturnPageState extends ConsumerState<ConfirmReturnPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Item condition section
             const BodyText('Item Condition', fontWeight: FontWeight.w600),
             verticalSpace(8),
             const BodySmall(
@@ -254,8 +253,6 @@ class _ConfirmReturnPageState extends ConsumerState<ConfirmReturnPage> {
               value: 'damaged',
               icon: Icons.warning_amber_rounded,
             ),
-
-            // Damage details section
             if (_selectedCondition == 'damaged') ...[
               verticalSpace(24),
               const BodyText('Damage Reason', fontWeight: FontWeight.w600),
@@ -266,8 +263,6 @@ class _ConfirmReturnPageState extends ConsumerState<ConfirmReturnPage> {
                 maxLines: 3,
               ),
               verticalSpace(24),
-
-              // Evidence section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -287,8 +282,6 @@ class _ConfirmReturnPageState extends ConsumerState<ConfirmReturnPage> {
                 color: AppColor.lightText,
               ),
               verticalSpace(16),
-
-              // Evidence grid
               if (_localImages.isNotEmpty) ...[
                 GridView.builder(
                   shrinkWrap: true,
@@ -372,8 +365,6 @@ class _ConfirmReturnPageState extends ConsumerState<ConfirmReturnPage> {
                 ),
                 verticalSpace(16),
               ],
-
-              // Add photo button
               GestureDetector(
                 onTap: _isUploading ? null : _showImageSourceDialog,
                 child: Container(
@@ -418,8 +409,6 @@ class _ConfirmReturnPageState extends ConsumerState<ConfirmReturnPage> {
                 ),
               ),
             ],
-
-            // Notes section
             verticalSpace(24),
             const BodyText('Notes (Optional)', fontWeight: FontWeight.w600),
             verticalSpace(8),
@@ -430,8 +419,6 @@ class _ConfirmReturnPageState extends ConsumerState<ConfirmReturnPage> {
             ),
 
             verticalSpace(40),
-
-            // Submit button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 42),
               child: CustomButton(

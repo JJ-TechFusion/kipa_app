@@ -103,7 +103,6 @@ class PaymentRemoteDataSource {
     );
 
     if (response.success && response.data != null) {
-      // response.data is already the inner data object {count, payment_requests}
       final dataMap = response.data as Map<String, dynamic>;
       return NetworkResponse(
         success: true,
