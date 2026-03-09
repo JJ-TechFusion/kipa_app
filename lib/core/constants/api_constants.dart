@@ -120,4 +120,7 @@ class ApiEndpoints {
 
   static String confirmLogisticsReturnUrl(String logisticsDeliveryId) =>
       '/logistics/$logisticsDeliveryId/confirm-return';
+  static const String supportConversationUrl = '/support';
+  static const String supportMessagesUrl = '/support/messages';
+  static const String supportMessagesReadUrl = '/support/messages/read';
 }

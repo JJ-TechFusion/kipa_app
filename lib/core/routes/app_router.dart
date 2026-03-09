@@ -219,6 +219,7 @@ class AppRouter {
             jobId: args?['jobId'] ?? '',
             participantName: args?['participantName'] ?? 'Chat',
             participantPhotoUrl: args?['participantPhotoUrl'],
+            showSenderNames: args?['showSenderNames'] ?? true,
           ),
         );
 

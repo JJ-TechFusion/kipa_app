@@ -162,6 +162,36 @@ class ChatMessageEntity {
   bool get isFromCustomer => senderType == 'customer';
   bool get isFromBuyer => senderType == 'buyer';
   bool get isFromSeller => senderType == 'seller';
+
+  ChatMessageEntity copyWith({
+    String? id,
+    String? senderId,
+    String? receiverId,
+    String? message,
+    String? mediaUrl,
+    String? mediaType,
+    String? status,
+    bool? isFromRider,
+    bool? isMe,
+    DateTime? timestamp,
+    String? senderName,
+    String? senderType,
+  }) {
+    return ChatMessageEntity(
+      id: id ?? this.id,
+      senderId: senderId ?? this.senderId,
+      receiverId: receiverId ?? this.receiverId,
+      message: message ?? this.message,
+      mediaUrl: mediaUrl ?? this.mediaUrl,
+      mediaType: mediaType ?? this.mediaType,
+      status: status ?? this.status,
+      isFromRider: isFromRider ?? this.isFromRider,
+      isMe: isMe ?? this.isMe,
+      timestamp: timestamp ?? this.timestamp,
+      senderName: senderName ?? this.senderName,
+      senderType: senderType ?? this.senderType,
+    );
+  }
 }
 
 class NearbyRiderEntity {

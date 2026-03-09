@@ -727,6 +727,7 @@ class _ErrandTrackingScreenState extends ConsumerState<ErrandTrackingScreen>
           'jobId': errand.deliveryJob!.id,
           'participantName': rider.name,
           'participantPhotoUrl': rider.photoUrl,
+          'showSenderNames': false,
         },
       );
     }

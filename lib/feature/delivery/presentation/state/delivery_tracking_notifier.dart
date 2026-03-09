@@ -141,7 +141,7 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
   void _handleChatMessage(Map<String, dynamic> data) {
     logMessage('DeliveryTracking', 'Received chat message data: $data');
 
-    final message = ChatMessageModel.fromJson(data);
+    var message = ChatMessageModel.fromJson(data);
     final myId = _currentUserId;
 
     logMessage(
@@ -151,6 +151,16 @@ class DeliveryTrackingNotifier extends Notifier<DeliveryTrackingState> {
     if (myId != null && message.senderId == myId) {
       logMessage('DeliveryTracking', 'Skipping own message');
       return;
+    }
+
+    // Enrich message with rider info if sender is the rider
+    final rider = state.job?.rider;
+    if (rider != null && message.senderId == rider.id) {
+      message = message.copyWith(
+        senderName: rider.name,
+        senderType: 'rider',
+        isFromRider: true,
+      );
     }
 
     final updatedMessages = [...state.messages, message];

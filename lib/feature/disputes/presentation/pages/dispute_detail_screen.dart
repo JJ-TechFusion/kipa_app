@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:kipa/core/shared/widgets/custom_snackbar.dart';
 import 'package:kipa/core/shared/widgets/custom_text.dart';
+import 'package:kipa/core/shared/widgets/widgets.dart';
+import 'package:kipa/feature/support/domain/entities/support_conversation_entity.dart';
+import 'package:kipa/feature/support/presentation/pages/support_chat_screen.dart';
+import 'package:kipa/feature/support/presentation/providers/support_provider.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/utils/constant.dart';
 import 'package:kipa/feature/disputes/presentation/providers/disputes_provider.dart';
@@ -17,6 +22,8 @@ class DisputeDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
+  bool _isOpeningSupportChat = false;
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +33,47 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
           .read(disputesNotifierProvider.notifier)
           .fetchDisputeById(widget.disputeId);
     });
+  }
+
+  Future<void> _openSupportChat() async {
+    if (_isOpeningSupportChat) return;
+
+    setState(() {
+      _isOpeningSupportChat = true;
+    });
+
+    final response = await ref
+        .read(getOrCreateSupportConversationUseCaseProvider)
+        .call();
+
+    if (!mounted) return;
+
+    setState(() {
+      _isOpeningSupportChat = false;
+    });
+
+    if (!response.success ||
+        response.data is! SupportConversationResponseEntity) {
+      CustomSnackBar.show(
+        context,
+        message: response.message.isEmpty
+            ? 'Failed to open support chat'
+            : response.message,
+        type: SnackBarType.error,
+      );
+      return;
+    }
+
+    final supportData = response.data as SupportConversationResponseEntity;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SupportChatScreen(
+          conversation: supportData.conversation,
+          activeDisputes: supportData.activeDisputes,
+        ),
+      ),
+    );
   }
 
   @override
@@ -339,6 +387,24 @@ class _DisputeDetailScreenState extends ConsumerState<DisputeDetailScreen> {
                       valueWeight: FontWeight.w600,
                     ),
                   ],
+                ),
+              ),
+              verticalSpace(16),
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 42),
+                  child: CustomButton(
+                    title: _isOpeningSupportChat
+                        ? 'Opening Support Chat...'
+                        : 'Chat with Support',
+                    onTap: _isOpeningSupportChat ? null : _openSupportChat,
+                    icon: Icons.support_agent,
+                    isLoading: _isOpeningSupportChat,
+                    color: AppColor.primary,
+                    textColor: Colors.white,
+                    borderRadius: 22,
+                  ),
                 ),
               ),
               verticalSpace(30),

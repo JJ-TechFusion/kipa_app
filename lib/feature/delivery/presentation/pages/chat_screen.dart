@@ -14,12 +14,14 @@ class ChatScreen extends ConsumerStatefulWidget {
   final String jobId;
   final String participantName;
   final String? participantPhotoUrl;
+  final bool showSenderNames;
 
   const ChatScreen({
     super.key,
     required this.jobId,
     required this.participantName,
     this.participantPhotoUrl,
+    this.showSenderNames = true,
   });
 
   @override
@@ -206,6 +208,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                 isMe:
                                     message.isMe ||
                                     message.senderId == currentUserId,
+                                showSenderName: widget.showSenderNames,
                               ),
                             ],
                           );
@@ -352,8 +355,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 class _ChatBubble extends StatelessWidget {
   final ChatMessageEntity message;
   final bool isMe;
+  final bool showSenderName;
 
-  const _ChatBubble({required this.message, required this.isMe});
+  const _ChatBubble({
+    required this.message,
+    required this.isMe,
+    this.showSenderName = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -391,7 +399,7 @@ class _ChatBubble extends StatelessWidget {
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
           children: [
-            if (!isMe)
+            if (!isMe && showSenderName)
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(

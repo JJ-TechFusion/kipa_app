@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:kipa/core/shared/widgets/custom_snackbar.dart';
 import 'package:kipa/core/shared/widgets/widgets.dart';
 import 'package:kipa/utils/constant.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/feature/support/presentation/pages/faq_screen.dart';
+import 'package:kipa/feature/support/presentation/pages/support_chat_screen.dart';
 import 'package:kipa/feature/disputes/domain/entities/dispute_entity.dart';
 import 'package:kipa/feature/disputes/presentation/providers/disputes_provider.dart';
 import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/feature/disputes/presentation/pages/disputes_list_screen.dart';
+import 'package:kipa/feature/support/domain/entities/support_conversation_entity.dart';
+import 'package:kipa/core/routes/route_names.dart';
 
-import '../../../../core/routes/route_names.dart';
+import '../providers/support_provider.dart';
 
 class SupportScreen extends ConsumerStatefulWidget {
   const SupportScreen({super.key});
@@ -23,6 +27,7 @@ class SupportScreen extends ConsumerStatefulWidget {
 class _SupportScreenState extends ConsumerState<SupportScreen> {
   static const _supportEmail = 'support@getkipa.com';
   static const _supportPhone = '+2349000000000';
+  bool _isOpeningSupportChat = false;
 
   @override
   void initState() {
@@ -49,6 +54,47 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
+  }
+
+  Future<void> _openSupportChat() async {
+    if (_isOpeningSupportChat) return;
+
+    setState(() {
+      _isOpeningSupportChat = true;
+    });
+
+    final response = await ref
+        .read(getOrCreateSupportConversationUseCaseProvider)
+        .call();
+
+    if (!mounted) return;
+
+    setState(() {
+      _isOpeningSupportChat = false;
+    });
+
+    if (!response.success ||
+        response.data is! SupportConversationResponseEntity) {
+      CustomSnackBar.show(
+        context,
+        message: response.message.isEmpty
+            ? 'Failed to open support chat'
+            : response.message,
+        type: SnackBarType.error,
+      );
+      return;
+    }
+
+    final supportData = response.data as SupportConversationResponseEntity;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SupportChatScreen(
+          conversation: supportData.conversation,
+          activeDisputes: supportData.activeDisputes,
+        ),
+      ),
+    );
   }
 
   @override
@@ -177,6 +223,14 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                       ),
                     ],
                   ],
+                  const SizedBox(height: 10),
+                  _buildNavRow(
+                    context,
+                    icon: Icons.support_agent,
+                    title: 'Chat with Support',
+                    onTap: _openSupportChat,
+                    isLoading: _isOpeningSupportChat,
+                  ),
                   const SizedBox(height: 30),
 
                   _buildNavRow(
@@ -245,9 +299,10 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    bool isLoading = false,
   }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         decoration: BoxDecoration(
@@ -259,11 +314,21 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
             Icon(icon, size: 20, color: AppColor.primary),
             const SizedBox(width: 12),
             Expanded(child: BodySmall(title, fontWeight: FontWeight.w500)),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 14,
-              color: AppColor.lightText,
-            ),
+            if (isLoading)
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColor.lightText,
+                ),
+              )
+            else
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: AppColor.lightText,
+              ),
           ],
         ),
       ),
