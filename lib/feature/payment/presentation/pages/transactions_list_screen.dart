@@ -231,7 +231,7 @@ class _TransactionsListScreenState
             if (transaction.isSeller) ...[
               if (isInterState) ...[
                 if (status.canMarkReady &&
-                    transaction.deliveryJobId != null) ...[
+                    transaction.logisticsDeliveryId != null) ...[
                   verticalSpace(16),
                   _buildMarkAsShippedButton(transaction),
                 ],
@@ -295,16 +295,24 @@ class _TransactionsListScreenState
       case 'awaiting_payment':
         return const Color(0xFFF59E0B);
       case 'paid':
+      case 'paid_awaiting_fulfillment':
+      case 'ready_for_pickup':
+      case 'searching_rider':
+      case 'rider_assigned':
       case 'in_transit':
+      case 'in_delivery':
       case 'processing':
         return AppColor.primary;
-      case 'completed':
       case 'delivered':
+      case 'confirmation_window':
+        return const Color(0xFF10B981).withAlpha(200);
+      case 'completed':
         return const Color(0xFF10B981);
       case 'refunded':
         return const Color(0xFF8B5CF6);
       case 'cancelled':
       case 'disputed':
+      case 'no_rider_found':
         return const Color(0xFFEF4444);
       default:
         return AppColor.kipaGrey;
@@ -321,7 +329,7 @@ class _TransactionsListScreenState
             context,
             RouteNames.shipLogisticsFormRoute,
             arguments: {
-              'logisticsDeliveryId': transaction.deliveryJobId,
+              'logisticsDeliveryId': transaction.logisticsDeliveryId,
               'paymentRequestId': transaction.paymentRequestId,
             },
           ).then((result) {

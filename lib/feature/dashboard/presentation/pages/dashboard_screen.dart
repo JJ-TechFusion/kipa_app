@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/feature/dashboard/presentation/provider/dashboard_provider.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/active_deliveries_list.dart';
 import 'package:kipa/feature/dashboard/presentation/widgets/balance_card.dart';
@@ -25,6 +26,7 @@ import '../../../sales/presentation/providers/sales_provider.dart';
 import '../../../errand/presentation/providers/errand_provider.dart';
 import '../../../errand/presentation/widgets/active_errand_card.dart';
 import '../../../errand/domain/enums/errand_status.dart';
+import '../../../disputes/presentation/providers/disputes_provider.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -62,6 +64,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         break;
       case 2: // Kipa Protect (Transactions) tab
         ref.read(transactionsListNotifierProvider.notifier).fetchTransactions();
+        break;
+      case 3: // Support tab
+        ref.read(disputesNotifierProvider.notifier).fetchDisputes();
         break;
     }
   }
@@ -119,6 +124,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             'status': delivery.riderStatusText,
             'deliveryJobId': delivery.deliveryJobId,
             'paymentRequestId': delivery.paymentRequestId,
+            'isBuyer': delivery.isBuyer,
             'timestamp': dateFormat.format(timestamp),
             'buyerRole': delivery.counterparty.role,
           };
@@ -230,53 +236,75 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               },
                             ),
                             verticalSpace(24),
-                            if (errandState.activeErrand != null &&
-                                errandState.activeErrand!.status.isActive &&
-                                errandState.activeErrand!.status !=
-                                    ErrandStatus.draft) ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 0,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const BodyText(
+                                  'Active Deliveries',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
                                 ),
-                                child: ActiveErrandCard(
-                                  errand: errandState.activeErrand!,
+                                GestureDetector(
                                   onTap: () {
-                                    final status =
-                                        errandState.activeErrand!.status;
-                                    if (status == ErrandStatus.searching) {
-                                      Navigator.pushNamed(
-                                        context,
-                                        RouteNames.errandSearchingRoute,
-                                        arguments: {
-                                          'errand': errandState.activeErrand,
-                                        },
-                                      );
-                                    } else if (status ==
-                                        ErrandStatus.delivered) {
-                                      Navigator.pushNamed(
-                                        context,
-                                        RouteNames.errandCompleteRoute,
-                                        arguments: {
-                                          'errand': errandState.activeErrand,
-                                        },
-                                      );
-                                    } else if (status.hasRider) {
-                                      Navigator.pushNamed(
-                                        context,
-                                        RouteNames.errandTrackingRoute,
-                                        arguments: {
-                                          'errand': errandState.activeErrand,
-                                        },
-                                      );
-                                    }
+                                    controller.setBottomNavIndex(1);
+                                    _refreshTabData(1);
                                   },
+                                  child: const BodySmall(
+                                    'View all',
+                                    color: AppColor.lightText,
+                                  ),
                                 ),
-                              ),
-                              verticalSpace(24),
-                            ],
+                              ],
+                            ),
+                            verticalSpace(16),
                             ActiveDeliveriesList(
                               deliveries: activeDeliveries,
                               onViewAllTap: () {},
+                              topContent:
+                                  errandState.activeErrand != null &&
+                                      errandState
+                                          .activeErrand!
+                                          .status
+                                          .isActive &&
+                                      errandState.activeErrand!.status !=
+                                          ErrandStatus.draft
+                                  ? ActiveErrandCard(
+                                      errand: errandState.activeErrand!,
+                                      onTap: () {
+                                        final status =
+                                            errandState.activeErrand!.status;
+                                        if (status == ErrandStatus.searching) {
+                                          Navigator.pushNamed(
+                                            context,
+                                            RouteNames.errandSearchingRoute,
+                                            arguments: {
+                                              'errand':
+                                                  errandState.activeErrand,
+                                            },
+                                          );
+                                        } else if (status ==
+                                            ErrandStatus.delivered) {
+                                          Navigator.pushNamed(
+                                            context,
+                                            RouteNames.errandCompleteRoute,
+                                            arguments: {
+                                              'errand':
+                                                  errandState.activeErrand,
+                                            },
+                                          );
+                                        } else if (status.hasRider) {
+                                          Navigator.pushNamed(
+                                            context,
+                                            RouteNames.errandTrackingRoute,
+                                            arguments: {
+                                              'errand':
+                                                  errandState.activeErrand,
+                                            },
+                                          );
+                                        }
+                                      },
+                                    )
+                                  : null,
                               onDeliveryTap: (index) {
                                 final delivery = activeDeliveries[index];
                                 if (delivery['deliveryJobId'] != null) {
@@ -286,11 +314,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                     arguments: {
                                       'deliveryJobId':
                                           delivery['deliveryJobId'],
+                                      'paymentRequestId':
+                                          delivery['paymentRequestId'],
+                                      'isBuyer': delivery['isBuyer'] ?? true,
                                     },
                                   );
                                 }
                               },
                             ),
+                            verticalSpace(24),
                           ],
                         ),
                       ),

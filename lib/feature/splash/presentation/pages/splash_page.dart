@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/routes/route_names.dart';
 import '../../../../core/services/notification/notification_service.dart';
 import '../../../../core/services/notification/notification_remote_datasource.dart';
+import '../../../../core/services/storage/secure_storage.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../utils/constant.dart';
+import '../../../../utils/session_utils.dart';
 import '../providers/splash_provider.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -25,6 +27,14 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
+
+    // Check if token expired (401 triggered logout) and clear session data
+    final secureStorage = getIt<SecureStorageService>();
+    final tokenExpired = await secureStorage.readData('tokenExpired');
+    if (tokenExpired == 'true') {
+      clearUserSession(ref);
+      await secureStorage.deleteData('tokenExpired');
+    }
 
     final appState = await ref.read(appStateProvider.future);
 

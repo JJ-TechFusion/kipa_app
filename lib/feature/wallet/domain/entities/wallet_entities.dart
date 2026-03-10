@@ -56,6 +56,7 @@ class VerifyTopUpResponseEntity {
 class WalletTransactionEntity {
   final String id;
   final String type;
+  final String status;
   final double amount;
   final double balanceAfter;
   final String referenceType;
@@ -66,6 +67,7 @@ class WalletTransactionEntity {
   WalletTransactionEntity({
     required this.id,
     required this.type,
+    this.status = '',
     required this.amount,
     required this.balanceAfter,
     required this.referenceType,
@@ -117,6 +119,31 @@ class WalletTransactionEntity {
 
   String get displayTitle =>
       description.isNotEmpty ? description : formattedType;
+
+  String get formattedStatus {
+    if (status.isEmpty) return '';
+    switch (status) {
+      case 'successful':
+        return 'Successful';
+      case 'success':
+        return 'Successful';
+      case 'pending':
+        return 'Pending';
+      case 'failed':
+        return 'Failed';
+      case 'processing':
+        return 'Processing';
+      default:
+        return status
+            .replaceAll('_', ' ')
+            .split(' ')
+            .map(
+              (w) =>
+                  w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '',
+            )
+            .join(' ');
+    }
+  }
 }
 
 class WalletTransactionListEntity {

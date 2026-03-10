@@ -6,6 +6,7 @@ import 'package:kipa/feature/auth/presentation/providers/auth_provider.dart';
 import 'package:kipa/theme/app_colors.dart';
 import 'package:kipa/core/routes/route_names.dart';
 import 'package:kipa/utils/constant.dart';
+import 'package:kipa/utils/session_utils.dart';
 import 'package:kipa/feature/profile/presentation/pages/security_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -32,6 +33,8 @@ class ProfileScreen extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
+      // Clear all user-specific cached data before logout
+      clearUserSession(ref);
       await ref.read(authNotifierProvider.notifier).logout();
       if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(
@@ -66,6 +69,8 @@ class ProfileScreen extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
+      // Clear all user-specific cached data before account deletion
+      clearUserSession(ref);
       final success = await ref
           .read(authNotifierProvider.notifier)
           .deleteAccount();

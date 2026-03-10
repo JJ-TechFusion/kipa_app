@@ -183,6 +183,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => DeliveryDetailsScreen(
             deliveryJobId: args?['deliveryJobId'] ?? '',
+            paymentRequestId: args?['paymentRequestId'],
             purchaseId: args?['purchaseId'],
             saleId: args?['saleId'],
             isBuyer: args?['isBuyer'] ?? true,

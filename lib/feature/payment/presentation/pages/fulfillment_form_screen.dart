@@ -32,11 +32,43 @@ class _FulfillmentFormScreenState extends ConsumerState<FulfillmentFormScreen> {
   bool _dropoffSelected = false;
 
   static const List<String> _nigerianStates = [
-    'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
-    'Borno', 'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu',
-    'FCT', 'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi',
-    'Kogi', 'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun',
-    'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba', 'Yobe', 'Zamfara',
+    'Abia',
+    'Adamawa',
+    'Akwa Ibom',
+    'Anambra',
+    'Bauchi',
+    'Bayelsa',
+    'Benue',
+    'Borno',
+    'Cross River',
+    'Delta',
+    'Ebonyi',
+    'Edo',
+    'Ekiti',
+    'Enugu',
+    'FCT',
+    'Gombe',
+    'Imo',
+    'Jigawa',
+    'Kaduna',
+    'Kano',
+    'Katsina',
+    'Kebbi',
+    'Kogi',
+    'Kwara',
+    'Lagos',
+    'Nasarawa',
+    'Niger',
+    'Ogun',
+    'Ondo',
+    'Osun',
+    'Oyo',
+    'Plateau',
+    'Rivers',
+    'Sokoto',
+    'Taraba',
+    'Yobe',
+    'Zamfara',
   ];
 
   bool get _isInterState => _deliveryType == 'inter_state';
@@ -53,7 +85,7 @@ class _FulfillmentFormScreenState extends ConsumerState<FulfillmentFormScreen> {
       return;
     }
 
-    if (!_pickupSelected || !_dropoffSelected) {
+    if (!_isInterState && (!_pickupSelected || !_dropoffSelected)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select pickup and dropoff addresses'),
@@ -65,7 +97,9 @@ class _FulfillmentFormScreenState extends ConsumerState<FulfillmentFormScreen> {
     if (_isInterState && (_pickupState == null || _dropoffState == null)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select pickup and dropoff states for interstate delivery'),
+          content: Text(
+            'Please select pickup and dropoff states for interstate delivery',
+          ),
         ),
       );
       return;
@@ -144,24 +178,26 @@ class _FulfillmentFormScreenState extends ConsumerState<FulfillmentFormScreen> {
             ),
             verticalSpace(16),
 
-            AddressAutocompleteField(
-              label: 'Pickup Address',
-              hintText: 'Enter pickup address',
-              googleApiKey: _googleMapsApiKey,
-              onPlaceSelected: (location) {
-                paymentNotifier.setPickupLocation(location);
-                setState(() => _pickupSelected = true);
-              },
-            ),
-            if (_pickupSelected && paymentState.pickupLocation != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: BodySmall(
-                  '✓ Location selected: ${paymentState.pickupLocation!.latitude.toStringAsFixed(4)}, ${paymentState.pickupLocation!.longitude.toStringAsFixed(4)}',
-                  color: Colors.green,
-                ),
+            if (!_isInterState) ...[
+              AddressAutocompleteField(
+                label: 'Pickup Address',
+                hintText: 'Enter pickup address',
+                googleApiKey: _googleMapsApiKey,
+                onPlaceSelected: (location) {
+                  paymentNotifier.setPickupLocation(location);
+                  setState(() => _pickupSelected = true);
+                },
               ),
-            verticalSpace(16),
+              if (_pickupSelected && paymentState.pickupLocation != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: BodySmall(
+                    '✓ Location selected: ${paymentState.pickupLocation!.latitude.toStringAsFixed(4)}, ${paymentState.pickupLocation!.longitude.toStringAsFixed(4)}',
+                    color: Colors.green,
+                  ),
+                ),
+              verticalSpace(16),
+            ],
 
             if (_isInterState) ...[
               DropDownWidget(
@@ -176,24 +212,26 @@ class _FulfillmentFormScreenState extends ConsumerState<FulfillmentFormScreen> {
               verticalSpace(16),
             ],
 
-            AddressAutocompleteField(
-              label: 'Dropoff Address',
-              hintText: 'Enter dropoff address',
-              googleApiKey: _googleMapsApiKey,
-              onPlaceSelected: (location) {
-                paymentNotifier.setDropoffLocation(location);
-                setState(() => _dropoffSelected = true);
-              },
-            ),
-            if (_dropoffSelected && paymentState.dropoffLocation != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: BodySmall(
-                  '✓ Location selected: ${paymentState.dropoffLocation!.latitude.toStringAsFixed(4)}, ${paymentState.dropoffLocation!.longitude.toStringAsFixed(4)}',
-                  color: Colors.green,
-                ),
+            if (!_isInterState) ...[
+              AddressAutocompleteField(
+                label: 'Dropoff Address',
+                hintText: 'Enter dropoff address',
+                googleApiKey: _googleMapsApiKey,
+                onPlaceSelected: (location) {
+                  paymentNotifier.setDropoffLocation(location);
+                  setState(() => _dropoffSelected = true);
+                },
               ),
-            verticalSpace(16),
+              if (_dropoffSelected && paymentState.dropoffLocation != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: BodySmall(
+                    '✓ Location selected: ${paymentState.dropoffLocation!.latitude.toStringAsFixed(4)}, ${paymentState.dropoffLocation!.longitude.toStringAsFixed(4)}',
+                    color: Colors.green,
+                  ),
+                ),
+              verticalSpace(16),
+            ],
 
             if (_isInterState) ...[
               DropDownWidget(

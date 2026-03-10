@@ -58,124 +58,142 @@ class _FulfillmentSuccessScreenState
           elevation: 0,
           backgroundColor: Colors.transparent,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20),
+        body: SafeArea(
           child: Column(
             children: [
-              verticalSpace(40),
-              SizedBox(
-                width: 120,
-                height: 120,
-                child: Image.asset(
-                  "assets/images/success.png",
-                  fit: BoxFit.contain,
-                ),
-              ),
-              verticalSpace(32),
-              const BodyText(
-                'Request created successfully!',
-                fontWeight: FontWeight.w500,
-              ),
-              verticalSpace(8),
-              const BodySmall(
-                'Share this payment code with your buyer to activate Kipa Protect',
-                textAlign: TextAlign.center,
-                color: AppColor.lightText,
-              ),
-              if (fulfillmentResponse != null) ...[
-                verticalSpace(16),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColor.pendingBalanceBackground,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      _buildInfoRow('Item', fulfillmentResponse.itemName),
-                      _buildInfoRow(
-                        'Delivery Fee',
-                        '₦${fulfillmentResponse.estimatedDeliveryFee.toStringAsFixed(2)}',
+                      verticalSpace(40),
+                      SizedBox(
+                        width: 120,
+                        height: 120,
+                        child: Image.asset(
+                          "assets/images/success.png",
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                      _buildInfoRow(
-                        'Total',
-                        '₦${fulfillmentResponse.estimatedTotal.toStringAsFixed(2)}',
+                      verticalSpace(32),
+                      const BodyText(
+                        'Request created successfully!',
+                        fontWeight: FontWeight.w500,
                       ),
+                      verticalSpace(8),
+                      const BodySmall(
+                        'Share this payment code with your buyer to activate Kipa Protect',
+                        textAlign: TextAlign.center,
+                        color: AppColor.lightText,
+                      ),
+                      if (fulfillmentResponse != null) ...[
+                        verticalSpace(16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColor.pendingBalanceBackground,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            children: [
+                              _buildInfoRow(
+                                'Item',
+                                fulfillmentResponse.itemName,
+                              ),
+                              _buildInfoRow(
+                                'Delivery Fee',
+                                '₦${fulfillmentResponse.estimatedDeliveryFee.toStringAsFixed(2)}',
+                              ),
+                              _buildInfoRow(
+                                'Total',
+                                '₦${fulfillmentResponse.estimatedTotal.toStringAsFixed(2)}',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      verticalSpace(24),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AppColor.kipaGrey.withAlpha(50),
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: const BoxDecoration(
+                                color: AppColor.pendingBalanceBackground,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.numbers,
+                                color: AppColor.primary,
+                              ),
+                            ),
+                            verticalSpace(16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColor.linkCopyBackground,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      paymentCode,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 13),
+                                    ),
+                                  ),
+                                  horizontalSpace(8),
+                                  GestureDetector(
+                                    onTap: () => _copyCode(paymentCode),
+                                    child: const Icon(
+                                      Icons.copy,
+                                      size: 18,
+                                      color: AppColor.kipaGrey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            verticalSpace(16),
+                            CustomButton(
+                              title: 'Copy Code',
+                              icon: Icons.copy,
+                              onTap: () => _copyCode(paymentCode),
+                              borderRadius: 12,
+                              size: 14,
+                            ),
+                          ],
+                        ),
+                      ),
+                      verticalSpace(24),
                     ],
                   ),
                 ),
-              ],
-              verticalSpace(24),
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColor.kipaGrey.withAlpha(50)),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: const BoxDecoration(
-                        color: AppColor.pendingBalanceBackground,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.numbers, color: AppColor.primary),
-                    ),
-                    verticalSpace(16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColor.linkCopyBackground,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              paymentCode,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                          ),
-                          horizontalSpace(8),
-                          GestureDetector(
-                            onTap: () => _copyCode(paymentCode),
-                            child: const Icon(
-                              Icons.copy,
-                              size: 18,
-                              color: AppColor.kipaGrey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    verticalSpace(16),
-                    CustomButton(
-                      title: 'Copy Code',
-                      icon: Icons.copy,
-                      onTap: () => _copyCode(paymentCode),
-                      borderRadius: 12,
-                      size: 14,
-                    ),
-                  ],
-                ),
               ),
-              const Spacer(),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 52,
+                  vertical: 20,
+                ),
                 child: AnimatedButton(
                   onTap: _onBackToHome,
                   child: CustomButton(title: 'Back to Home', borderRadius: 30),
                 ),
               ),
-              verticalSpace(20),
             ],
           ),
         ),

@@ -7,54 +7,44 @@ class ActiveDeliveriesList extends StatelessWidget {
   final List<Map<String, dynamic>> deliveries;
   final VoidCallback onViewAllTap;
   final Function(int) onDeliveryTap;
+  final Widget? topContent;
 
   const ActiveDeliveriesList({
     super.key,
     required this.deliveries,
     required this.onViewAllTap,
     required this.onDeliveryTap,
+    this.topContent,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (deliveries.isEmpty) {
+    if (deliveries.isEmpty && topContent == null) {
       return _buildEmptyState();
     }
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const BodyText(
-              'Active Deliveries',
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
+        if (topContent != null) ...[topContent!, const SizedBox(height: 16)],
+        if (deliveries.isNotEmpty)
+          SizedBox(
+            height: 190,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: deliveries.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 16),
+              itemBuilder: (context, index) {
+                return SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.92,
+                  child: ActiveDeliveryCard(
+                    deliveryData: deliveries[index],
+                    onTap: () => onDeliveryTap(index),
+                  ),
+                );
+              },
             ),
-            GestureDetector(
-              onTap: onViewAllTap,
-              child: const BodySmall('View all', color: AppColor.lightText),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 190,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: deliveries.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 16),
-            itemBuilder: (context, index) {
-              return SizedBox(
-                width: MediaQuery.of(context).size.width * 0.92,
-                child: ActiveDeliveryCard(
-                  deliveryData: deliveries[index],
-                  onTap: () => onDeliveryTap(index),
-                ),
-              );
-            },
           ),
-        ),
       ],
     );
   }

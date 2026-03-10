@@ -70,6 +70,7 @@ class WalletTransactionModel extends WalletTransactionEntity {
   WalletTransactionModel({
     required super.id,
     required super.type,
+    super.status,
     required super.amount,
     required super.balanceAfter,
     required super.referenceType,
@@ -82,6 +83,7 @@ class WalletTransactionModel extends WalletTransactionEntity {
     return WalletTransactionModel(
       id: json['id'] ?? '',
       type: json['type'] ?? '',
+      status: json['status'] ?? '',
       amount: (json['amount'] ?? 0).toDouble(),
       balanceAfter: (json['balance_after'] ?? 0).toDouble(),
       referenceType: json['reference_type'] ?? '',

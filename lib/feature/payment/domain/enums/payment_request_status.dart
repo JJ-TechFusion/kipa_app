@@ -39,6 +39,7 @@ enum PaymentRequestStatus {
         return PaymentRequestStatus.searchingRider;
       case 'rider_assigned':
         return PaymentRequestStatus.riderAssigned;
+      case 'in_transit':
       case 'in_delivery':
         return PaymentRequestStatus.inDelivery;
       case 'delivered':

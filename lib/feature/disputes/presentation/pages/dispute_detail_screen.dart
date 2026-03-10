@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:kipa/core/shared/widgets/custom_snackbar.dart';
-import 'package:kipa/core/shared/widgets/custom_text.dart';
 import 'package:kipa/core/shared/widgets/widgets.dart';
 import 'package:kipa/feature/support/domain/entities/support_conversation_entity.dart';
 import 'package:kipa/feature/support/presentation/pages/support_chat_screen.dart';

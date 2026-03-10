@@ -2,25 +2,25 @@ import '../../../location/domain/entities/fulfillment_entity.dart';
 
 class CreateFulfillmentModel {
   final String deliveryType;
-  final String pickupAddress;
-  final double pickupLat;
-  final double pickupLng;
+  final String? pickupAddress;
+  final double? pickupLat;
+  final double? pickupLng;
   final String? pickupState;
-  final String dropoffAddress;
-  final double dropoffLat;
-  final double dropoffLng;
+  final String? dropoffAddress;
+  final double? dropoffLat;
+  final double? dropoffLng;
   final String? dropoffState;
   final String vehicleType;
 
   const CreateFulfillmentModel({
     required this.deliveryType,
-    required this.pickupAddress,
-    required this.pickupLat,
-    required this.pickupLng,
+    this.pickupAddress,
+    this.pickupLat,
+    this.pickupLng,
     this.pickupState,
-    required this.dropoffAddress,
-    required this.dropoffLat,
-    required this.dropoffLng,
+    this.dropoffAddress,
+    this.dropoffLat,
+    this.dropoffLng,
     this.dropoffState,
     required this.vehicleType,
   });
@@ -43,14 +43,14 @@ class CreateFulfillmentModel {
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{
       'delivery_type': deliveryType,
-      'pickup_address': pickupAddress,
-      'pickup_lat': pickupLat,
-      'pickup_lng': pickupLng,
-      'dropoff_address': dropoffAddress,
-      'dropoff_lat': dropoffLat,
-      'dropoff_lng': dropoffLng,
       'vehicle_type': vehicleType,
     };
+    if (pickupAddress != null) map['pickup_address'] = pickupAddress;
+    if (pickupLat != null) map['pickup_lat'] = pickupLat;
+    if (pickupLng != null) map['pickup_lng'] = pickupLng;
+    if (dropoffAddress != null) map['dropoff_address'] = dropoffAddress;
+    if (dropoffLat != null) map['dropoff_lat'] = dropoffLat;
+    if (dropoffLng != null) map['dropoff_lng'] = dropoffLng;
     if (pickupState != null) map['pickup_state'] = pickupState;
     if (dropoffState != null) map['dropoff_state'] = dropoffState;
     return map;

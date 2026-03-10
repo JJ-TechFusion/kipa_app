@@ -26,6 +26,8 @@ class WalletScreen extends ConsumerStatefulWidget {
 }
 
 class _WalletScreenState extends ConsumerState<WalletScreen> {
+  bool _hideVirtualAccountPromptForSession = false;
+
   @override
   void initState() {
     super.initState();
@@ -76,6 +78,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   }
 
   void _showCreateVirtualAccountSheet() {
+    setState(() {
+      _hideVirtualAccountPromptForSession = true;
+    });
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -87,7 +93,17 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     );
   }
 
-  Future<void> _declineVirtualAccount() async {
+  void _dismissVirtualAccountPrompt() {
+    setState(() {
+      _hideVirtualAccountPromptForSession = true;
+    });
+  }
+
+  Future<void> _handleVirtualAccountDecline(bool dontShowAgain) async {
+    _dismissVirtualAccountPrompt();
+
+    if (!dontShowAgain) return;
+
     final walletNotifier = ref.read(walletNotifierProvider.notifier);
     await walletNotifier.declineVirtualAccount();
   }
@@ -101,8 +117,12 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
 
     final showVirtualAccountPrompt =
         virtualAccountStatus != null &&
+        !walletState.isFetchingVirtualAccountStatus &&
+        virtualAccount == null &&
+        virtualAccountStatus.account == null &&
         !virtualAccountStatus.hasAccount &&
-        !virtualAccountStatus.declined;
+        !virtualAccountStatus.declined &&
+        !_hideVirtualAccountPromptForSession;
 
     return Scaffold(
       appBar: AppBar(
@@ -190,7 +210,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       bottomNavigationBar: showVirtualAccountPrompt
           ? _VirtualAccountPromptBar(
               onAccept: _showCreateVirtualAccountSheet,
-              onDecline: _declineVirtualAccount,
+              onDecline: _handleVirtualAccountDecline,
               isLoading: walletState.isDecliningVirtualAccount,
             )
           : null,
@@ -776,6 +796,7 @@ class _TransactionHistoryList extends ConsumerWidget {
           amount: formattedAmount,
           isCredit: tx.isCredit,
           icon: tx.icon,
+          status: tx.formattedStatus,
         );
       }).toList(),
     );
@@ -788,6 +809,7 @@ class _TransactionTile extends StatelessWidget {
   final String amount;
   final bool isCredit;
   final IconData icon;
+  final String status;
 
   const _TransactionTile({
     required this.title,
@@ -795,6 +817,7 @@ class _TransactionTile extends StatelessWidget {
     required this.amount,
     required this.isCredit,
     this.icon = Icons.account_balance_wallet_outlined,
+    this.status = '',
   });
 
   @override
@@ -829,6 +852,24 @@ class _TransactionTile extends StatelessWidget {
                 BodySmall(title, fontWeight: FontWeight.w500),
                 verticalSpace(4),
                 Caption(date),
+                if (status.isNotEmpty) ...[
+                  verticalSpace(8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _statusBackgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Overline(
+                      status,
+                      color: _statusTextColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -840,6 +881,34 @@ class _TransactionTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color get _statusBackgroundColor {
+    switch (status.toLowerCase()) {
+      case 'successful':
+        return const Color(0xFFE8F5E9);
+      case 'failed':
+        return const Color(0xFFFFEBEE);
+      case 'pending':
+      case 'processing':
+        return const Color(0xFFFFF4E5);
+      default:
+        return const Color(0xFFE8EAF6);
+    }
+  }
+
+  Color get _statusTextColor {
+    switch (status.toLowerCase()) {
+      case 'successful':
+        return AppColor.green;
+      case 'failed':
+        return AppColor.errorColor;
+      case 'pending':
+      case 'processing':
+        return const Color(0xFFB26A00);
+      default:
+        return AppColor.primary;
+    }
   }
 }
 
@@ -925,14 +994,13 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
       return;
     }
 
-    Navigator.pop(context);
-
     final success = await ref
         .read(walletNotifierProvider.notifier)
         .withdraw(_selectedBankAccountId!, amount);
 
     if (mounted) {
       if (success) {
+        Navigator.pop(context);
         CustomSnackBar.show(
           context,
           message: 'Withdrawal initiated successfully',
@@ -986,6 +1054,27 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
             verticalSpace(8),
             const Caption("Enter the amount to withdraw"),
             verticalSpace(24),
+            if (walletState.errorMessage != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColor.errorColor.withAlpha(18),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Caption(
+                    walletState.errorMessage!,
+                    color: AppColor.errorColor,
+                  ),
+                ),
+              ),
+              verticalSpace(16),
+            ],
             if (bankAccountsState.isFetchingBankAccounts)
               const CircularProgressIndicator()
             else if (bankAccounts.isEmpty)
@@ -1201,9 +1290,9 @@ class _VirtualAccountCard extends StatelessWidget {
   }
 }
 
-class _VirtualAccountPromptBar extends StatelessWidget {
+class _VirtualAccountPromptBar extends StatefulWidget {
   final VoidCallback onAccept;
-  final VoidCallback onDecline;
+  final Future<void> Function(bool dontShowAgain) onDecline;
   final bool isLoading;
 
   const _VirtualAccountPromptBar({
@@ -1211,6 +1300,14 @@ class _VirtualAccountPromptBar extends StatelessWidget {
     required this.onDecline,
     this.isLoading = false,
   });
+
+  @override
+  State<_VirtualAccountPromptBar> createState() =>
+      _VirtualAccountPromptBarState();
+}
+
+class _VirtualAccountPromptBarState extends State<_VirtualAccountPromptBar> {
+  bool _dontShowAgain = false;
 
   @override
   Widget build(BuildContext context) {
@@ -1265,9 +1362,34 @@ class _VirtualAccountPromptBar extends StatelessWidget {
             verticalSpace(16),
             Row(
               children: [
+                Checkbox(
+                  value: _dontShowAgain,
+                  onChanged: widget.isLoading
+                      ? null
+                      : (value) {
+                          setState(() {
+                            _dontShowAgain = value ?? false;
+                          });
+                        },
+                  activeColor: AppColor.primary,
+                  visualDensity: VisualDensity.compact,
+                ),
+                const Expanded(
+                  child: Caption(
+                    "Don't show this again",
+                    color: AppColor.primaryText,
+                  ),
+                ),
+              ],
+            ),
+            verticalSpace(8),
+            Row(
+              children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: isLoading ? null : onDecline,
+                    onPressed: widget.isLoading
+                        ? null
+                        : () => widget.onDecline(_dontShowAgain),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: BorderSide(color: Colors.grey.shade300),
@@ -1275,7 +1397,7 @@ class _VirtualAccountPromptBar extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: isLoading
+                    child: widget.isLoading
                         ? const SizedBox(
                             width: 20,
                             height: 20,
@@ -1287,7 +1409,7 @@ class _VirtualAccountPromptBar extends StatelessWidget {
                 horizontalSpace(12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: isLoading ? null : onAccept,
+                    onPressed: widget.isLoading ? null : widget.onAccept,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColor.primary,
                       padding: const EdgeInsets.symmetric(vertical: 12),

@@ -269,44 +269,52 @@ class _ErrandCompleteScreenState extends ConsumerState<ErrandCompleteScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.green.withAlpha(25),
-                  shape: BoxShape.circle,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    verticalSpace(120),
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.green.withAlpha(25),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Image.asset("assets/images/success.png"),
+                    ),
+                    verticalSpace(32),
+                    const H4(
+                      'Delivery Complete!',
+                      color: AppColor.darkPrimary,
+                      textAlign: TextAlign.center,
+                    ),
+                    verticalSpace(12),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 32),
+                      child: BodySmall(
+                        'Your package has been delivered successfully. Thank you for using Kipa!',
+                        textAlign: TextAlign.center,
+                        color: AppColor.lightText,
+                      ),
+                    ),
+                  ],
                 ),
-                child: Image.asset("assets/images/success.png"),
               ),
-              verticalSpace(32),
-              const H4(
-                'Delivery Complete!',
-                color: AppColor.darkPrimary,
-                textAlign: TextAlign.center,
-              ),
-              verticalSpace(12),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32),
-                child: BodySmall(
-                  'Your package has been delivered successfully. Thank you for using Kipa!',
-                  textAlign: TextAlign.center,
-                  color: AppColor.lightText,
-                ),
-              ),
-              verticalSpace(48),
-              AnimatedButton(
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 52, vertical: 20),
+              child: AnimatedButton(
                 onTap: () {
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
                 child: CustomButton(title: "Back to Home", borderRadius: 20),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -56,7 +56,9 @@ class _AddBankAccountScreenState extends ConsumerState<AddBankAccountScreen> {
       return;
     }
 
-    final resolvedAccount = ref.read(bankAccountsNotifierProvider).resolvedAccount;
+    final resolvedAccount = ref
+        .read(bankAccountsNotifierProvider)
+        .resolvedAccount;
     if (resolvedAccount == null) {
       CustomSnackBar.show(
         context,
@@ -124,6 +126,19 @@ class _AddBankAccountScreenState extends ConsumerState<AddBankAccountScreen> {
                     const BodyText(
                       'Add your bank account details to receive withdrawals',
                       color: AppColor.lightText,
+                    ),
+                    verticalSpace(12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF4E5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Caption(
+                        'Microfinance banks are not supported for withdrawals. Please add a commercial bank account instead.',
+                        color: AppColor.primaryText,
+                      ),
                     ),
                     verticalSpace(24),
                     DropDownWidget(
@@ -256,7 +271,8 @@ class _AddBankAccountScreenState extends ConsumerState<AddBankAccountScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 36.0),
                       child: AnimatedButton(
-                        onTap: state.isAddingBankAccount ||
+                        onTap:
+                            state.isAddingBankAccount ||
                                 state.resolvedAccount == null
                             ? null
                             : _handleSubmit,

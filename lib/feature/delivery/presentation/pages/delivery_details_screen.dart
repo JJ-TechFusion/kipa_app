@@ -21,6 +21,7 @@ import '../../../../core/shared/widgets/widgets.dart';
 
 class DeliveryDetailsScreen extends ConsumerStatefulWidget {
   final String deliveryJobId;
+  final String? paymentRequestId;
   final String? purchaseId;
   final String? saleId;
   final bool isBuyer;
@@ -28,6 +29,7 @@ class DeliveryDetailsScreen extends ConsumerStatefulWidget {
   const DeliveryDetailsScreen({
     super.key,
     required this.deliveryJobId,
+    this.paymentRequestId,
     this.purchaseId,
     this.saleId,
     this.isBuyer = true,
@@ -56,6 +58,13 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
         .read(deliveryTrackingProvider.notifier)
         .startTracking(jobId: widget.deliveryJobId);
 
+    if (widget.paymentRequestId != null &&
+        widget.paymentRequestId!.isNotEmpty) {
+      ref
+          .read(transactionStatusNotifierProvider.notifier)
+          .fetchTransactionStatus(widget.paymentRequestId!);
+    }
+
     if (widget.isBuyer && widget.purchaseId != null) {
       ref
           .read(purchasesNotifierProvider.notifier)
@@ -72,6 +81,7 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     final trackingState = ref.watch(deliveryTrackingProvider);
     final purchasesState = ref.watch(purchasesNotifierProvider);
     final salesState = ref.watch(salesNotifierProvider);
+    final transactionStatusState = ref.watch(transactionStatusNotifierProvider);
     final job = trackingState.job;
 
     ref.listen(deliveryTrackingProvider.select((s) => s.job), (prev, next) {
@@ -195,6 +205,189 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     }
 
     final riderStatusText = getRiderStatusText(status, isBuyer: widget.isBuyer);
+    final footerActions = <Widget>[];
+
+    if (widget.isBuyer &&
+        !_deliveryConfirmed &&
+        !_disputeOpened &&
+        job.status.toLowerCase() == 'delivered' &&
+        purchasesState.purchaseDetail?.status.toLowerCase() != 'completed' &&
+        purchasesState.purchaseDetail?.status.toLowerCase() != 'disputed') {
+      footerActions.add(
+        CustomButton(
+          title: 'Open Dispute',
+          onTap: () async {
+            await Navigator.pushNamed(
+              context,
+              RouteNames.disputeRoute,
+              arguments: {
+                'purchaseId': widget.purchaseId,
+                'itemName': purchasesState.purchaseDetail?.itemName,
+              },
+            );
+            if (mounted && widget.purchaseId != null) {
+              setState(() => _disputeOpened = true);
+              ref
+                  .read(purchasesNotifierProvider.notifier)
+                  .fetchPurchaseById(widget.purchaseId!);
+            }
+          },
+          color: AppColor.kipaGrey.withAlpha(50),
+          textColor: AppColor.primaryText,
+          borderRadius: 30,
+        ),
+      );
+      footerActions.add(
+        CustomButton(
+          title: 'Confirm Delivery',
+          onTap: () async {
+            if (widget.purchaseId == null) return;
+
+            final confirmed = await ref
+                .read(purchasesNotifierProvider.notifier)
+                .confirmDelivery(widget.purchaseId!);
+
+            if (confirmed && context.mounted) {
+              setState(() => _deliveryConfirmed = true);
+              CustomSnackBar.show(
+                context,
+                message: 'Delivery confirmed. Payment released to seller.',
+                type: SnackBarType.success,
+              );
+              ref
+                  .read(purchasesNotifierProvider.notifier)
+                  .fetchPurchaseById(widget.purchaseId!);
+            } else if (context.mounted) {
+              final errorMessage =
+                  ref.read(purchasesNotifierProvider).errorMessage ??
+                  'Failed to confirm delivery';
+              CustomSnackBar.show(
+                context,
+                message: errorMessage,
+                type: SnackBarType.error,
+              );
+            }
+          },
+          icon: CupertinoIcons.checkmark_circle,
+          borderRadius: 30,
+        ),
+      );
+    }
+
+    if (widget.isBuyer &&
+        !_returnConfirmed &&
+        purchasesState.purchaseDetail?.prStatus?.toLowerCase() ==
+            'return_required') {
+      footerActions.add(
+        CustomButton(
+          title: 'Confirm Return',
+          isLoading: purchasesState.isInitiatingReturn,
+          onTap: () async {
+            if (widget.purchaseId == null) return;
+
+            final response = await ref
+                .read(purchasesNotifierProvider.notifier)
+                .readyForReturn(widget.purchaseId!);
+
+            if (response != null && context.mounted) {
+              setState(() => _returnConfirmed = true);
+              Navigator.pushNamed(
+                context,
+                RouteNames.deliveryTrackingRoute,
+                arguments: {
+                  'deliveryJobId': response.returnJobId,
+                  'isReturnFlow': true,
+                },
+              );
+            } else if (context.mounted) {
+              final errorMessage =
+                  ref.read(purchasesNotifierProvider).errorMessage ??
+                  'Failed to initiate return';
+              CustomSnackBar.show(
+                context,
+                message: errorMessage,
+                type: SnackBarType.error,
+              );
+            }
+          },
+          icon: Icons.assignment_return,
+          borderRadius: 30,
+        ),
+      );
+    }
+
+    if (widget.isBuyer &&
+        purchasesState.purchaseDetail?.prStatus?.toLowerCase() ==
+            'pending_rebook' &&
+        purchasesState.purchaseDetail?.delivery?.status.toLowerCase() ==
+            'buyer_unavailable') {
+      footerActions.add(
+        CustomButton(
+          title: 'Rebook Rider',
+          isLoading: purchasesState.isRebooking,
+          onTap: () async {
+            if (widget.purchaseId == null) return;
+
+            final success = await ref
+                .read(purchasesNotifierProvider.notifier)
+                .rebookDelivery(widget.purchaseId!);
+
+            if (success && context.mounted) {
+              CustomSnackBar.show(
+                context,
+                message:
+                    'Delivery rebooked! Rider will continue to your location.',
+                type: SnackBarType.success,
+              );
+              ref
+                  .read(purchasesNotifierProvider.notifier)
+                  .fetchPurchaseById(widget.purchaseId!);
+            } else if (context.mounted) {
+              final errorMessage =
+                  ref.read(purchasesNotifierProvider).errorMessage ??
+                  'Failed to rebook delivery';
+              CustomSnackBar.show(
+                context,
+                message: errorMessage,
+                type: SnackBarType.error,
+              );
+            }
+          },
+          icon: Icons.refresh,
+          borderRadius: 30,
+        ),
+      );
+    }
+
+    if (!widget.isBuyer && widget.saleId != null) {
+      final timeline = salesState.saleDetail?.timeline;
+      final currentStep = timeline?.currentStep ?? '';
+      final isReturnDelivered =
+          currentStep == 'return_delivered' ||
+          currentStep == 'return_confirmed';
+      final isReturnAlreadyConfirmed = (timeline?.steps ?? []).any(
+        (s) =>
+            (s.step == 'return_confirmed' ||
+                s.title.toLowerCase().contains('return confirmed')) &&
+            (s.status == 'completed' || s.status == 'done'),
+      );
+
+      if (isReturnDelivered && !isReturnAlreadyConfirmed) {
+        footerActions.add(
+          CustomButton(
+            title: 'Confirm Return',
+            isLoading: salesState.isConfirmingReturn,
+            onTap: () => Navigator.pushNamed(
+              context,
+              RouteNames.confirmReturnRoute,
+              arguments: {'saleId': widget.saleId},
+            ),
+            icon: Icons.check_circle,
+            borderRadius: 30,
+          ),
+        );
+      }
+    }
 
     return Scaffold(
       backgroundColor: AppColor.scaffoldBackground,
@@ -219,336 +412,173 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+      body: SafeArea(
+        top: false,
         child: Column(
           children: [
-            if (!isPickupInitiated) ...[
-              PaymentStatusCard(amount: amount, date: date),
-              verticalSpace(24),
-            ] else ...[
-              RiderInfoBanner(statusText: riderStatusText),
-              verticalSpace(24),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    if (!isPickupInitiated) ...[
+                      PaymentStatusCard(amount: amount, date: date),
+                      verticalSpace(24),
+                    ] else ...[
+                      RiderInfoBanner(statusText: riderStatusText),
+                      verticalSpace(24),
 
-              if (displayCode != null && displayCode.isNotEmpty) ...[
-                CodeCard(
-                  code: displayCode,
-                  title: codeTitle,
-                  subtitle: codeSubtitle,
-                ),
-                verticalSpace(24),
-              ],
-
-              Builder(
-                builder: (ctx) {
-                  bool isReturnConfirmed = false;
-                  if (widget.isBuyer) {
-                    isReturnConfirmed =
-                        purchasesState.purchaseDetail?.timeline?.steps.any(
-                          (s) =>
-                              (s.step == 'return_confirmed' ||
-                                  s.title.toLowerCase().contains(
-                                    'return confirmed',
-                                  )) &&
-                              (s.status == 'completed' || s.status == 'done'),
-                        ) ==
-                        true;
-                  } else {
-                    isReturnConfirmed =
-                        salesState.saleDetail?.timeline?.steps.any(
-                          (s) =>
-                              (s.step == 'return_confirmed' ||
-                                  s.title.toLowerCase().contains(
-                                    'return confirmed',
-                                  )) &&
-                              (s.status == 'completed' || s.status == 'done'),
-                        ) ==
-                        true;
-                  }
-
-                  final isMapDisabled =
-                      orderStatus?.toLowerCase() == 'completed' ||
-                      isReturnConfirmed;
-
-                  return _buildMapPreview(
-                    job,
-                    isReturnFlow: isReturnFlow,
-                    trackingJobId: isReturnFlow
-                        ? (widget.isBuyer
-                              ? purchasesState
-                                    .purchaseDetail
-                                    ?.delivery
-                                    ?.returnJobId
-                              : salesState.saleDetail?.delivery?.returnJobId)
-                        : null,
-                    disabled: isMapDisabled,
-                  );
-                },
-              ),
-              verticalSpace(24),
-            ],
-
-            _buildProductDetailsCard(
-              itemName: itemName,
-              itemSpecs: itemDesc,
-              itemPrice: itemPrice,
-              serviceFee: serviceFee,
-              feeLabel: feeLabel,
-              totalAmount: amount,
-              deliveryStatus: deliveryStatus,
-              orderStatus: orderStatus,
-            ),
-            verticalSpace(24),
-
-            if (!isPickupInitiated) ...[
-              const ProcessingStatusCard(daysLeft: 3),
-              verticalSpace(24),
-            ],
-
-            _buildTimeline(
-              widget.isBuyer
-                  ? purchasesState.purchaseDetail?.timeline
-                  : salesState.saleDetail?.timeline,
-            ),
-            verticalSpace(24),
-
-            if (widget.isBuyer) ...[
-              if (job.rider != null) ...[
-                BuyerInfoCard(
-                  title: 'Rider Information',
-                  roleLabel: 'Rider',
-                  name: job.rider!.name,
-                  email: '',
-                  phone: job.rider!.phone,
-                  imageUrl: job.rider!.photoUrl,
-                  onCall: () {},
-                  onChat: () {},
-                  chatIcon: Icons.chat,
-                ),
-                verticalSpace(24),
-              ],
-            ] else ...[
-              if (job.rider != null) ...[
-                BuyerInfoCard(
-                  title: 'Rider Information',
-                  roleLabel: 'Rider',
-                  name: job.rider!.name,
-                  imageUrl: job.rider!.photoUrl,
-                  email: '',
-                  phone: job.rider!.phone,
-                  onCall: () {},
-                  onChat: () {},
-                  chatIcon: Icons.chat,
-                ),
-                verticalSpace(24),
-              ],
-            ],
-
-            SafeFundsBanner(amount: escrowAmount, customText: escrowText),
-            verticalSpace(24),
-
-            if (widget.isBuyer &&
-                !_deliveryConfirmed &&
-                !_disputeOpened &&
-                job.status.toLowerCase() == 'delivered' &&
-                purchasesState.purchaseDetail?.status.toLowerCase() !=
-                    'completed' &&
-                purchasesState.purchaseDetail?.status.toLowerCase() !=
-                    'disputed') ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
-                child: CustomButton(
-                  title: 'Open Dispute',
-                  onTap: () async {
-                    await Navigator.pushNamed(
-                      context,
-                      RouteNames.disputeRoute,
-                      arguments: {
-                        'purchaseId': widget.purchaseId,
-                        'itemName': purchasesState.purchaseDetail?.itemName,
-                      },
-                    );
-                    if (mounted && widget.purchaseId != null) {
-                      setState(() => _disputeOpened = true);
-                      ref
-                          .read(purchasesNotifierProvider.notifier)
-                          .fetchPurchaseById(widget.purchaseId!);
-                    }
-                  },
-                  color: AppColor.kipaGrey.withAlpha(50),
-                  textColor: AppColor.primaryText,
-                  borderRadius: 30,
-                ),
-              ),
-              verticalSpace(16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
-                child: CustomButton(
-                  title: 'Confirm Delivery',
-                  onTap: () async {
-                    if (widget.purchaseId == null) return;
-
-                    final confirmed = await ref
-                        .read(purchasesNotifierProvider.notifier)
-                        .confirmDelivery(widget.purchaseId!);
-
-                    if (confirmed && context.mounted) {
-                      setState(() => _deliveryConfirmed = true);
-                      CustomSnackBar.show(
-                        context,
-                        message:
-                            'Delivery confirmed. Payment released to seller.',
-                        type: SnackBarType.success,
-                      );
-                      ref
-                          .read(purchasesNotifierProvider.notifier)
-                          .fetchPurchaseById(widget.purchaseId!);
-                    } else if (context.mounted) {
-                      final errorMessage =
-                          ref.read(purchasesNotifierProvider).errorMessage ??
-                          'Failed to confirm delivery';
-                      CustomSnackBar.show(
-                        context,
-                        message: errorMessage,
-                        type: SnackBarType.error,
-                      );
-                    }
-                  },
-                  icon: CupertinoIcons.checkmark_circle,
-                  borderRadius: 30,
-                ),
-              ),
-              verticalSpace(16),
-            ],
-
-            if (widget.isBuyer &&
-                !_returnConfirmed &&
-                purchasesState.purchaseDetail?.prStatus?.toLowerCase() ==
-                    'return_required') ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
-                child: CustomButton(
-                  title: 'Confirm Return',
-                  isLoading: purchasesState.isInitiatingReturn,
-                  onTap: () async {
-                    if (widget.purchaseId == null) return;
-
-                    final response = await ref
-                        .read(purchasesNotifierProvider.notifier)
-                        .readyForReturn(widget.purchaseId!);
-
-                    if (response != null && context.mounted) {
-                      setState(() => _returnConfirmed = true);
-                      Navigator.pushNamed(
-                        context,
-                        RouteNames.deliveryTrackingRoute,
-                        arguments: {
-                          'deliveryJobId': response.returnJobId,
-                          'isReturnFlow': true,
-                        },
-                      );
-                    } else if (context.mounted) {
-                      final errorMessage =
-                          ref.read(purchasesNotifierProvider).errorMessage ??
-                          'Failed to initiate return';
-                      CustomSnackBar.show(
-                        context,
-                        message: errorMessage,
-                        type: SnackBarType.error,
-                      );
-                    }
-                  },
-                  icon: Icons.assignment_return,
-                  borderRadius: 30,
-                ),
-              ),
-              verticalSpace(16),
-            ],
-            if (widget.isBuyer &&
-                purchasesState.purchaseDetail?.prStatus?.toLowerCase() ==
-                    'pending_rebook' &&
-                purchasesState.purchaseDetail?.delivery?.status.toLowerCase() ==
-                    'buyer_unavailable') ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 42),
-                child: CustomButton(
-                  title: 'Rebook Rider',
-                  isLoading: purchasesState.isRebooking,
-                  onTap: () async {
-                    if (widget.purchaseId == null) return;
-
-                    final success = await ref
-                        .read(purchasesNotifierProvider.notifier)
-                        .rebookDelivery(widget.purchaseId!);
-
-                    if (success && context.mounted) {
-                      CustomSnackBar.show(
-                        context,
-                        message:
-                            'Delivery rebooked! Rider will continue to your location.',
-                        type: SnackBarType.success,
-                      );
-                      ref
-                          .read(purchasesNotifierProvider.notifier)
-                          .fetchPurchaseById(widget.purchaseId!);
-                    } else if (context.mounted) {
-                      final errorMessage =
-                          ref.read(purchasesNotifierProvider).errorMessage ??
-                          'Failed to rebook delivery';
-                      CustomSnackBar.show(
-                        context,
-                        message: errorMessage,
-                        type: SnackBarType.error,
-                      );
-                    }
-                  },
-                  icon: Icons.refresh,
-                  borderRadius: 30,
-                ),
-              ),
-              verticalSpace(16),
-            ],
-            if (!widget.isBuyer && widget.saleId != null) ...[
-              Builder(
-                builder: (context) {
-                  final timeline = salesState.saleDetail?.timeline;
-                  final currentStep = timeline?.currentStep ?? '';
-
-                  final isReturnDelivered =
-                      currentStep == 'return_delivered' ||
-                      currentStep == 'return_confirmed';
-
-                  final isReturnAlreadyConfirmed = (timeline?.steps ?? []).any(
-                    (s) =>
-                        (s.step == 'return_confirmed' ||
-                            s.title.toLowerCase().contains(
-                              'return confirmed',
-                            )) &&
-                        (s.status == 'completed' || s.status == 'done'),
-                  );
-
-                  if (isReturnDelivered && !isReturnAlreadyConfirmed) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 42),
-                      child: CustomButton(
-                        title: 'Confirm Return',
-                        isLoading: salesState.isConfirmingReturn,
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          RouteNames.confirmReturnRoute,
-                          arguments: {'saleId': widget.saleId},
+                      if (displayCode != null && displayCode.isNotEmpty) ...[
+                        CodeCard(
+                          code: displayCode,
+                          title: codeTitle,
+                          subtitle: codeSubtitle,
                         ),
-                        icon: Icons.check_circle,
-                        borderRadius: 30,
+                        verticalSpace(24),
+                      ],
+
+                      Builder(
+                        builder: (ctx) {
+                          bool isReturnConfirmed = false;
+                          if (widget.isBuyer) {
+                            isReturnConfirmed =
+                                purchasesState.purchaseDetail?.timeline?.steps
+                                    .any(
+                                      (s) =>
+                                          (s.step == 'return_confirmed' ||
+                                              s.title.toLowerCase().contains(
+                                                'return confirmed',
+                                              )) &&
+                                          (s.status == 'completed' ||
+                                              s.status == 'done'),
+                                    ) ==
+                                true;
+                          } else {
+                            isReturnConfirmed =
+                                salesState.saleDetail?.timeline?.steps.any(
+                                  (s) =>
+                                      (s.step == 'return_confirmed' ||
+                                          s.title.toLowerCase().contains(
+                                            'return confirmed',
+                                          )) &&
+                                      (s.status == 'completed' ||
+                                          s.status == 'done'),
+                                ) ==
+                                true;
+                          }
+
+                          final isMapDisabled =
+                              orderStatus?.toLowerCase() == 'completed' ||
+                              isReturnConfirmed;
+
+                          return _buildMapPreview(
+                            job,
+                            isReturnFlow: isReturnFlow,
+                            trackingJobId: isReturnFlow
+                                ? (widget.isBuyer
+                                      ? purchasesState
+                                            .purchaseDetail
+                                            ?.delivery
+                                            ?.returnJobId
+                                      : salesState
+                                            .saleDetail
+                                            ?.delivery
+                                            ?.returnJobId)
+                                : null,
+                            disabled: isMapDisabled,
+                          );
+                        },
                       ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
+                      verticalSpace(24),
+                    ],
+
+                    _buildProductDetailsCard(
+                      itemName: itemName,
+                      itemSpecs: itemDesc,
+                      itemPrice: itemPrice,
+                      serviceFee: serviceFee,
+                      feeLabel: feeLabel,
+                      totalAmount: amount,
+                      deliveryStatus: deliveryStatus,
+                      orderStatus: orderStatus,
+                    ),
+                    verticalSpace(24),
+
+                    if (!isPickupInitiated) ...[
+                      const ProcessingStatusCard(daysLeft: 3),
+                      verticalSpace(24),
+                    ],
+
+                    _buildTimeline(
+                      widget.isBuyer
+                          ? purchasesState.purchaseDetail?.timeline
+                          : salesState.saleDetail?.timeline,
+                      fallbackTimeline:
+                          transactionStatusState.transactionStatus?.timeline,
+                    ),
+                    verticalSpace(24),
+
+                    if (widget.isBuyer) ...[
+                      if (job.rider != null) ...[
+                        BuyerInfoCard(
+                          title: 'Rider Information',
+                          roleLabel: 'Rider',
+                          name: job.rider!.name,
+                          email: '',
+                          phone: job.rider!.phone,
+                          imageUrl: job.rider!.photoUrl,
+                          onCall: () {},
+                          onChat: () {},
+                          chatIcon: Icons.chat,
+                        ),
+                        verticalSpace(24),
+                      ],
+                    ] else ...[
+                      if (job.rider != null) ...[
+                        BuyerInfoCard(
+                          title: 'Rider Information',
+                          roleLabel: 'Rider',
+                          name: job.rider!.name,
+                          imageUrl: job.rider!.photoUrl,
+                          email: '',
+                          phone: job.rider!.phone,
+                          onCall: () {},
+                          onChat: () {},
+                          chatIcon: Icons.chat,
+                        ),
+                        verticalSpace(24),
+                      ],
+                    ],
+
+                    SafeFundsBanner(
+                      amount: escrowAmount,
+                      customText: escrowText,
+                    ),
+                    verticalSpace(24),
+                    if (footerActions.isNotEmpty) verticalSpace(20),
+                  ],
+                ),
               ),
-              verticalSpace(16),
-            ],
-            verticalSpace(20),
+            ),
+            if (footerActions.isNotEmpty)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 52,
+                    vertical: 20,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = 0; i < footerActions.length; i++) ...[
+                        footerActions[i],
+                        if (i != footerActions.length - 1) verticalSpace(16),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -898,10 +928,11 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
     );
   }
 
-  Widget _buildTimeline(dynamic timeline) {
+  Widget _buildTimeline(dynamic timeline, {dynamic fallbackTimeline}) {
     final dateFormat = DateFormat('MMM d, h:mma');
+    final resolvedTimeline = timeline ?? fallbackTimeline;
 
-    if (timeline == null) {
+    if (resolvedTimeline == null) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(20),
@@ -910,8 +941,8 @@ class _DeliveryDetailsScreenState extends ConsumerState<DeliveryDetailsScreen> {
       );
     }
 
-    final steps = timeline.steps ?? [];
-    final currentStep = timeline.currentStep ?? '';
+    final steps = resolvedTimeline.steps ?? [];
+    final currentStep = resolvedTimeline.currentStep ?? '';
 
     return TransactionTimeline(
       steps: steps.map<TimelineStep>((step) {

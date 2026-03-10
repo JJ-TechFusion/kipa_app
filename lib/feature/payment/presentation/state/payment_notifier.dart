@@ -64,8 +64,12 @@ class PaymentNotifier extends Notifier<PaymentState> {
     _markReadyForPickupUseCase = ref.read(markReadyForPickupUseCaseProvider);
     _cancelRiderSearchUseCase = ref.read(cancelRiderSearchUseCaseProvider);
     _uploadItemImageUseCase = ref.read(uploadItemImageUseCaseProvider);
-    _shipLogisticsDeliveryUseCase = ref.read(shipLogisticsDeliveryUseCaseProvider);
-    _uploadShipmentReceiptUseCase = ref.read(uploadShipmentReceiptUseCaseProvider);
+    _shipLogisticsDeliveryUseCase = ref.read(
+      shipLogisticsDeliveryUseCaseProvider,
+    );
+    _uploadShipmentReceiptUseCase = ref.read(
+      uploadShipmentReceiptUseCaseProvider,
+    );
     return const PaymentState();
   }
 
@@ -277,10 +281,11 @@ class PaymentNotifier extends Notifier<PaymentState> {
     String? pickupState,
     String? dropoffState,
   }) async {
+    final isInterState = deliveryType == 'inter_state';
     final pickup = state.pickupLocation;
     final dropoff = state.dropoffLocation;
 
-    if (pickup == null || dropoff == null) {
+    if (!isInterState && (pickup == null || dropoff == null)) {
       state = state.copyWith(
         errorMessage: 'Please select both pickup and dropoff locations',
       );
@@ -290,14 +295,21 @@ class PaymentNotifier extends Notifier<PaymentState> {
     state = state.copyWith(isCreatingFulfillment: true, errorMessage: null);
 
     try {
-      final request = CreateFulfillmentEntity.fromLocations(
-        deliveryType: deliveryType,
-        pickup: pickup,
-        dropoff: dropoff,
-        vehicleType: vehicleType,
-        pickupState: pickupState,
-        dropoffState: dropoffState,
-      );
+      final request = isInterState
+          ? CreateFulfillmentEntity(
+              deliveryType: deliveryType,
+              vehicleType: vehicleType,
+              pickupState: pickupState,
+              dropoffState: dropoffState,
+            )
+          : CreateFulfillmentEntity.fromLocations(
+              deliveryType: deliveryType,
+              pickup: pickup!,
+              dropoff: dropoff!,
+              vehicleType: vehicleType,
+              pickupState: pickupState,
+              dropoffState: dropoffState,
+            );
 
       final response = await _createFulfillmentUseCase(
         paymentRequestId,
@@ -503,7 +515,10 @@ class PaymentNotifier extends Notifier<PaymentState> {
     required String fileName,
     required List<int> fileBytes,
   }) async {
-    state = state.copyWith(isUploadingShipmentReceipt: true, errorMessage: null);
+    state = state.copyWith(
+      isUploadingShipmentReceipt: true,
+      errorMessage: null,
+    );
 
     try {
       final response = await _uploadShipmentReceiptUseCase(

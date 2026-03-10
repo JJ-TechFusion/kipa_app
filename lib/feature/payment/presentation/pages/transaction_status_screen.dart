@@ -106,50 +106,71 @@ class _TransactionStatusScreenState
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await ref
-              .read(transactionStatusNotifierProvider.notifier)
-              .fetchTransactionStatus(widget.paymentRequestId);
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 22),
-          child: Column(
-            children: [
-              isPaid
-                  ? _buildReceivedHeader(transaction)
-                  : _buildPendingHeader(),
-              verticalSpace(24),
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await ref
+                      .read(transactionStatusNotifierProvider.notifier)
+                      .fetchTransactionStatus(widget.paymentRequestId);
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(22, 16, 22, 16),
+                  child: Column(
+                    children: [
+                      isPaid
+                          ? _buildReceivedHeader(transaction)
+                          : _buildPendingHeader(),
+                      verticalSpace(24),
 
-              if (isPaid &&
-                  transaction.isSeller &&
-                  _shouldShowProcessingBanner(transaction)) ...[
-                _buildProcessingBanner(transaction),
-                verticalSpace(24),
-              ],
+                      if (isPaid &&
+                          transaction.isSeller &&
+                          _shouldShowProcessingBanner(transaction)) ...[
+                        _buildProcessingBanner(transaction),
+                        verticalSpace(24),
+                      ],
 
-              _buildTransactionDetailsCard(
-                transaction,
-                isBuyer,
-                currencyFormat,
-              ),
-              verticalSpace(32),
+                      _buildTransactionDetailsCard(
+                        transaction,
+                        isBuyer,
+                        currencyFormat,
+                      ),
+                      verticalSpace(32),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TransactionTimeline(
-                  steps: _getTimelineSteps(transaction.timeline),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TransactionTimeline(
+                          steps: _getTimelineSteps(transaction.timeline),
+                        ),
+                      ),
+                      verticalSpace(32),
+                      if (isPaid) ...[
+                        _buildUserInfo(transaction, isBuyer),
+                        verticalSpace(32),
+                        _buildFundsSecuredBanner(
+                          transaction,
+                          isBuyer,
+                          currencyFormat,
+                        ),
+                        verticalSpace(32),
+                      ],
+                    ],
+                  ),
                 ),
               ),
-              verticalSpace(32),
-              if (isPaid) ...[
-                _buildUserInfo(transaction, isBuyer),
-                verticalSpace(32),
-                _buildFundsSecuredBanner(transaction, isBuyer, currencyFormat),
-                verticalSpace(32),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 42),
+            ),
+            if (isPaid)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 52,
+                    vertical: 16,
+                  ),
                   child: CustomButton(
                     title: 'Back to Home',
                     onTap: () {
@@ -163,10 +184,8 @@ class _TransactionStatusScreenState
                     borderRadius: 30,
                   ),
                 ),
-                verticalSpace(12),
-              ],
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
